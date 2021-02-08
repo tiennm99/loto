@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <title>Lô tô (made by miti99)</title>
+  </head>
+  
+  <body onload="start()">
+    <h1>Lô tô</h1>
+    Tạo bảng chơi lô tô, lấy cảm hứng từ những buổi họp lớp thiếu giấy chơi lô tô của TN1 (2014-2017)
+    <a href="javascript:toggle('instructions');">Hướng dẫn</a>
+    
+    <noscript>
+      <div class="error">
+        <strong>Lỗi:</strong>
+        <p>
+          <em> JavaScript không được bật</em>
+        </p>
+      </div>
+    </noscript>
+    
+    <div id="instructions">
+      <h2>Hướng dẫn</h2>
+      <ul>
+        <noscript>
+          <li>Bật JavaScript</li>
+        </noscript>
+        <li>Nhấn <strong>Tạo</strong> để tạo bảng mới</li>
+      </ul>
+    </div>
+    
+    <form>
+      <input type="button" value="Tạo" onclick="generate();" />
+    </form>
+    
+    <h2>Bảng</h2>
+    <div id="grid"></div>
+    <script src="script.js"></script>
+  </body>
+  
+</html>
