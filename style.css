@@ -1,0 +1,61 @@
+h2 {
+  background: blueviolet;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid blue;
+}
+
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+table {
+  width: 100%;
+}
+
+td {
+  padding: 10px 20px;
+  border-top: 1px solid lightgray;
+  border-left: 1px solid lightgray;
+  border-bottom: 1px solid darkgray;
+  border-right: 1px solid darkgray;
+}
+
+.error {
+  background-color: orange;
+  color: red;
+  padding: 5px;
+  margin: 20px 50px;
+  border: 1px solid red;
+}
+
+.hightlight {
+  background: yellow;
+}
+
+a {
+  color: blue;
+}
+
+td label {
+  cursor: pointer;
+}
+
+form {
+  margin: 5px;
+  padding: 5px;
+  color: blue;
+}
+
+#instructions {
+  display: none;
+  border: 1px solid blue;
+  margin: 10px;
+  padding: 20px;
+}
+
+table td.crossed {
+  background-image: linear-gradient(to bottom right, transparent calc(50% - 2px), black, transparent calc(50% + 2px));
+}
