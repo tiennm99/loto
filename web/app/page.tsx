@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
   generateGrid,
@@ -58,12 +59,21 @@ export default function Home() {
             Lấy cảm hứng từ những buổi họp lớp thiếu giấy chơi lô tô
             <br className="hidden sm:block" /> của TN1 (2014–2017)
           </p>
-          <button
-            onClick={() => setShowInstructions((v) => !v)}
-            className="mt-3 text-xs text-indigo-500 dark:text-indigo-400 hover:underline"
-          >
-            {showInstructions ? "Ẩn hướng dẫn" : "Hướng dẫn"}
-          </button>
+          <div className="mt-3 flex items-center justify-center gap-3 text-xs">
+            <button
+              onClick={() => setShowInstructions((v) => !v)}
+              className="text-indigo-500 dark:text-indigo-400 hover:underline"
+            >
+              {showInstructions ? "Ẩn hướng dẫn" : "Hướng dẫn"}
+            </button>
+            <span className="text-slate-300 dark:text-slate-600">|</span>
+            <Link
+              href="/master"
+              className="text-orange-500 dark:text-orange-400 hover:underline"
+            >
+              Trang quản trò →
+            </Link>
+          </div>
         </header>
 
         {/* Instructions */}
