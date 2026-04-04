@@ -14,62 +14,53 @@ export default function Home() {
   const [crossed, setCrossed] = useState<boolean[][]>([]);
   const [showInstructions, setShowInstructions] = useState(false);
 
-  // Load saved state on mount
   useEffect(() => {
     const savedGrid = loadGrid();
     if (savedGrid) {
       setGrid(savedGrid);
-      const savedCrossed = loadCrossedState();
       setCrossed(
-        savedCrossed ??
-          savedGrid.map((row) => row.map(() => false))
+        loadCrossedState() ?? savedGrid.map((row) => row.map(() => false))
       );
     }
   }, []);
 
-  // Persist crossed state on change
   useEffect(() => {
-    if (crossed.length > 0) {
-      saveCrossedState(crossed);
-    }
+    if (crossed.length > 0) saveCrossedState(crossed);
   }, [crossed]);
 
   const handleGenerate = useCallback(() => {
     if (grid && !confirm("Bạn có muốn tạo lại bảng không?")) return;
     const newGrid = generateGrid();
-    setGrid(newGrid);
     const newCrossed = newGrid.map((row) => row.map(() => false));
+    setGrid(newGrid);
     setCrossed(newCrossed);
     saveGrid(newGrid);
     saveCrossedState(newCrossed);
   }, [grid]);
 
-  const handleCellClick = useCallback(
-    (row: number, col: number) => {
-      setCrossed((prev) => {
-        const next = prev.map((r) => [...r]);
-        next[row][col] = !next[row][col];
-        return next;
-      });
-    },
-    []
-  );
+  const handleCellClick = useCallback((row: number, col: number) => {
+    setCrossed((prev) => {
+      const next = prev.map((r) => [...r]);
+      next[row][col] = !next[row][col];
+      return next;
+    });
+  }, []);
 
   return (
-    <div className="flex flex-col flex-1 items-center px-4 py-6 sm:py-10">
-      <div className="w-full max-w-2xl">
+    <div className="flex flex-col flex-1 items-center px-3 py-8 sm:py-12">
+      <div className="w-full max-w-lg">
         {/* Header */}
-        <header className="text-center mb-6">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
             Lô tô
           </h1>
-          <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400 mb-3">
-            Tạo bảng chơi lô tô, lấy cảm hứng từ những buổi họp lớp thiếu
-            giấy chơi lô tô của TN1 (2014-2017)
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            Lấy cảm hứng từ những buổi họp lớp thiếu giấy chơi lô tô
+            <br className="hidden sm:block" /> của TN1 (2014–2017)
           </p>
           <button
             onClick={() => setShowInstructions((v) => !v)}
-            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="mt-3 text-xs text-indigo-500 dark:text-indigo-400 hover:underline"
           >
             {showInstructions ? "Ẩn hướng dẫn" : "Hướng dẫn"}
           </button>
@@ -77,85 +68,81 @@ export default function Home() {
 
         {/* Instructions */}
         {showInstructions && (
-          <div className="mb-6 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 p-4 text-sm">
-            <h2 className="font-semibold mb-2">Hướng dẫn</h2>
-            <ul className="list-disc list-inside space-y-1 text-stone-600 dark:text-stone-400">
+          <div className="mb-6 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-4 text-sm text-slate-600 dark:text-slate-400">
+            <ul className="space-y-1 list-disc list-inside">
               <li>
-                Nhấn <strong>Tạo bảng mới</strong> để tạo bảng mới
+                Nhấn <strong className="text-slate-800 dark:text-slate-200">Tạo bảng mới</strong> để tạo bảng
               </li>
               <li>Nhấn vào ô số để đánh dấu khi số được xổ</li>
-              <li>Nhấn lại ô đã đánh dấu để bỏ đánh dấu</li>
-              <li>Bảng và trạng thái được lưu tự động</li>
+              <li>Nhấn lại để bỏ đánh dấu</li>
+              <li>Bảng được lưu tự động</li>
             </ul>
           </div>
         )}
 
         {/* Generate button */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8">
           <button
             onClick={handleGenerate}
-            className="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium
-                       hover:bg-blue-700 active:bg-blue-800
-                       transition-colors shadow-sm"
+            className="px-8 py-3 rounded-full font-semibold text-white
+                       bg-gradient-to-r from-indigo-500 to-purple-500
+                       hover:from-indigo-600 hover:to-purple-600
+                       active:scale-95 transition-all shadow-lg shadow-indigo-500/25"
           >
             Tạo bảng mới
           </button>
         </div>
 
         {/* Grid */}
-        {grid && (
-          <div className="overflow-x-auto rounded-xl border border-stone-200 dark:border-stone-700 shadow-sm">
-            <table className="w-full border-collapse">
-              <tbody>
-                {grid.map((row, i) => (
-                  <tr key={i}>
-                    {row.map((num, j) => {
-                      const hasNumber = num > 0;
-                      const isCrossed =
-                        hasNumber && crossed[i]?.[j];
+        {grid ? (
+          <div className="rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700">
+            <div className="loto-grid">
+              {grid.flat().map((num, idx) => {
+                const row = Math.floor(idx / 9);
+                const col = idx % 9;
+                const hasNumber = num > 0;
+                const isCrossed = hasNumber && crossed[row]?.[col];
 
-                      return (
-                        <td
-                          key={j}
-                          onClick={
-                            hasNumber
-                              ? () => handleCellClick(i, j)
-                              : undefined
-                          }
-                          className={`
-                            relative text-center border border-stone-200 dark:border-stone-700
-                            h-10 sm:h-12 text-sm sm:text-lg font-medium
-                            transition-colors select-none
-                            ${
-                              hasNumber
-                                ? isCrossed
-                                  ? "cell-crossed bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 cursor-pointer"
-                                  : "bg-amber-50 dark:bg-amber-950/30 text-stone-800 dark:text-stone-200 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30"
-                                : "bg-stone-50 dark:bg-stone-900/50"
-                            }
-                          `}
-                        >
-                          {hasNumber ? num : ""}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                return (
+                  <div
+                    key={idx}
+                    onClick={hasNumber ? () => handleCellClick(row, col) : undefined}
+                    className={`
+                      relative flex items-center justify-center
+                      aspect-square text-base sm:text-xl font-bold
+                      border-r border-b border-slate-200/80 dark:border-slate-700/60
+                      transition-all select-none
+                      ${hasNumber
+                        ? isCrossed
+                          ? "cell-crossed bg-red-50 dark:bg-red-950/30 text-red-400 dark:text-red-500 cursor-pointer"
+                          : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400"
+                        : "bg-slate-50 dark:bg-slate-900/60"
+                      }
+                    `}
+                  >
+                    {hasNumber ? num : ""}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
-
-        {/* Empty state */}
-        {!grid && (
-          <div className="text-center text-stone-400 dark:text-stone-500 py-16">
+        ) : (
+          <div className="text-center text-slate-400 dark:text-slate-500 py-20 text-sm">
             Nhấn &ldquo;Tạo bảng mới&rdquo; để bắt đầu chơi
           </div>
         )}
 
         {/* Footer */}
-        <footer className="mt-8 text-center text-xs text-stone-400 dark:text-stone-500">
-          made by miti99
+        <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600">
+          Made with ❤️ by{" "}
+          <a
+            href="https://miti99.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-500 hover:underline"
+          >
+            miti99
+          </a>
         </footer>
       </div>
     </div>
