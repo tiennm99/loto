@@ -32,6 +32,12 @@ body {
   gap: 0;
 }
 
+.master-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0;
+}
+
 /* Crossed cell diagonal line */
 .cell-crossed::after {
   content: "";
