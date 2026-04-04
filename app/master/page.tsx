@@ -94,30 +94,6 @@ export default function MasterPage() {
     setLastCalled(next);
   }, [state]);
 
-  const handleToggleNumber = useCallback(
-    (num: number) => {
-      if (!state) return;
-      if (calledSet.has(num)) {
-        // Uncall: remove from called, add back to remaining
-        setState({
-          called: state.called.filter((n) => n !== num),
-          remaining: [...state.remaining, num],
-        });
-        if (lastCalled === num) {
-          const newCalled = state.called.filter((n) => n !== num);
-          setLastCalled(newCalled.length > 0 ? newCalled[newCalled.length - 1] : null);
-        }
-      } else {
-        // Manual call: add to called, remove from remaining
-        setState({
-          called: [...state.called, num],
-          remaining: state.remaining.filter((n) => n !== num),
-        });
-        setLastCalled(num);
-      }
-    },
-    [state, calledSet, lastCalled]
-  );
 
   return (
     <div className="flex flex-col flex-1 items-center px-3 py-8 sm:py-12">
@@ -142,7 +118,7 @@ export default function MasterPage() {
         <div className="flex justify-center gap-3 mb-6">
           <button
             onClick={handleNewGame}
-            className="px-5 py-2.5 rounded-full font-semibold text-white text-sm
+            className="px-8 py-4 rounded-full font-semibold text-white text-lg
                        bg-gradient-to-r from-orange-500 to-red-500
                        hover:from-orange-600 hover:to-red-600
                        active:scale-95 transition-all shadow-lg shadow-orange-500/25"
@@ -152,7 +128,7 @@ export default function MasterPage() {
           {state && state.remaining.length > 0 && (
             <button
               onClick={handleDrawNext}
-              className="px-6 py-2.5 rounded-full font-semibold text-white text-sm
+              className="px-10 py-4 rounded-full font-semibold text-white text-lg
                          bg-gradient-to-r from-emerald-500 to-teal-500
                          hover:from-emerald-600 hover:to-teal-600
                          active:scale-95 transition-all shadow-lg shadow-emerald-500/25"
@@ -211,16 +187,15 @@ export default function MasterPage() {
                 return (
                   <div
                     key={idx}
-                    onClick={hasNumber ? () => handleToggleNumber(num) : undefined}
                     className={`
                       relative flex items-center justify-center
                       aspect-square text-sm sm:text-base font-bold
                       border-r border-b border-slate-200/80 dark:border-slate-700/60
-                      transition-all select-none
+                      transition-colors select-none
                       ${hasNumber
                         ? isCalled
-                          ? "bg-orange-500 dark:bg-orange-600 text-white cursor-pointer"
-                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-950/20"
+                          ? "bg-orange-500 dark:bg-orange-600 text-white"
+                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                         : "bg-slate-100 dark:bg-slate-900/60"
                       }
                     `}
