@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #f8fafc;
+  --foreground: #1e293b;
 }
 
 @theme inline {
@@ -14,8 +14,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c0a09;
-    --foreground: #e7e5e4;
+    --background: #0f172a;
+    --foreground: #e2e8f0;
   }
 }
 
@@ -25,19 +25,22 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Crossed cell diagonal line */
-.cell-crossed {
-  position: relative;
+/* Equal-width grid cells */
+.loto-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 0;
 }
 
+/* Crossed cell diagonal line */
 .cell-crossed::after {
   content: "";
   position: absolute;
-  inset: 4px;
+  inset: 6px;
   background-image: linear-gradient(
     to bottom right,
     transparent calc(50% - 1.5px),
-    currentColor,
+    #ef4444,
     transparent calc(50% + 1.5px)
   );
   pointer-events: none;
