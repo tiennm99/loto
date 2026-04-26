@@ -1,8 +1,10 @@
 const isProd = process.env.NODE_ENV === "production";
 const isCodeserver = process.env.NEXT_DEV_PROFILE === "codeserver";
-// Cloudflare Pages injects CF_PAGES=1 during its build; avoid the GH Pages
-// /loto basePath there since CF serves the site at the root.
-const isCfPages = process.env.CF_PAGES === "1";
+
+// Build profiles select basePath for the deploy target:
+//   gh — GitHub Pages, served at tiennm99.github.io/loto
+//   cf — Cloudflare Pages, served at loto.miti99.com (custom domain, root)
+const buildProfile = process.env.BUILD_PROFILE;
 
 // In dev under code-server's reverse proxy, basePath/assetPrefix must match
 // the proxy URL so links, assets, and the HMR socket all resolve.
@@ -21,11 +23,23 @@ function codeserverConfig() {
 }
 
 const cs = isCodeserver ? codeserverConfig() : null;
-// NEXT_BASE_PATH wins so custom-domain / fork deploys don't have to edit code.
+
+// basePath resolution order (first non-null wins):
+//   1. NEXT_BASE_PATH — explicit override (escape hatch for forks / custom domains)
+//   2. codeserver dev profile
+//   3. BUILD_PROFILE=gh|cf — explicit deploy target
+//   4. NODE_ENV=production — legacy fallback (bare `npm run build` → GH Pages)
+//   5. local dev — empty
 const basePath =
   process.env.NEXT_BASE_PATH ??
   cs?.basePath ??
-  (isCfPages ? "" : isProd ? "/loto" : "");
+  (buildProfile === "gh"
+    ? "/loto"
+    : buildProfile === "cf"
+      ? ""
+      : isProd
+        ? "/loto"
+        : "");
 
 const nextConfig = {
   output: "export",

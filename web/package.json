@@ -6,6 +6,8 @@
     "dev": "next dev",
     "dev:codeserver": "NEXT_DEV_PROFILE=codeserver next dev -H 0.0.0.0",
     "build": "next build",
+    "build:gh": "BUILD_PROFILE=gh next build",
+    "build:cf": "BUILD_PROFILE=cf next build",
     "start": "next start",
     "lint": "eslint"
   },
