@@ -290,19 +290,5 @@
       </div>
       <PlayerBoard storagePrefix="loto_master_card" />
     </div>
-
-    <footer
-      class="mt-10 text-center text-xs text-slate-400 dark:text-slate-600"
-    >
-      Made with ❤️ by{" "}
-      <a
-        href="https://miti99.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-indigo-500 hover:underline"
-      >
-        miti99
-      </a>
-    </footer>
   </div>
 </div>

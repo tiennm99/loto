@@ -207,7 +207,18 @@
               {/each}
             </div>
           {/each}
-          <div class="section-label">Tân Tân tốt nhất</div>
+          <div class="section-label">
+            <span>
+              Made with ❤️ by <a
+                href="https://miti99.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline hover:text-indigo-600 dark:hover:text-indigo-300"
+              >
+                miti99
+              </a>
+            </span>
+          </div>
         </div>
         <!-- Right frame -->
         <div class="section-divider-vertical" aria-hidden="true"></div>
