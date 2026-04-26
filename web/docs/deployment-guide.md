@@ -2,38 +2,25 @@
 
 ## Build Profiles
 
-Two named profiles select the basePath for the deploy target:
-
-| Script | basePath | Target URL |
+| Script | basePath | Target |
 |---|---|---|
-| `npm run build:gh` | `/loto` | `https://tiennm99.github.io/loto` |
-| `npm run build:cf` | `""` (root) | `https://loto.miti99.com` |
-| `npm run build` | `/loto` | legacy default — same as `build:gh` |
+| `npm run build` | `""` (root) | Cloudflare Pages → `https://loto.miti99.com` |
+| `npm run build:gh` | `/loto` | GitHub Pages → `https://tiennm99.github.io/loto` (manual fallback) |
 
-Implementation: `next.config.mjs` reads `BUILD_PROFILE` (`gh` or `cf`) and
-picks the basePath. `NEXT_BASE_PATH` overrides everything for one-off
-custom-domain builds.
+Implementation: `next.config.mjs` reads `BUILD_PROFILE`. Default is empty
+basePath; `BUILD_PROFILE=gh` switches to `/loto`. `NEXT_BASE_PATH`
+overrides everything for one-off custom-domain builds.
 
-## Production Deployment
+## Production Deployment — Cloudflare Pages
 
-### GitHub Pages
+Primary deploy. Set up via the Cloudflare dashboard once; subsequent
+pushes to `master` trigger automatic builds + deploys.
 
-Auto-deploys from `master` via `.github/workflows/deploy.yml`. Runs
-`npm run build:gh`, then uploads `out/` as a Pages artifact.
-
-URL: `https://tiennm99.github.io/loto`. basePath `/loto` because GH Pages
-serves the project under that path prefix.
-
-### Cloudflare Pages
-
-Custom domain target: `https://loto.miti99.com` (basePath `""`).
-
-**Option A — Dashboard:**
 1. dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git
    → pick the repo
 2. Build settings:
    - Framework preset: `Next.js (Static HTML Export)`
-   - Build command: `npm run build:cf`
+   - Build command: `npm run build`
    - Build output directory: `out`
    - Production branch: `master`
 3. After first deploy, add the custom domain:
@@ -41,27 +28,19 @@ Custom domain target: `https://loto.miti99.com` (basePath `""`).
    records to add at your registrar (or auto-configures if `miti99.com` is
    on Cloudflare DNS).
 
-**Option B — GitHub Actions (`.github/workflows/deploy-cloudflare-pages.yml`):**
+No GitHub Actions involved; no repo secrets needed.
 
-Add two repo secrets:
-- `CLOUDFLARE_API_TOKEN` — dash → My Profile → API Tokens → Create with the
-  `Pages — Edit` template
-- `CLOUDFLARE_ACCOUNT_ID` — visible in the dash sidebar
+## Manual GH Pages Deploy (optional)
 
-The workflow runs `npm run build:cf`, then publishes `out/` via
-`cloudflare/wrangler-action@v3` to a Pages project named `loto`. Custom
-domain setup is the same dashboard step as Option A — done once.
-
-The two providers can run in parallel — different artifacts, different
-URLs. Drop whichever you stop wanting by deleting its workflow file.
-
-### Manual Deploy
+If you ever want to push a build to GitHub Pages by hand:
 
 ```bash
-npm run build:gh   # for GH Pages
-npm run build:cf   # for CF Pages / any root-served host
-# out/ directory ready for upload to any static host
+npm run build:gh
+# upload out/ to the GH Pages target
 ```
+
+The repo no longer auto-deploys to GH Pages — there's no GitHub Actions
+workflow. CF Pages is the only auto-deploy target.
 
 ## Development Environment
 
