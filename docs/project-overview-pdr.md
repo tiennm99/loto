@@ -4,7 +4,7 @@
 
 Lô tô is a traditional Vietnamese bingo game. The app replicates the game digitally for players to generate their own 9×9 number cards and mark cells as a host calls numbers from 1–90. First player to complete an entire row wins and shouts "Kinh!" (the game's victory cheer).
 
-The inspiration comes from TN1 class reunions (2014–2017) where players often ran out of physical bingo cards.
+The inspiration comes from TN1 class reunions (2014–2017) where players often ran build of physical bingo cards.
 
 ## Core Mechanics
 
@@ -14,10 +14,11 @@ The inspiration comes from TN1 class reunions (2014–2017) where players often 
 
 ## Tech Stack
 
-- **Framework**: Next.js 16.2.2 (App Router, SSG via `output: "export"`)
-- **Runtime**: React 19.2.4 (Hooks: useState, useEffect, useCallback, useRef)
+- **Framework**: SvelteKit 2 with Svelte 5 (runes mode)
+- **Runtime**: Svelte 5 runes ($state, $derived, $effect, $props)
 - **Styling**: Tailwind CSS 4 (utility-first, animations)
 - **Persistence**: localStorage (no backend)
+- **Deploy**: Cloudflare Pages (root domain), GitHub Pages fallback (`/loto`)
 - **Dev Profile**: code-server compatible via `/absproxy/{port}` basePath + HMR proxy config
 
 ## Architecture Overview
@@ -32,7 +33,7 @@ State is entirely client-side. Each page/card instance uses a unique localStorag
 
 - **Production**: GitHub Pages auto-deploys from `master` branch via `.github/workflows/deploy.yml`. App is served at `/loto` basePath.
 - **Development**: `npm run dev` (local), `npm run dev:codeserver` (code-server via proxy).
-- **Build**: `npm run build` generates static export to `out/` directory.
+- **Build**: `npm run build` generates static export to `build/` directory.
 
 ## Key Acceptance Criteria
 

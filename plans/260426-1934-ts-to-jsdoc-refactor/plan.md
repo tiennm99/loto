@@ -1,7 +1,8 @@
 ---
 slug: ts-to-jsdoc-refactor
 created: 2026-04-26
-status: planned
+status: completed
+completedAt: 2026-04-26
 mode: fast
 blockedBy: []
 blocks: []

@@ -30,7 +30,7 @@
 - Text: slate-600 (light) / slate-400 (dark)
 
 ### Dark Mode
-All colors have corresponding `dark:` variants. Use Tailwind's `prefers-color-scheme: dark` media query (set in `globals.css`).
+All colors have corresponding `dark:` variants. Tailwind's `prefers-color-scheme: dark` media query is enabled (set in `app.css`).
 
 ## Typography
 
@@ -114,7 +114,7 @@ All colors have corresponding `dark:` variants. Use Tailwind's `prefers-color-sc
 - **spin-slow-reverse** (3s): 🎊 emoji (counter-rotation)
 
 ### Ephemeral
-- **toast** (5s): "Chờ X" notification (scale 0.8→1.05→1, fade out)
+- **toast** (5s): "Chờ X" notification (scale 0.8→1.05→1, fade build)
 
 ### Interactive
 - **active:scale-95**: Button press response

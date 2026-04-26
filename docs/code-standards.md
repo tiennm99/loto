@@ -2,30 +2,33 @@
 
 ## File Naming & Structure
 
-- **Kebab-case** for all files: `player-board.jsx`, `game-logic.js`.
+- **Kebab-case** for all files: `PlayerBoard.svelte`, `game-logic.js`.
 - **Descriptive names**: Long names are preferred for self-documentation. Avoid ambiguity.
 - **Single responsibility**: Each file has one primary export (component or utilities).
 - **Max 200 lines per file**: Split larger components into smaller focused ones.
 
-## React & JavaScript Conventions
+## Svelte 5 Runes & JavaScript
 
-### Hooks
-- **useState**: For local UI state (grid, crossed, form inputs).
-- **useEffect**: For side effects (load from localStorage, save to localStorage, detect changes).
-- **useCallback**: For event handlers to stabilize function identity across renders.
-- **useRef**: For mutable values that don't trigger renders (timers, celebratedRows set).
+### State & Reactivity
+- **$state**: For mutable local UI state (grid, crossed, booleans). `let grid = $state(...)`
+- **$derived**: For computed values that auto-update when dependencies change. `const rowCompleteness = $derived(grid && crossed.length ? [...] : [])`
+- **$effect**: For side effects (localStorage sync, detecting completed rows). Replaces React useEffect.
+- **$props**: For destructuring component props. `let { storagePrefix = "loto" } = $props()`
+
+### Plain References (No Reactivity)
+- Use regular `let` or `const` for timers, Sets, Maps (not reactive). Example: `let toastTimer = null; const celebratedRows = new Set();`
 
 ### Typing (JSDoc)
-- Author types in JSDoc comments — `jsconfig.json` has `checkJs: true`, so `tsc --noEmit` validates them.
-- Component props: `@typedef {Object} Props { ... }` followed by `@param {Props} props` on the function.
-- Layout children: `@param {{ children: React.ReactNode }} props`.
+- Use JSDoc `@typedef {Object}` for prop types, JSDoc type annotations for functions.
+- `jsconfig.json` has `checkJs: false` (not enabled), so types are documentation-only.
+- Component props: `@typedef {Object} Props { ... }` then `/** @type {Props} */ let { ... } = $props()`
 - Avoid `any`; use precise types (e.g., `number[][]` for grid).
-- Generics: `@template T` then reference `T` in `@param` / `@returns`.
+- Generics: `@template T` for utility functions.
 
-### Client-Only Constraint
-- All interactive pages must have `"use client"` at the top.
-- No server-side data fetching; use localStorage instead.
-- No async Server Components.
+### Client-Only Architecture
+- SvelteKit's `ssr: false` in `+layout.js` disables server rendering.
+- All pages are client-only; no server-side data fetching.
+- Use localStorage exclusively for persistence.
 
 ## CSS & Tailwind 4 Patterns
 
@@ -81,7 +84,7 @@ function loadGrid(prefix = "loto") {
 ## Error Handling
 
 - **Silent fallback**: JSON parse errors return null; caller checks for null.
-- **No try-catch in render**: Keep logic in useEffect or event handlers.
+- **No try-catch in render**: Keep logic in $effect or event handlers.
 - **Confirmation dialogs**: `confirm("Bạn có muốn...")` for destructive actions.
 
 ## Naming Conventions
@@ -91,13 +94,13 @@ function loadGrid(prefix = "loto") {
 | camelCase | `handleCellClick`, `storagePrefix` | variables, functions, props |
 | PascalCase | `PlayerBoard`, `MasterPage` | components, types |
 | UPPER_SNAKE | `STORAGE_KEY`, `NUM_ROWS` | constants |
-| kebab-case | `player-board.jsx` | file names |
+| kebab-case | `PlayerBoard.svelte` | file names |
 
 ## Comment Style
 
 - Document **why**, not **what**. The code shows what it does.
 - Use `/** JSDoc */` for exported functions.
-- Inline comments for complex logic (e.g., weighted random selection in `lib/game-logic.js:19–28`).
+- Inline comments for complex logic (e.g., weighted random selection in `src/lib/game-logic.js:19–28`).
 
 ### Example
 ```js
@@ -116,37 +119,62 @@ function randomANumberInRow(weights) {
 }
 ```
 
+## Internal Navigation
+
+- Use `import { base } from '$app/paths'` for internal links to preserve basePath across deployments.
+- Example: `<a href="{base}/master">Host page</a>` works on root (`""`) and subpath (`/loto`) equally.
+
 ## Import Organization
 
-1. React/Next imports
+1. SvelteKit imports (`$app/paths`, `$lib/...`)
 2. Third-party imports
 3. Local component/utility imports
 
 ```js
-import { useCallback, useState } from "react";
-import Link from "next/link";
-import PlayerBoard from "../components/player-board";
-import { generateGrid } from "../lib/game-logic";
+import { base } from "$app/paths";
+import { generateGrid, isRowComplete } from "$lib/game-logic.js";
+import PlayerBoard from "$lib/PlayerBoard.svelte";
+```
+
+## Component Patterns
+
+### Props Pattern
+```svelte
+<script>
+  /**
+   * @typedef {Object} Props
+   * @property {string} [storagePrefix]
+   */
+  /** @type {Props} */
+  let { storagePrefix = "loto" } = $props();
+</script>
+```
+
+### Event Handlers
+Use inline event handlers (`onclick`, `onkeydown`). Svelte 5 handles click delegation. Event objects automatically passed:
+```svelte
+<button onclick={() => handleCellClick(row, col)}>Click</button>
+<div onkeydown={(e) => e.key === "Escape" && dismiss()}>Dialog</div>
 ```
 
 ## Testing (Not Currently Implemented)
 
 Future tests should follow:
 - Unit: test game logic (generateGrid, isRowComplete, getWaitingNumber) in isolation.
-- Component: mock localStorage, render PlayerBoard with different props.
+- Component: render PlayerBoard, mock localStorage, verify toast/popup.
 - E2E: player flow (generate → click → bingo).
 
 ## Configuration
 
-### Environment Variables
-- **NEXT_DEV_PROFILE**: "codeserver" triggers proxy config.
-- **CODESERVER_HOST**: Hostname for HMR (required if NEXT_DEV_PROFILE=codeserver).
+### Environment Variables (code-server only)
+- **VITE_DEV_PROFILE**: "codeserver" triggers proxy config.
+- **CODESERVER_HOST**: Hostname for HMR.
 - **CODESERVER_PORT**: Port (defaults to 3000).
 
 Set in `.env.local` (not committed).
 
 ### Build Targets
-- **output: "export"**: Static HTML export (no Node.js server needed).
-- **basePath**: Configurable per deployment environment.
+- **adapter-static**: Generates static HTML + JS in `build/`.
+- **basePath**: Dual-mode: `""` (Cloudflare, dev) or `/loto` (GitHub Pages via `BUILD_PROFILE=gh`).
 
 Last reviewed: 2026-04-26

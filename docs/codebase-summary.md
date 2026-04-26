@@ -5,33 +5,35 @@
 ### Routing & Layout
 | File | Purpose |
 |------|---------|
-| `app/layout.jsx` | Root HTML layout. Sets Vietnamese lang, imports Geist font, applies global flex layout. |
-| `app/page.jsx` | Player page (`/`). Instructions toggle, PlayerBoard component, indigo gradient branding. |
-| `app/master/page.jsx` | Host page (`/master`). Controls (new game, draw number), 9×10 master board, host's player card. |
+| `src/routes/+layout.svelte` | Root HTML layout. Sets Vietnamese lang, imports Geist font, applies global flex layout. |
+| `src/routes/+page.svelte` | Player page (`/`). Instructions toggle, PlayerBoard component, indigo gradient branding. |
+| `src/routes/master/+page.svelte` | Host page (`/master`). Controls (new game, draw number), 9×10 master board, host's player card. |
 
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `components/player-board.jsx` | Reusable player card (9×9 grid). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. |
+| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. |
 
 ### Game Logic
 | File | Purpose |
 |------|---------|
-| `lib/game-logic.js` | Stateless utilities: generateGrid (weighted column selection), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
+| `src/lib/game-logic.js` | Stateless utilities: generateGrid (weighted column selection), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
 
 ### Styling
 | File | Purpose |
 |------|---------|
-| `app/globals.css` | Root styles: Tailwind @import, CSS variables (light/dark), `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast), `.cell-crossed` diagonal. |
+| `src/app.css` | Root styles: Tailwind @import, CSS variables (light/dark), `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast), `.cell-crossed` diagonal. |
 
 ### Configuration
 | File | Purpose |
 |------|---------|
-| `next.config.mjs` | Dual basePath: prod `/loto`, codeserver `/absproxy/{PORT}`. Exports static HTML. HMR-aware. |
-| `package.json` | Next 16.2.2, React 19.2.4, Tailwind 4. Scripts: dev, dev:codeserver, build, start, lint. |
-| `eslint.config.mjs` | ESLint 9 config (Next.js preset). |
-| `.gitignore` | Excludes node_modules, .next, .env.local, etc. |
-| `.env.example` | Template for env vars (currently none required for runtime; codeserver profile reads CODESERVER_HOST/PORT). |
+| `svelte.config.js` | adapter-static (HTML export), dual basePath via BUILD_PROFILE env. |
+| `vite.config.js` | Tailwind + SvelteKit plugins. codeserver HMR config (port, allowedHosts, hmr). |
+| `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite. Scripts: dev, dev:codeserver, build, build:gh, lint. |
+| `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). |
+| `jsconfig.json` | Path alias `$lib`, no checkJs. |
+| `.gitignore` | Excludes node_modules, build, .env.local, etc. |
+| `.env.example` | codeserver profile vars (CODESERVER_HOST, CODESERVER_PORT). |
 
 ## Key Data Structures
 
@@ -66,10 +68,10 @@ RootLayout
 
 | Function | Location | Effect |
 |----------|----------|--------|
-| `generateGrid()` | game-logic.js:52 | Creates 9×9 with weighted column selection (5 nums/row). |
-| `isRowComplete()` | game-logic.js:108 | Boolean: all non-zero cells in row crossed? |
-| `getWaitingNumber()` | game-logic.js:120 | Returns the single uncrossed number in row, or null. |
-| `handleCellClick()` | player-board.jsx:112 | Toggle crossed[row][col]. |
-| `handleDrawNext()` | master/page.jsx:88 | Pop first number from remaining, add to called. |
+| `generateGrid()` | game-logic.js:74 | Creates 9×9 with weighted column selection (5 nums/row). |
+| `isRowComplete()` | game-logic.js:200 | Boolean: all non-zero cells in row crossed? |
+| `getWaitingNumber()` | game-logic.js:218 | Returns the single uncrossed number in row, or null. |
+| `handleCellClick()` | PlayerBoard.svelte:127 | Toggle crossed[row][col]. |
+| `saveGrid()` / `loadGrid()` | game-logic.js:149–167 | localStorage with prefix-based keys. |
 
 Last reviewed: 2026-04-26

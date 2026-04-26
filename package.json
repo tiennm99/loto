@@ -2,23 +2,26 @@
   "name": "loto",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "dev:codeserver": "NEXT_DEV_PROFILE=codeserver next dev -H 0.0.0.0",
-    "build": "next build",
-    "build:gh": "BUILD_PROFILE=gh next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.2.2",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "dev": "vite dev",
+    "dev:codeserver": "VITE_DEV_PROFILE=codeserver vite dev --host 0.0.0.0",
+    "build": "vite build",
+    "build:gh": "BUILD_PROFILE=gh vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@eslint/js": "^9",
+    "@sveltejs/adapter-static": "^3",
+    "@sveltejs/kit": "^2",
+    "@sveltejs/vite-plugin-svelte": "^6",
+    "@tailwindcss/vite": "^4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.2",
-    "tailwindcss": "^4"
+    "eslint-plugin-svelte": "^2",
+    "globals": "^15",
+    "svelte": "^5",
+    "tailwindcss": "^4",
+    "vite": "^7"
   }
 }

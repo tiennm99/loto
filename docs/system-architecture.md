@@ -80,38 +80,36 @@ Access: https://<proxy>/absproxy/3000/
 
 ## Client-Only Architecture
 
-All pages use `"use client"` because:
-- `output: "export"` disables server components
+All pages are client-only (no SSR) because:
+- `ssr: false` in `+layout.js` disables server-side rendering
 - localStorage is unavailable on server
-- Hydration requires client-only state initialization
+- State initialization (grid, crossed) must run in browser
 
-Files with `"use client"`:
-- `app/page.jsx`
-- `app/master/page.jsx`
-- `components/player-board.jsx`
+Files that are client-only:
+- `src/routes/+page.svelte` (player page)
+- `src/routes/master/+page.svelte` (host page)
+- `src/lib/PlayerBoard.svelte` (shared component)
 
 ## Data Flow: Mark a Cell
 
 ```
-1. User clicks <div> in PlayerBoard
+1. User clicks button in PlayerBoard
 2. handleCellClick(row, col) fires
-3. setCrossed(prev => [...]) toggles crossed[row][col]
-4. useEffect listens to crossed → saveCrossedState()
+3. crossed = crossed.map(...) toggled state
+4. $effect listens to crossed → saveCrossedState()
 5. localStorage updated with new crossed state
-6. Render cycle checks isRowComplete() + getWaitingNumber()
+6. $derived updates rowCompleteness matrix
 7. If row complete → bingo popup; if waiting → toast
 ```
 
-## Data Flow: Draw a Number
+## Data Flow: Initial Load
 
 ```
-1. User clicks "Xổ số" button on master page
-2. handleDrawNext() runs
-3. Sets state: { called: [...old, next], remaining: [...old].slice(1) }
-4. useEffect listens to state → saveState() → localStorage["loto_master"]
-5. Master grid re-renders: cells with numbers in called set turn orange
-6. lastCalled updates the big display
-7. Host can see their card update in real-time (separate component)
+1. Component mounts
+2. $effect runs initial loadGrid(storagePrefix)
+3. If found, load crossed state (or initialize as all false)
+4. Pre-populate celebratedRows + notifiedWaitingRows sets
+5. Pass grid + crossed to UI render
 ```
 
 ## Animations
@@ -123,7 +121,7 @@ Files with `"use client"`:
 | bounce-slow | 1.5s infinite | Emoji on bingo popup |
 | spin-slow | 3s infinite | ✨ on bingo popup |
 | spin-slow-reverse | 3s infinite reverse | 🎊 on bingo popup |
-| toast | 5s forwards | "Chờ X" notification fade in/out |
+| toast | 5s forwards | "Chờ X" notification fade in/build |
 | cell-crossed::after | instant | Red diagonal line in marked cells |
 
 ## Offline Capability

@@ -1,8 +1,7 @@
 .vscode/
 node_modules/
-.next/
-out/
+.svelte-kit/
+build/
 .env.local
 .env*.local
-tsconfig.tsbuildinfo
 repomix-output.xml
