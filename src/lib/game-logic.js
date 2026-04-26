@@ -21,41 +21,6 @@ const NUM_COLS = 9;
 const NUM_PER_ROW = 5;
 
 /**
- * Weighted random selection of a column index.
- * @param {number[]} weights
- * @returns {number}
- */
-function randomANumberInRow(weights) {
-  const tempWeight = [...weights];
-  for (let i = 1; i < tempWeight.length; i++) {
-    tempWeight[i] += tempWeight[i - 1];
-  }
-  const rand = Math.floor(Math.random() * tempWeight[tempWeight.length - 1]);
-  for (let i = 0; i < tempWeight.length; i++) {
-    if (rand < tempWeight[i]) return i;
-  }
-  return 0;
-}
-
-/**
- * Select NUM_PER_ROW columns for a row using weighted random. Mutates baseWeight.
- * @param {number[]} baseWeight
- * @returns {number[]}
- */
-function randomARow(baseWeight) {
-  const tempWeight = [...baseWeight];
-  /** @type {number[]} */
-  const selectedCols = [];
-  for (let i = 0; i < NUM_PER_ROW; i++) {
-    const col = randomANumberInRow(tempWeight);
-    selectedCols.push(col);
-    tempWeight[col] = 0;
-    baseWeight[col]--;
-  }
-  return selectedCols;
-}
-
-/**
  * Pick `num` random numbers from column `col`'s range.
  * @param {number} num
  * @param {number} col
@@ -64,37 +29,67 @@ function randomARow(baseWeight) {
 function randomNumbersInCol(num, col) {
   const arr = [...NUM_IN_COL[col]];
   arr.sort(() => 0.5 - Math.random());
-  return arr.slice(0, num);
+  // Pick `num` at random, then return them ascending so they sit
+  // top-to-bottom in the column (lô tô hội chợ convention).
+  return arr.slice(0, num).sort((a, b) => a - b);
 }
 
 /**
- * Generate a 9x9 lô tô grid. Cell values: 0 = empty, >0 = number.
+ * Choose which columns are filled in each row so that every row has exactly
+ * NUM_PER_ROW filled cells AND every column ends up with exactly NUM_PER_ROW
+ * filled cells. Forces any column whose remaining quota equals the number of
+ * rows left — otherwise that column could not reach its target — then picks
+ * the rest at random from columns with quota > 0. The forced set never
+ * exceeds NUM_PER_ROW because total remaining quota = NUM_PER_ROW * rowsLeft.
+ * @returns {number[][]}
+ */
+function pickFilledCols() {
+  const quota = new Array(NUM_COLS).fill(NUM_PER_ROW);
+  /** @type {number[][]} */
+  const result = [];
+  for (let row = 0; row < NUM_ROWS; row++) {
+    const rowsLeft = NUM_ROWS - row;
+    /** @type {number[]} */
+    const forced = [];
+    /** @type {number[]} */
+    const candidates = [];
+    for (let col = 0; col < NUM_COLS; col++) {
+      if (quota[col] === rowsLeft) forced.push(col);
+      else if (quota[col] > 0) candidates.push(col);
+    }
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    const selected = [
+      ...forced,
+      ...candidates.slice(0, NUM_PER_ROW - forced.length),
+    ].sort((a, b) => a - b);
+    for (const col of selected) quota[col]--;
+    result.push(selected);
+  }
+  return result;
+}
+
+/**
+ * Generate a 9x9 lô tô grid with exactly NUM_PER_ROW filled cells per row
+ * AND per column. Cell values: 0 = empty, >0 = number.
  * @returns {number[][]}
  */
 export function generateGrid() {
   const cell = Array.from({ length: NUM_ROWS }, () =>
     new Array(NUM_COLS).fill(0)
   );
-  const countNumPerCol = new Array(NUM_COLS).fill(0);
-  const baseWeight = new Array(NUM_COLS).fill(6);
-
-  for (let i = 0; i < NUM_ROWS; i++) {
-    const newRow = randomARow(baseWeight);
-    newRow.forEach((col) => {
-      countNumPerCol[col]++;
-      cell[i][col] = -1;
-    });
+  const colsPerRow = pickFilledCols();
+  for (let row = 0; row < NUM_ROWS; row++) {
+    for (const col of colsPerRow[row]) cell[row][col] = -1;
   }
-
-  for (let i = 0; i < NUM_COLS; i++) {
-    const selectedNum = randomNumbersInCol(countNumPerCol[i], i);
-    for (let j = 0; j < NUM_ROWS; j++) {
-      if (cell[j][i] === -1) {
-        cell[j][i] = selectedNum.shift() ?? 0;
-      }
+  for (let col = 0; col < NUM_COLS; col++) {
+    const picked = randomNumbersInCol(NUM_PER_ROW, col);
+    for (let row = 0; row < NUM_ROWS; row++) {
+      if (cell[row][col] === -1) cell[row][col] = picked.shift() ?? 0;
     }
   }
-
   return cell;
 }
 
