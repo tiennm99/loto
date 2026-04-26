@@ -2,21 +2,32 @@
   const STORAGE_KEY = "loto_master";
 
   /**
-   * Build the 9x10 board: columns 0-8 map to number ranges 1-9, 10-19, ..., 80-90.
+   * Build the 11x9 board, aligned by last digit so column N row R holds
+   * the number whose tens-digit is N (col 0 = ones, col 8 = eighties/90)
+   * and whose ones-digit is R. Row 0 holds the *0 multiples (10..80),
+   * rows 1-9 hold 1..9, 11..19, ..., 81..89, and row 10 holds 90 alone.
+   * Empty slots are 0.
    * @returns {number[][]}
    */
   function buildBoard() {
     /** @type {number[][]} */
     const board = [];
-    for (let row = 0; row < 10; row++) {
+    for (let row = 0; row < 11; row++) {
       /** @type {number[]} */
       const cells = [];
       for (let col = 0; col < 9; col++) {
-        const num = col === 0 ? row + 1 : col * 10 + row;
-        if (col === 0 && row === 9) cells.push(0);
-        else if (col === 8 && row === 9) cells.push(90);
-        else if (col > 0 && row === 9) cells.push(0);
-        else cells.push(num);
+        let num = 0;
+        if (row === 10) {
+          // Only 90 sits in this trailing row, last column.
+          if (col === 8) num = 90;
+        } else if (row === 0) {
+          // First col has no *0 number in 1-9 range; others get 10, 20, ..., 80.
+          if (col > 0) num = col * 10;
+        } else {
+          // rows 1..9 hold digit `row`: col 0 -> row, col N -> N*10 + row.
+          num = col === 0 ? row : col * 10 + row;
+        }
+        cells.push(num);
       }
       board.push(cells);
     }
@@ -77,7 +88,11 @@
     if (state) saveState(state);
   });
 
-  const calledSet = $derived(new Set(state?.called ?? []));
+  // Map number -> 1-based draw order; lets the master grid show "this
+  // was the Nth call" for fast Kinh! verification.
+  const callOrder = $derived(
+    new Map((state?.called ?? []).map((n, i) => [n, i + 1])),
+  );
 
   function handleNewGame() {
     if (state && !confirm("Bạn có muốn tạo ván mới không?")) return;
@@ -191,7 +206,9 @@
         <div class="master-grid">
           {#each BOARD_FLAT as num, idx (idx)}
             {@const hasNumber = num > 0}
-            {@const isCalled = hasNumber && calledSet.has(num)}
+            {@const order = hasNumber ? callOrder.get(num) : undefined}
+            {@const isCalled = order !== undefined}
+            {@const isLast = isCalled && num === lastCalled}
             <div
               class="relative flex items-center justify-center
                      aspect-square text-sm sm:text-base font-bold
@@ -199,11 +216,20 @@
                      transition-colors select-none
                      {hasNumber
                        ? isCalled
-                         ? 'bg-orange-500 dark:bg-orange-600 text-white'
+                         ? isLast
+                           ? 'bg-red-500 dark:bg-red-600 text-white ring-2 ring-red-300 dark:ring-red-400 ring-inset z-10'
+                           : 'bg-orange-500 dark:bg-orange-600 text-white'
                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200'
                        : 'bg-slate-100 dark:bg-slate-900/60'}"
             >
               {hasNumber ? num : ""}
+              {#if isCalled}
+                <span
+                  class="absolute top-0.5 right-0.5 text-[9px] sm:text-[10px] font-semibold leading-none text-white/80 tabular-nums"
+                >
+                  {order}
+                </span>
+              {/if}
             </div>
           {/each}
         </div>
