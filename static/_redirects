@@ -1,4 +1,10 @@
-# Cloudflare Pages: any unknown path → 301 redirect to homepage.
-# Static asset files are served first, so this only fires on misses.
-# Keeps old /master bookmarks (and any future stray URL) on the app.
-/* / 301
+# Cloudflare Pages routing rules.
+#
+# 1. /master* → 301 redirect to / (handles old bookmarks from when the
+#    host had its own page; the URL bar updates to /).
+# 2. /* → 200 rewrite to /index.html (SPA fallback for any other unknown
+#    path: keeps the URL but serves the homepage content). Static assets
+#    take precedence over rules, so /, /_app/*, /favicon.ico, etc. are
+#    served directly without rewrite — no redirect loop on /.
+/master*  /             301
+/*        /index.html   200
