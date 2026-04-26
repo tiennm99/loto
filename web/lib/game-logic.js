@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  * Lô tô card generation, persistence, and row-state helpers.
  * @module lib/game-logic
@@ -101,22 +99,22 @@ export function generateGrid() {
 }
 
 /**
- * @template T
+ * Parse JSON and validate its shape with a runtime guard. Returns null on
+ * either parse failure or validation failure.
  * @param {string | null} raw
- * @param {(v: unknown) => boolean} validate runtime guard; cast result to T on success
- * @returns {T | null}
+ * @param {(v: any) => boolean} validate
  */
 function safeParse(raw, validate) {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
-    return validate(parsed) ? /** @type {T} */ (parsed) : null;
+    return validate(parsed) ? parsed : null;
   } catch {
     return null;
   }
 }
 
-/** @param {unknown} v @returns {boolean} */
+/** @param {any} v */
 function isNumberMatrix(v) {
   return (
     Array.isArray(v) &&
@@ -130,7 +128,7 @@ function isNumberMatrix(v) {
   );
 }
 
-/** @param {unknown} v @returns {boolean} */
+/** @param {any} v */
 function isBoolMatrix(v) {
   return (
     Array.isArray(v) &&

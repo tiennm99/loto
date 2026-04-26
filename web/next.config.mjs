@@ -1,5 +1,3 @@
-// @ts-check
-
 const isProd = process.env.NODE_ENV === "production";
 const isCodeserver = process.env.NEXT_DEV_PROFILE === "codeserver";
 
@@ -24,7 +22,6 @@ const cs = isCodeserver ? codeserverConfig() : null;
 const basePath =
   process.env.NEXT_BASE_PATH ?? cs?.basePath ?? (isProd ? "/loto" : "");
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
   basePath,
