@@ -26,7 +26,9 @@ That format is intentionally out of scope.
   may keep playing further rows (game does not end).
 - **Waiting state**: when a row needs only 1 number, app announces **"Chờ N"**.
 - **Host (quản trò)** draws numbers from a shuffled 1–90 deck, tracks them on
-  a master board, and may also play their own card.
+  a master board with circular tokens (pink ring for 1–49, green for 50–90,
+  cream fill on called, dim on uncalled, red ring + scale on the most
+  recent draw), and may also play their own card.
 - **Settings**: gear icon in headers opens a modal with a color picker for
   the empty/blank cell color (default brown matches physical card).
   Persisted to `loto_settings`.

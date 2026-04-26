@@ -7,7 +7,7 @@
 |------|---------|
 | `src/routes/+layout.svelte` | Root HTML layout. Sets Vietnamese lang, imports Geist font, applies global flex layout. |
 | `src/routes/+page.svelte` | Player page (`/`). Instructions toggle, PlayerBoard component, indigo gradient branding. |
-| `src/routes/master/+page.svelte` | Host page (`/master`). Controls (new game, draw number), 11×9 last-digit-aligned master board with draw-order overlay, host's player card. |
+| `src/routes/master/+page.svelte` | Host page (`/master`). Controls (new game, draw number), 11×9 last-digit-aligned master board with circular tokens (pink ring for 1–49, green for 50–90; cream fill when called, dim when uncalled; red ring + scale on last-called) and draw-order overlay, host's player card. |
 
 ### Shared Components
 | File | Purpose |
