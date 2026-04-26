@@ -1,9 +1,8 @@
-const isProd = process.env.NODE_ENV === "production";
 const isCodeserver = process.env.NEXT_DEV_PROFILE === "codeserver";
 
 // Build profiles select basePath for the deploy target:
-//   gh — GitHub Pages, served at tiennm99.github.io/loto
-//   cf — Cloudflare Pages, served at loto.miti99.com (custom domain, root)
+//   (default) — Cloudflare Pages, served at loto.miti99.com (root)
+//   gh        — GitHub Pages, served at tiennm99.github.io/loto
 const buildProfile = process.env.BUILD_PROFILE;
 
 // In dev under code-server's reverse proxy, basePath/assetPrefix must match
@@ -27,19 +26,12 @@ const cs = isCodeserver ? codeserverConfig() : null;
 // basePath resolution order (first non-null wins):
 //   1. NEXT_BASE_PATH — explicit override (escape hatch for forks / custom domains)
 //   2. codeserver dev profile
-//   3. BUILD_PROFILE=gh|cf — explicit deploy target
-//   4. NODE_ENV=production — legacy fallback (bare `npm run build` → GH Pages)
-//   5. local dev — empty
+//   3. BUILD_PROFILE=gh — explicit GH Pages target
+//   4. default — empty (CF Pages / local dev / any root-served host)
 const basePath =
   process.env.NEXT_BASE_PATH ??
   cs?.basePath ??
-  (buildProfile === "gh"
-    ? "/loto"
-    : buildProfile === "cf"
-      ? ""
-      : isProd
-        ? "/loto"
-        : "");
+  (buildProfile === "gh" ? "/loto" : "");
 
 const nextConfig = {
   output: "export",

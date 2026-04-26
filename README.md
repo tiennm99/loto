@@ -30,4 +30,4 @@ Use `/absproxy/{port}/`, **not** `/proxy/{port}/` — the latter strips the path
 npm run build
 ```
 
-Static export to `out/`. Deployed to GitHub Pages from `master` via `.github/workflows/deploy.yml`.
+Static export to `out/`. Deployed to Cloudflare Pages from `master` (set up via the CF dashboard — see `docs/deployment-guide.md`).
