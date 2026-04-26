@@ -32,17 +32,25 @@ pushes to `main` trigger automatic builds + deploys.
 
 No GitHub Actions involved; no repo secrets needed.
 
-## Manual GH Pages Deploy (optional)
+## GitHub Pages (parallel auto-deploy)
 
-If you ever want to push a build to GitHub Pages by hand:
+`.github/workflows/deploy-github-pages.yml` runs on every push to `main`,
+builds with `npm run build:gh` (basePath `/loto`), and publishes `build/`
+as a Pages artifact.
+
+URL: `https://tiennm99.github.io/loto`.
+
+CF Pages and GH Pages run in parallel — different URLs, different
+artifacts, no conflict. Drop GH Pages by deleting the workflow file.
+
+### Manual GH Pages Deploy
+
+If you'd rather export by hand:
 
 ```bash
 npm run build:gh
 # upload build/ to the GH Pages target
 ```
-
-The repo no longer auto-deploys to GH Pages — there's no GitHub Actions
-workflow. CF Pages is the only auto-deploy target.
 
 ## Development Environment
 
@@ -147,10 +155,11 @@ Generates:
 
 ## CI/CD Pipeline
 
-Cloudflare Pages handles CI/CD automatically:
-- GitHub Pages deployment removed (Cloudflare is primary).
-- Manual fallback: `npm run build:gh && git push` (if needed).
-- No GitHub Actions workflow for automatic GH Pages deploy.
+Both providers auto-deploy on push to `main`:
+- **Cloudflare Pages** — wired via the CF dashboard, builds with `npm run build`,
+  publishes to `loto.miti99.com`.
+- **GitHub Pages** — wired via `.github/workflows/deploy-github-pages.yml`,
+  builds with `npm run build:gh`, publishes to `tiennm99.github.io/loto`.
 
 ## Performance Checklist
 
