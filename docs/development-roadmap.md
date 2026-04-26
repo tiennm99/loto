@@ -4,13 +4,15 @@ This document tracks **future work only**. Completed features live in git commit
 
 ## Currently Implemented Features
 
-The app is fully functional for core gameplay:
-- 9×9 player card generation with weighted number distribution
-- Cell marking (toggle crossed state)
-- Bingo detection and celebration popup
+The app is fully functional for core gameplay (Lô tô hội chợ Tân Tân variant):
+- 9×9 player card with **exactly 5 per row and 5 per column**, columns
+  ascending top-to-bottom
+- Cell marking (toggle crossed state); player can keep playing after Kinh
+- Bingo detection and "Kinh!" celebration popup
 - "Chờ X" waiting notifications
 - Host number drawing from 1–90 deck
-- 9×10 master board tracking called numbers
+- 11×9 last-digit-aligned master board with draw-order overlay for fast
+  Kinh verification
 - Host's own player card (isolated instance)
 - localStorage persistence
 - Dark mode
@@ -79,10 +81,13 @@ Track games won, time per bingo, etc. Requires server-side persistence. Out of s
 - Screen reader support
 
 ### Custom Number Range
-Host selects range (e.g., 1–75 for American bingo) instead of hardcoded 1–90. Requires config UI and refactor of game logic constants.
+Host selects range (e.g., 1–75 for American bingo) instead of hardcoded 1–90. Requires config UI and refactor of game logic constants. **Out of scope** per Lô tô hội chợ Tân Tân focus.
 
 ### Different Grid Sizes
-Support 8×8 or 10×10 grids. Major refactor (NUM_ROWS, NUM_COLS constants, weighted selection algorithm).
+Support 8×8 or 10×10 grids, or 3×9 European Bingo 90 tickets. **Out of scope** — variant locked to 9×9 Tân Tân format.
+
+### Two-line / Full-house Win Tiers
+European Bingo 90 patterns. **Out of scope** — Tân Tân uses single-line "Kinh!" only.
 
 ---
 
