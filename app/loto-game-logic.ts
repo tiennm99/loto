@@ -76,15 +76,12 @@ export function generateGrid(): number[][] {
   return cell;
 }
 
-const STORAGE_KEY_GRID = "loto_grid";
-const STORAGE_KEY_CROSSED = "loto_crossed";
-
-export function saveGrid(grid: number[][]): void {
-  localStorage.setItem(STORAGE_KEY_GRID, JSON.stringify(grid));
+export function saveGrid(grid: number[][], prefix = "loto"): void {
+  localStorage.setItem(`${prefix}_grid`, JSON.stringify(grid));
 }
 
-export function loadGrid(): number[][] | null {
-  const data = localStorage.getItem(STORAGE_KEY_GRID);
+export function loadGrid(prefix = "loto"): number[][] | null {
+  const data = localStorage.getItem(`${prefix}_grid`);
   if (!data) return null;
   try {
     return JSON.parse(data);
@@ -93,16 +90,44 @@ export function loadGrid(): number[][] | null {
   }
 }
 
-export function saveCrossedState(crossed: boolean[][]): void {
-  localStorage.setItem(STORAGE_KEY_CROSSED, JSON.stringify(crossed));
+export function saveCrossedState(crossed: boolean[][], prefix = "loto"): void {
+  localStorage.setItem(`${prefix}_crossed`, JSON.stringify(crossed));
 }
 
-export function loadCrossedState(): boolean[][] | null {
-  const data = localStorage.getItem(STORAGE_KEY_CROSSED);
+export function loadCrossedState(prefix = "loto"): boolean[][] | null {
+  const data = localStorage.getItem(`${prefix}_crossed`);
   if (!data) return null;
   try {
     return JSON.parse(data);
   } catch {
     return null;
   }
+}
+
+/** Check if a row has all its numbers crossed */
+export function isRowComplete(
+  grid: number[][],
+  crossed: boolean[][],
+  row: number
+): boolean {
+  for (let col = 0; col < 9; col++) {
+    if (grid[row][col] > 0 && !crossed[row]?.[col]) return false;
+  }
+  return true;
+}
+
+/** Find the single remaining uncrossed number in a row, or null if != 1 remaining */
+export function getWaitingNumber(
+  grid: number[][],
+  crossed: boolean[][],
+  row: number
+): number | null {
+  let remaining: number | null = null;
+  for (let col = 0; col < 9; col++) {
+    if (grid[row][col] > 0 && !crossed[row]?.[col]) {
+      if (remaining !== null) return null;
+      remaining = grid[row][col];
+    }
+  }
+  return remaining;
 }
