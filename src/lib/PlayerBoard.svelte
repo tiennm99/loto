@@ -186,7 +186,7 @@
                 {#if !hasNumber}
                   <div
                     aria-hidden="true"
-                    class="relative aspect-[3/5]"
+                    class="relative aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40"
                     style:background-color="var(--empty-cell-bg)"
                   ></div>
                 {:else}
@@ -197,6 +197,7 @@
                     onclick={() => handleCellClick(row, col)}
                     class="tan-tan-num relative flex items-center justify-center
                            aspect-[3/5] text-2xl sm:text-3xl
+                           border border-slate-400/50 dark:border-slate-600/40
                            transition-all select-none cursor-pointer
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
                            {isCrossed
