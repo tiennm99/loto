@@ -213,27 +213,41 @@
             {@const order = hasNumber ? callOrder.get(num) : undefined}
             {@const isCalled = order !== undefined}
             {@const isLast = isCalled && num === lastCalled}
+            {@const isLow = hasNumber && num <= 49}
             <div
               style:background-color={hasNumber ? null : "var(--empty-cell-bg)"}
               class="relative flex items-center justify-center
-                     aspect-square text-sm sm:text-base font-bold
+                     aspect-square
                      border-r border-b border-slate-200/80 dark:border-slate-700/60
-                     transition-colors select-none
-                     {hasNumber
-                       ? isCalled
-                         ? isLast
-                           ? 'bg-red-500 dark:bg-red-600 text-white ring-2 ring-red-300 dark:ring-red-400 ring-inset z-10'
-                           : 'bg-orange-500 dark:bg-orange-600 text-white'
-                         : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200'
-                       : ''}"
+                     bg-white dark:bg-slate-800 select-none
+                     {isLast ? 'z-10' : ''}"
             >
-              {hasNumber ? num : ""}
-              {#if isCalled}
-                <span
-                  class="absolute top-0.5 right-0.5 text-[9px] sm:text-[10px] font-semibold leading-none text-white/80 tabular-nums"
+              {#if hasNumber}
+                <!-- Token: cream/beige inner, ring colored by value (pink ≤49, green ≥50). -->
+                <div
+                  class="flex items-center justify-center
+                         w-[82%] h-[82%] rounded-full
+                         text-sm sm:text-base font-bold tabular-nums
+                         border-[3px] transition-all
+                         {isLow
+                           ? 'border-pink-500 dark:border-pink-400'
+                           : 'border-emerald-500 dark:border-emerald-400'}
+                         {isCalled
+                           ? 'bg-amber-50 dark:bg-amber-100 text-rose-700 dark:text-rose-800'
+                           : 'bg-slate-50/60 dark:bg-slate-700/40 text-slate-400 dark:text-slate-500 opacity-60'}
+                         {isLast
+                           ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
+                           : ''}"
                 >
-                  {order}
-                </span>
+                  {num}
+                </div>
+                {#if isCalled}
+                  <span
+                    class="absolute top-0.5 right-0.5 text-[9px] sm:text-[10px] font-semibold leading-none text-slate-500 dark:text-slate-400 tabular-nums"
+                  >
+                    {order}
+                  </span>
+                {/if}
               {/if}
             </div>
           {/each}
