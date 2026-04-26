@@ -161,6 +161,7 @@
 
     <!-- Current number -->
     {#if lastCalled}
+      {@const lastIsLow = lastCalled <= 49}
       <div class="flex flex-col items-center mb-6">
         <div
           class="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1"
@@ -168,9 +169,16 @@
           Số vừa xổ
         </div>
         <div
-          class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-xl shadow-orange-500/30"
+          class="w-24 h-24 sm:w-28 sm:h-28 rounded-full
+                 bg-amber-50 dark:bg-amber-100
+                 border-[6px] sm:border-[7px]
+                 flex items-center justify-center
+                 shadow-xl ring-2 ring-red-500/70 ring-offset-2 ring-offset-transparent
+                 {lastIsLow
+                   ? 'border-pink-500 dark:border-pink-400 shadow-pink-500/30'
+                   : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
         >
-          <span class="text-4xl sm:text-5xl font-black text-white">
+          <span class="text-5xl sm:text-6xl font-black tabular-nums text-rose-700 dark:text-rose-800">
             {lastCalled}
           </span>
         </div>
