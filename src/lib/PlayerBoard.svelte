@@ -134,6 +134,16 @@
   function onModalKeydown(e) {
     if (e.key === "Escape") showCongrats = false;
   }
+
+  // Tân Tân physical card: 3 stacked 3x9 mini-cards with these labels
+  // (top → bottom). Underlying 9x9 data is unchanged; this is purely
+  // visual segmentation.
+  const SECTIONS = /** @type {const} */ ([0, 3, 6]);
+  const SECTION_LABELS = [
+    "Minh Tân",
+    "Loại đặc biệt",
+    "Tấn tài tấn lộc",
+  ];
 </script>
 
 <div class="flex justify-center mb-6">
@@ -154,41 +164,48 @@
       aria-label="Bảng lô tô"
       class="rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700"
     >
-      <div class="loto-grid">
-        {#each grid.flat() as num, idx (idx)}
-          {@const row = Math.floor(idx / 9)}
-          {@const col = idx % 9}
-          {@const hasNumber = num > 0}
-          {@const isCrossed = hasNumber && !!crossed[row]?.[col]}
-          {@const rowComplete = hasNumber && rowCompleteness[row]}
+      {#each SECTIONS as startRow, sectionIdx (sectionIdx)}
+        {#if sectionIdx > 0}
+          <div class="section-divider" aria-hidden="true"></div>
+        {/if}
+        <div class="section-label">{SECTION_LABELS[sectionIdx]}</div>
+        <div class="loto-grid">
+          {#each grid.slice(startRow, startRow + 3).flat() as num, idx (idx)}
+            {@const row = startRow + Math.floor(idx / 9)}
+            {@const col = idx % 9}
+            {@const hasNumber = num > 0}
+            {@const isCrossed = hasNumber && !!crossed[row]?.[col]}
+            {@const rowComplete = hasNumber && rowCompleteness[row]}
 
-          {#if !hasNumber}
-            <div
-              aria-hidden="true"
-              class="relative flex items-center justify-center aspect-square border-r border-b border-slate-200/80 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/60"
-            ></div>
-          {:else}
-            <button
-              type="button"
-              aria-label="Số {num}{isCrossed ? ', đã đánh dấu' : ''}"
-              aria-pressed={isCrossed}
-              onclick={() => handleCellClick(row, col)}
-              class="relative flex items-center justify-center
-                     aspect-square text-base sm:text-xl font-bold
-                     border-r border-b border-slate-200/80 dark:border-slate-700/60
-                     transition-all select-none cursor-pointer
-                     focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
-                     {isCrossed
-                       ? rowComplete
-                         ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400'
-                         : 'cell-crossed bg-red-50 dark:bg-red-950/30 text-red-400 dark:text-red-500'
-                       : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
-            >
-              {num}
-            </button>
-          {/if}
-        {/each}
-      </div>
+            {#if !hasNumber}
+              <div
+                aria-hidden="true"
+                class="relative flex items-center justify-center aspect-square border-r border-b border-slate-200/80 dark:border-slate-700/60"
+                style:background-color="var(--empty-cell-bg)"
+              ></div>
+            {:else}
+              <button
+                type="button"
+                aria-label="Số {num}{isCrossed ? ', đã đánh dấu' : ''}"
+                aria-pressed={isCrossed}
+                onclick={() => handleCellClick(row, col)}
+                class="relative flex items-center justify-center
+                       aspect-square text-base sm:text-xl font-bold
+                       border-r border-b border-slate-200/80 dark:border-slate-700/60
+                       transition-all select-none cursor-pointer
+                       focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
+                       {isCrossed
+                         ? rowComplete
+                           ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400'
+                           : 'cell-crossed bg-red-50 dark:bg-red-950/30 text-red-400 dark:text-red-500'
+                         : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
+              >
+                {num}
+              </button>
+            {/if}
+          {/each}
+        </div>
+      {/each}
     </div>
 
     {#if toast}

@@ -3,6 +3,9 @@
 :root {
   --background: #f8fafc;
   --foreground: #1e293b;
+  /* Default empty-cell color matches a Minh Tân paper card. Overridden
+     at runtime by the settings store via documentElement.style. */
+  --empty-cell-bg: #7a4a2b;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +31,42 @@ body {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   gap: 0;
+}
+
+/* Decorative cross-hatch divider between mini-cards on the player sheet,
+   echoing the ✚✚✚ borders on a physical Minh Tân card. */
+.section-divider {
+  height: 8px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 6px,
+    #c2410c 6px 8px,
+    transparent 8px 14px
+  );
+  background-color: rgb(255 247 237 / 0.6);
+}
+@media (prefers-color-scheme: dark) {
+  .section-divider {
+    background-color: rgb(67 20 7 / 0.4);
+  }
+}
+
+.section-label {
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 6px 0;
+  color: #c2410c;
+  background-color: rgb(255 247 237 / 0.5);
+  font-style: italic;
+}
+@media (prefers-color-scheme: dark) {
+  .section-label {
+    color: #fb923c;
+    background-color: rgb(67 20 7 / 0.4);
+  }
 }
 
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
