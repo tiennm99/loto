@@ -173,10 +173,10 @@
                  bg-amber-50 dark:bg-amber-100
                  border-[6px] sm:border-[7px]
                  flex items-center justify-center
-                 shadow-xl ring-2 ring-red-500/70 ring-offset-2 ring-offset-transparent
+                 shadow-xl
                  {lastIsLow
-                   ? 'border-pink-500 shadow-pink-500/30'
-                   : 'border-emerald-500 shadow-emerald-500/30'}"
+                   ? 'border-pink-500 dark:border-pink-400 shadow-pink-500/30'
+                   : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
         >
           <span class="text-5xl sm:text-6xl font-black tabular-nums text-rose-700 dark:text-rose-800">
             {lastCalled}
