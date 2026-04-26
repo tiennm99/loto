@@ -178,7 +178,12 @@
                    ? 'border-pink-500 dark:border-pink-400 shadow-pink-500/30'
                    : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
         >
-          <span class="text-5xl sm:text-6xl font-black tabular-nums text-rose-700 dark:text-rose-800">
+          <span
+            class="text-5xl sm:text-6xl font-black tabular-nums
+                   {lastIsLow
+                     ? 'text-pink-500 dark:text-pink-400'
+                     : 'text-emerald-500 dark:text-emerald-400'}"
+          >
             {lastCalled}
           </span>
         </div>
@@ -204,10 +209,9 @@
               class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9
                      text-sm sm:text-base font-black tabular-nums rounded-full
                      border-[3px] bg-amber-50 dark:bg-amber-100
-                     text-rose-700 dark:text-rose-800
                      {isLow
-                       ? 'border-pink-500 dark:border-pink-400'
-                       : 'border-emerald-500 dark:border-emerald-400'}"
+                       ? 'border-pink-500 dark:border-pink-400 text-pink-500 dark:text-pink-400'
+                       : 'border-emerald-500 dark:border-emerald-400 text-emerald-500 dark:text-emerald-400'}"
             >
               {num}
             </span>
@@ -248,8 +252,8 @@
                          {!isCalled
                            ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
                            : isLow
-                             ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-rose-700 dark:text-rose-800'
-                             : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-rose-700 dark:text-rose-800'}
+                             ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-pink-500 dark:text-pink-400'
+                             : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-500 dark:text-emerald-400'}
                          {isLast
                            ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
                            : ''}"
