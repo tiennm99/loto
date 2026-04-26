@@ -3,9 +3,9 @@
 :root {
   --background: #f8fafc;
   --foreground: #1e293b;
-  /* Default empty-cell color matches a Minh Tân paper card. Overridden
-     at runtime by the settings store via documentElement.style. */
-  --empty-cell-bg: #7a4a2b;
+  /* Default empty-cell color matches a Tân Tân BAMBOORAFT paper card.
+     Overridden at runtime by the settings store via documentElement.style. */
+  --empty-cell-bg: #1e88e5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,39 +34,55 @@ body {
 }
 
 /* Decorative cross-hatch divider between mini-cards on the player sheet,
-   echoing the ✚✚✚ borders on a physical Minh Tân card. */
+   echoing the ✚✚✚ blue borders on a Tân Tân BAMBOORAFT card. */
 .section-divider {
   height: 8px;
   background-image: repeating-linear-gradient(
     90deg,
     transparent 0 6px,
-    #c2410c 6px 8px,
+    #1e88e5 6px 8px,
     transparent 8px 14px
   );
-  background-color: rgb(255 247 237 / 0.6);
+  background-color: rgb(227 242 253 / 0.7);
 }
 @media (prefers-color-scheme: dark) {
   .section-divider {
-    background-color: rgb(67 20 7 / 0.4);
+    background-color: rgb(13 71 161 / 0.4);
   }
 }
 
 .section-label {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   padding: 6px 0;
-  color: #c2410c;
-  background-color: rgb(255 247 237 / 0.5);
+  color: #1565c0;
+  background-color: rgb(227 242 253 / 0.6);
   font-style: italic;
 }
 @media (prefers-color-scheme: dark) {
   .section-label {
-    color: #fb923c;
-    background-color: rgb(67 20 7 / 0.4);
+    color: #64b5f6;
+    background-color: rgb(13 71 161 / 0.4);
   }
+}
+
+/* Tân Tân BAMBOORAFT-style number — tall, condensed, heavy black. Stack
+   prefers a system condensed face; falls back to negative letter-spacing
+   on platforms without one so the digits still read tall-and-tight. */
+.tan-tan-num {
+  font-family:
+    "Arial Narrow",
+    "Avenir Next Condensed",
+    "Roboto Condensed",
+    "Liberation Sans Narrow",
+    system-ui,
+    sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

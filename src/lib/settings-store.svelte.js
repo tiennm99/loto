@@ -11,8 +11,8 @@ const STORAGE_KEY = "loto_settings";
 const HEX6 = /^#[0-9a-fA-F]{6}$/;
 
 export const DEFAULT_SETTINGS = Object.freeze({
-  /** Brown — matches a Minh Tân paper card. */
-  emptyCellColor: "#7a4a2b",
+  /** Blue — matches a Tân Tân BAMBOORAFT paper card. */
+  emptyCellColor: "#1e88e5",
 });
 
 export const settings = $state({ ...DEFAULT_SETTINGS });

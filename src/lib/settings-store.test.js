@@ -22,8 +22,8 @@ describe("settings-store — defaults", () => {
     expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(true);
   });
 
-  it("default empty-cell color is brown (#7a4a2b)", () => {
-    expect(DEFAULT_SETTINGS.emptyCellColor).toBe("#7a4a2b");
+  it("default empty-cell color is Tân Tân blue (#1e88e5)", () => {
+    expect(DEFAULT_SETTINGS.emptyCellColor).toBe("#1e88e5");
   });
 });
 

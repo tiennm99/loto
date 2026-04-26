@@ -16,8 +16,10 @@ That format is intentionally out of scope.
 - **Card**: 9 rows × 9 columns. Exactly **5 numbers per row** AND exactly
   **5 numbers per column** (45 numbers per card; 36 blanks).
 - **Visual layout**: card displayed as 3 stacked 3×9 mini-cards with
-  traditional separator labels — *Minh Tân*, *Loại đặc biệt*,
-  *Tấn tài tấn lộc* — matching the physical Minh Tân paper sheet.
+  traditional separator labels — *Tân Tân*, *An khang thịnh vượng*,
+  *Tân Tân tốt nhất* — matching the physical Tân Tân BAMBOORAFT paper
+  sheet (tall non-square cells, condensed bold black numbers on white,
+  blue empty-cell background by default).
 - **Column ranges**: col 0 = 1–9, col 1 = 10–19, …, col 7 = 70–79,
   col 8 = 80–90.
 - **Within a column**: numbers placed top-to-bottom in **ascending** order.
