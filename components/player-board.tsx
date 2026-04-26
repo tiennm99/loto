@@ -9,7 +9,7 @@ import {
   loadGrid,
   saveCrossedState,
   saveGrid,
-} from "./loto-game-logic";
+} from "@/lib/game-logic";
 
 interface PlayerBoardProps {
   /** localStorage key prefix; allows multiple independent boards (e.g. user vs master) */

@@ -2,7 +2,7 @@
 
 ## File Naming & Structure
 
-- **Kebab-case** for all files: `loto-player-board.tsx`, `loto-game-logic.ts`.
+- **Kebab-case** for all files: `player-board.tsx`, `game-logic.ts`.
 - **Descriptive names**: Long names are preferred for self-documentation. Avoid ambiguity.
 - **Single responsibility**: Each file has one primary export (component or utilities).
 - **Max 200 lines per file**: Split larger components into smaller focused ones.
@@ -81,13 +81,13 @@ function loadGrid(prefix = "loto"): number[][] | null {
 | camelCase | `handleCellClick`, `storagePrefix` | variables, functions, props |
 | PascalCase | `PlayerBoard`, `MasterPage` | components, types |
 | UPPER_SNAKE | `STORAGE_KEY`, `NUM_ROWS` | constants |
-| kebab-case | `loto-player-board.tsx` | file names |
+| kebab-case | `player-board.tsx` | file names |
 
 ## Comment Style
 
 - Document **why**, not **what**. The code shows what it does.
 - Use `/** JSDoc */` for exported functions.
-- Inline comments for complex logic (e.g., weighted random selection in `loto-game-logic.ts:19–28`).
+- Inline comments for complex logic (e.g., weighted random selection in `lib/game-logic.ts:19–28`).
 
 ### Example
 ```typescript
@@ -111,8 +111,8 @@ function randomANumberInRow(weights: number[]): number {
 ```typescript
 import { useCallback, useState } from "react";
 import Link from "next/link";
-import PlayerBoard from "./loto-player-board";
-import { generateGrid } from "./loto-game-logic";
+import PlayerBoard from "@/components/player-board";
+import { generateGrid } from "@/lib/game-logic";
 ```
 
 ## Testing (Not Currently Implemented)
