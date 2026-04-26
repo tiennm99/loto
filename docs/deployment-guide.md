@@ -32,25 +32,39 @@ pushes to `main` trigger automatic builds + deploys.
 
 No GitHub Actions involved; no repo secrets needed.
 
-## GitHub Pages (parallel auto-deploy)
+## GitHub Pages (redirect-only)
 
-`.github/workflows/deploy-github-pages.yml` runs on every push to `main`,
-builds with `npm run build:gh` (basePath `/loto`), and publishes `build/`
-as a Pages artifact.
+`.github/workflows/deploy-github-pages.yml` no longer builds the app.
+It generates two tiny HTML pages (`/loto/index.html` and
+`/loto/master/index.html`) that immediately redirect to the canonical
+URL on Cloudflare Pages.
 
-URL: `https://tiennm99.github.io/loto`.
+The redirect uses both `<meta http-equiv="refresh">` (no-JS fallback)
+and a tiny inline script that preserves path / query / hash:
 
-CF Pages and GH Pages run in parallel — different URLs, different
-artifacts, no conflict. Drop GH Pages by deleting the workflow file.
+```js
+location.replace("https://loto.miti99.com" + path + search + hash);
+```
 
-### Manual GH Pages Deploy
+So `tiennm99.github.io/loto/` → `loto.miti99.com/` and
+`tiennm99.github.io/loto/master` → `loto.miti99.com/master`.
 
-If you'd rather export by hand:
+The redirect runs on every push to `main`. If you want full GH Pages
+serving back (instead of the redirect), restore the prior version of
+`.github/workflows/deploy-github-pages.yml` from git history — it ran
+`npm run build:gh` and uploaded the `build/` artifact.
+
+### Manual GH Pages Build (still available)
+
+If you ever want to build a real GH Pages export by hand:
 
 ```bash
 npm run build:gh
-# upload build/ to the GH Pages target
+# upload build/ to the GH Pages target manually
 ```
+
+`build:gh` script kept as an escape hatch — not used by the automated
+redirect workflow.
 
 ## Development Environment
 
@@ -155,11 +169,12 @@ Generates:
 
 ## CI/CD Pipeline
 
-Both providers auto-deploy on push to `main`:
-- **Cloudflare Pages** — wired via the CF dashboard, builds with `npm run build`,
-  publishes to `loto.miti99.com`.
-- **GitHub Pages** — wired via `.github/workflows/deploy-github-pages.yml`,
-  builds with `npm run build:gh`, publishes to `tiennm99.github.io/loto`.
+Two pipelines run on push to `main`:
+- **Cloudflare Pages** (canonical) — wired via the CF dashboard, builds with
+  `npm run build`, publishes to `loto.miti99.com`.
+- **GitHub Pages** (redirect-only) — wired via
+  `.github/workflows/deploy-github-pages.yml`, deploys static redirect HTML
+  that forwards `tiennm99.github.io/loto/*` to `loto.miti99.com/*`.
 
 ## Performance Checklist
 
