@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import PlayerBoard from "../loto-player-board";
+import PlayerBoard from "@/components/player-board";
 
 const STORAGE_KEY = "loto_master";
 

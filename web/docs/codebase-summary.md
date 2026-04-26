@@ -12,12 +12,12 @@
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `app/loto-player-board.tsx` | Reusable player card (9×9 grid). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. |
+| `components/player-board.tsx` | Reusable player card (9×9 grid). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. |
 
 ### Game Logic
 | File | Purpose |
 |------|---------|
-| `app/loto-game-logic.ts` | Stateless utilities: generateGrid (weighted column selection), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
+| `lib/game-logic.ts` | Stateless utilities: generateGrid (weighted column selection), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
 
 ### Styling
 | File | Purpose |
@@ -66,10 +66,10 @@ RootLayout
 
 | Function | Location | Effect |
 |----------|----------|--------|
-| `generateGrid()` | loto-game-logic.ts:52 | Creates 9×9 with weighted column selection (5 nums/row). |
-| `isRowComplete()` | loto-game-logic.ts:108 | Boolean: all non-zero cells in row crossed? |
-| `getWaitingNumber()` | loto-game-logic.ts:120 | Returns the single uncrossed number in row, or null. |
-| `handleCellClick()` | loto-player-board.tsx:112 | Toggle crossed[row][col]. |
+| `generateGrid()` | game-logic.ts:52 | Creates 9×9 with weighted column selection (5 nums/row). |
+| `isRowComplete()` | game-logic.ts:108 | Boolean: all non-zero cells in row crossed? |
+| `getWaitingNumber()` | game-logic.ts:120 | Returns the single uncrossed number in row, or null. |
+| `handleCellClick()` | player-board.tsx:112 | Toggle crossed[row][col]. |
 | `handleDrawNext()` | master/page.tsx:88 | Pop first number from remaining, add to called. |
 
 Last reviewed: 2026-04-26

@@ -88,7 +88,7 @@ All pages use `"use client"` because:
 Files with `"use client"`:
 - `app/page.tsx`
 - `app/master/page.tsx`
-- `app/loto-player-board.tsx`
+- `components/player-board.tsx`
 
 ## Data Flow: Mark a Cell
 
