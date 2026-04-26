@@ -13,11 +13,17 @@ The app is fully functional for core gameplay (Lô tô hội chợ Tân Tân var
 - Host number drawing from 1–90 deck
 - 11×9 last-digit-aligned master board with draw-order overlay for fast
   Kinh verification
+- Player card rendered as 3 stacked Tân Tân mini-cards
+  (Minh Tân / Loại đặc biệt / Tấn tài tấn lộc) with cross-hatch dividers
+- Settings modal: empty-cell color picker (color picker + 8 presets +
+  reset), applies to player + master grids, persisted to `loto_settings`
 - Host's own player card (isolated instance)
 - localStorage persistence
 - Dark mode
 - Mobile responsive
 - Offline capable
+- Unit tests (Vitest: 26 game-logic tests + 12 settings-store tests, 38 total passing)
+  covering constraint validation, persistence, and error handling
 
 ## Idea Phase
 
@@ -49,15 +55,9 @@ Internationalization (English, Chinese, etc.). Requires extraction of all Vietna
 ### Undo/Redo System
 Full undo/redo stack with history navigation. Adds complexity to state management. **Status**: Considered (YAGNI for now)
 
-## Testing (Planned but Unstarted)
+## Testing
 
-### Unit Tests
-- Game logic: `generateGrid()`, `isRowComplete()`, `getWaitingNumber()`
-- localStorage helpers: `saveGrid()`, `loadGrid()`, etc.
-
-**Tech**: Vitest (Vite's native test runner)
-
-### Component Tests
+### Component Tests (Planned)
 - PlayerBoard with mocked localStorage, $state/$derived verification
 - Master page with different game states
 
@@ -96,10 +96,11 @@ European Bingo 90 patterns. **Out of scope** — Tân Tân uses single-line "Kin
 All decisions follow **YAGNI** (You Aren't Gonna Need It), **KISS** (Keep It Simple), **DRY** (Don't Repeat Yourself):
 - No multiplayer sync → adds server dependency, breaks static export (Cloudflare Pages)
 - No i18n → Vietnamese-only community, localizing adds complexity
-- No testing → small codebase (<300 LOC), manual testing covers critical paths; add when code grows
+- Unit tests implemented → critical paths (constraints, persistence, settings) now have automated coverage
+- Component/E2E tests deferred → small codebase, manual testing sufficient for UI flows
 - No undo/redo → simple game, mistakes are play experience
 - Svelte 5 runes → cleaner reactivity than hooks, smaller mental model
 
 Future work gates on **real user demand**, not speculation.
 
-Last reviewed: 2026-04-26
+Last reviewed: 2026-04-27

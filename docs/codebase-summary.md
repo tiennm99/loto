@@ -12,25 +12,33 @@
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. |
+| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Minh Tân / Loại đặc biệt / Tấn tài tấn lộc). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
+| `src/lib/SettingsButton.svelte` | Gear icon + modal. Color picker + 8 preset swatches for empty-cell color. Reset-to-default button. Mounted on both `/` and `/master` headers. |
 
 ### Game Logic
 | File | Purpose |
 |------|---------|
 | `src/lib/game-logic.js` | Stateless utilities: generateGrid (constraint-aware picker — exact 5 per row & per col, ascending-sorted columns), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
+| `src/lib/settings-store.svelte.js` | Reactive global UI settings via Svelte 5 runes. `emptyCellColor` (hex) persisted to localStorage `loto_settings`. Pushes value to `--empty-cell-bg` CSS var on `:root`. |
 
 ### Styling
 | File | Purpose |
 |------|---------|
 | `src/app.css` | Root styles: Tailwind @import, CSS variables (light/dark), `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast), `.cell-crossed` diagonal. |
 
+### Tests
+| File | Purpose |
+|------|---------|
+| `src/lib/game-logic.test.js` | 26 unit tests: generateGrid shape (9×9, 5 per row/col, no duplicates), column ranges & ascending sort, row completion, waiting number detection, persistence (saveGrid/loadGrid/saveCrossedState/loadCrossedState with validators). |
+| `src/lib/settings-store.test.js` | 12 unit tests: defaults, loadSettings (restore from localStorage, apply CSS var, handle empty/corrupt), saveSettings, resetSettings, color validation. |
+
 ### Configuration
 | File | Purpose |
 |------|---------|
 | `svelte.config.js` | adapter-static (HTML export), dual basePath via BUILD_PROFILE env. |
 | `vite.config.js` | Tailwind + SvelteKit plugins. codeserver HMR config (port, allowedHosts, hmr). |
-| `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite. Scripts: dev, dev:codeserver, build, build:gh, lint. |
-| `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). |
+| `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite. Scripts: dev, dev:codeserver, build, build:gh, lint, test, test:watch. |
+| `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). Declares Svelte 5 rune globals (lines 16–22). |
 | `jsconfig.json` | Path alias `$lib`, no checkJs. |
 | `.gitignore` | Excludes node_modules, build, .env.local, etc. |
 | `.env.example` | codeserver profile vars (CODESERVER_HOST, CODESERVER_PORT). |
@@ -50,6 +58,7 @@
 | `loto_master` | Host's drawn/remaining numbers. |
 | `loto_master_card_grid` | Host's player card numbers. |
 | `loto_master_card_crossed` | Host's marked cells. |
+| `loto_settings` | Global UI settings: `{ emptyCellColor: "#rrggbb" }`. |
 
 ## Component Hierarchy
 
@@ -76,4 +85,4 @@ RootLayout
 | `handleCellClick()` | PlayerBoard.svelte | Toggle crossed[row][col]. |
 | `saveGrid()` / `loadGrid()` | game-logic.js | localStorage with prefix-based keys. |
 
-Last reviewed: 2026-04-26
+Last reviewed: 2026-04-27

@@ -15,6 +15,9 @@ That format is intentionally out of scope.
 ### In scope (Lô tô hội chợ Tân Tân)
 - **Card**: 9 rows × 9 columns. Exactly **5 numbers per row** AND exactly
   **5 numbers per column** (45 numbers per card; 36 blanks).
+- **Visual layout**: card displayed as 3 stacked 3×9 mini-cards with
+  traditional separator labels — *Minh Tân*, *Loại đặc biệt*,
+  *Tấn tài tấn lộc* — matching the physical Minh Tân paper sheet.
 - **Column ranges**: col 0 = 1–9, col 1 = 10–19, …, col 7 = 70–79,
   col 8 = 80–90.
 - **Within a column**: numbers placed top-to-bottom in **ascending** order.
@@ -24,6 +27,9 @@ That format is intentionally out of scope.
 - **Waiting state**: when a row needs only 1 number, app announces **"Chờ N"**.
 - **Host (quản trò)** draws numbers from a shuffled 1–90 deck, tracks them on
   a master board, and may also play their own card.
+- **Settings**: gear icon in headers opens a modal with a color picker for
+  the empty/blank cell color (default brown matches physical card).
+  Persisted to `loto_settings`.
 
 ### Out of scope
 - 3×9 / 15-number Bingo 90 / Tombola tickets (European format).
@@ -85,6 +91,8 @@ State is entirely client-side. Each page/card instance uses a unique localStorag
 - [x] Dark mode support (Tailwind dark classes).
 - [x] Mobile-responsive (base + sm breakpoints).
 - [x] HMR works on code-server via proxy.
+- [x] Player card rendered as 3 stacked Tân Tân mini-cards with separator labels.
+- [x] Settings modal with empty-cell color picker; applies to both player and master grids; persisted.
 
 ## Visual Language
 

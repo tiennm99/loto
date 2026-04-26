@@ -3,19 +3,21 @@
 ## Page Flow
 
 ```
-Entry
+Entry (+layout.svelte)
+  ├─ onMount: loadSettings() — restore emptyCellColor from loto_settings,
+  │   apply to --empty-cell-bg CSS variable before pages render
+  │
   ├─ / (Player Page)
   │   ├─ Load loto_grid, loto_crossed from localStorage
-  │   ├─ Display 9×9 grid
+  │   ├─ Display 9×9 grid (empty cells use --empty-cell-bg from settings)
   │   ├─ Generate new grid on button click
   │   ├─ Mark/unmark cells on click
   │   └─ Show bingo popup + "Chờ X" toasts
   │
   └─ /master (Host Page)
       ├─ Load loto_master (called/remaining)
-      ├─ Display 11×9 master board (numbers 1–90, aligned by ones-digit;
-      │   col 0 = 1–9, col 8 = 80–90; each called cell shows draw order)
-      ├─ Draw button shows next called number (highlighted in red on board)
+      ├─ Display 11×9 master board (empty cells use --empty-cell-bg)
+      ├─ Draw button shows next called number (highlighted in red)
       ├─ Display host's own card (loto_master_card prefix)
       └─ New Game button resets called/remaining
 ```
@@ -131,4 +133,4 @@ Files that are client-only:
 
 All state is localStorage. No API calls. Fully functional offline after initial load.
 
-Last reviewed: 2026-04-26
+Last reviewed: 2026-04-27

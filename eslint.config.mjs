@@ -9,7 +9,18 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: { ...globals.browser, ...globals.node },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        // Svelte 5 runes — usable inside .svelte and .svelte.js files.
+        $state: "readonly",
+        $derived: "readonly",
+        $effect: "readonly",
+        $props: "readonly",
+        $bindable: "readonly",
+        $inspect: "readonly",
+        $host: "readonly",
+      },
     },
   },
   {
