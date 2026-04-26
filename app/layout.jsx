@@ -6,13 +6,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-/** @type {import('next').Metadata} */
 export const metadata = {
   title: "Lô tô",
   description: "Bàn số của trò chơi Lô tô",
 };
 
-/** @param {{ children: React.ReactNode }} props */
 export default function RootLayout({ children }) {
   return (
     <html lang="vi" className={`${geistSans.variable} h-full antialiased`}>

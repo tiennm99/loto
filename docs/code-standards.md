@@ -125,8 +125,8 @@ function randomANumberInRow(weights) {
 ```js
 import { useCallback, useState } from "react";
 import Link from "next/link";
-import PlayerBoard from "@/components/player-board";
-import { generateGrid } from "@/lib/game-logic";
+import PlayerBoard from "../components/player-board";
+import { generateGrid } from "../lib/game-logic";
 ```
 
 ## Testing (Not Currently Implemented)

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import PlayerBoard from "@/components/player-board";
+import PlayerBoard from "../components/player-board";
 
 export default function Home() {
   const [showInstructions, setShowInstructions] = useState(false);

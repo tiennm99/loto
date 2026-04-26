@@ -9,29 +9,23 @@ import {
   loadGrid,
   saveCrossedState,
   saveGrid,
-} from "@/lib/game-logic";
+} from "../lib/game-logic";
 
 /**
- * @typedef {Object} PlayerBoardProps
- * @property {string} [storagePrefix] localStorage key prefix; allows multiple
- *   independent boards (e.g. user vs master)
+ * Reusable player card component.
+ *
+ * @param {object} props
+ * @param {string} [props.storagePrefix] localStorage key prefix; allows
+ *   multiple independent boards (e.g. user vs master).
  */
-
-/** @param {PlayerBoardProps} props */
 export default function PlayerBoard({ storagePrefix = "loto" } = {}) {
-  /** @type {[number[][] | null, (g: number[][] | null) => void]} */
-  const [grid, setGrid] = useState(/** @type {number[][] | null} */ (null));
-  /** @type {[boolean[][], React.Dispatch<React.SetStateAction<boolean[][]>>]} */
-  const [crossed, setCrossed] = useState(/** @type {boolean[][]} */ ([]));
+  const [grid, setGrid] = useState(null);
+  const [crossed, setCrossed] = useState([]);
   const [showCongrats, setShowCongrats] = useState(false);
   const [congratsRow, setCongratsRow] = useState(-1);
-  /** @type {[string | null, (s: string | null) => void]} */
-  const [toast, setToast] = useState(/** @type {string | null} */ (null));
-  /** @type {React.MutableRefObject<ReturnType<typeof setTimeout> | null>} */
+  const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
-  /** @type {React.MutableRefObject<Set<number>>} */
   const celebratedRows = useRef(new Set());
-  /** @type {React.MutableRefObject<Set<number>>} */
   const notifiedWaitingRows = useRef(new Set());
 
   const dismissToast = useCallback(() => {
@@ -43,7 +37,6 @@ export default function PlayerBoard({ storagePrefix = "loto" } = {}) {
   }, []);
 
   const showToast = useCallback(
-    /** @param {string} msg */
     (msg) => {
       dismissToast();
       setToast(msg);
@@ -124,20 +117,13 @@ export default function PlayerBoard({ storagePrefix = "loto" } = {}) {
     dismissToast();
   }, [grid, dismissToast, storagePrefix]);
 
-  const handleCellClick = useCallback(
-    /**
-     * @param {number} row
-     * @param {number} col
-     */
-    (row, col) => {
-      setCrossed((prev) => {
-        const next = prev.map((r) => [...r]);
-        next[row][col] = !next[row][col];
-        return next;
-      });
-    },
-    []
-  );
+  const handleCellClick = useCallback((row, col) => {
+    setCrossed((prev) => {
+      const next = prev.map((r) => [...r]);
+      next[row][col] = !next[row][col];
+      return next;
+    });
+  }, []);
 
   return (
     <>

@@ -2,25 +2,19 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import PlayerBoard from "@/components/player-board";
+import PlayerBoard from "../../components/player-board";
 
 const STORAGE_KEY = "loto_master";
 
 /**
- * @typedef {Object} MasterState
- * @property {number[]} called numbers drawn so far, in order
- * @property {number[]} remaining numbers left to draw, pre-shuffled
- */
-
-/**
+ * Master draw state shape:
+ *   { called: number[], remaining: number[] }
+ *
  * Build the 9x10 board: columns 0-8 map to number ranges 1-9, 10-19, ..., 80-90.
- * @returns {number[][]}
  */
 function buildBoard() {
-  /** @type {number[][]} */
   const board = [];
   for (let row = 0; row < 10; row++) {
-    /** @type {number[]} */
     const cells = [];
     for (let col = 0; col < 9; col++) {
       const num = col === 0 ? row + 1 : col * 10 + row;
@@ -40,7 +34,6 @@ function buildBoard() {
   return board;
 }
 
-/** @returns {MasterState} */
 function createFreshState() {
   const all = Array.from({ length: 90 }, (_, i) => i + 1);
   // Shuffle
@@ -51,12 +44,10 @@ function createFreshState() {
   return { called: [], remaining: all };
 }
 
-/** @param {MasterState} state */
 function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-/** @returns {MasterState | null} */
 function loadState() {
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return null;
@@ -71,10 +62,8 @@ const BOARD = Object.freeze(buildBoard().map((row) => Object.freeze(row)));
 const BOARD_FLAT = Object.freeze(BOARD.flatMap((r) => r));
 
 export default function MasterPage() {
-  /** @type {[MasterState | null, (s: MasterState | null) => void]} */
-  const [state, setState] = useState(/** @type {MasterState | null} */ (null));
-  /** @type {[number | null, (n: number | null) => void]} */
-  const [lastCalled, setLastCalled] = useState(/** @type {number | null} */ (null));
+  const [state, setState] = useState(null);
+  const [lastCalled, setLastCalled] = useState(null);
 
   useEffect(() => {
     const saved = loadState();
