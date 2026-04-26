@@ -9,11 +9,17 @@
 
 ## Svelte 5 Runes & JavaScript
 
+### Rune Globals & eslint
+Svelte 5 runes (`$state`, `$derived`, `$effect`, `$props`, `$bindable`, `$inspect`, `$host`) are declared as readonly globals in `eslint.config.mjs` (lines 16–22) to suppress "undefined variable" linter errors. They are usable in `.svelte` and `.svelte.js` files without import.
+
 ### State & Reactivity
 - **$state**: For mutable local UI state (grid, crossed, booleans). `let grid = $state(...)`
 - **$derived**: For computed values that auto-update when dependencies change. `const rowCompleteness = $derived(grid && crossed.length ? [...] : [])`
 - **$effect**: For side effects (localStorage sync, detecting completed rows). Replaces React useEffect.
 - **$props**: For destructuring component props. `let { storagePrefix = "loto" } = $props()`
+
+### Reactive Store Files (`.svelte.js`)
+Use the `.svelte.js` extension for modules that export rune-based reactive state (e.g., `settings-store.svelte.js`). This signals to bundlers and linters that the file uses Svelte 5 reactivity at module scope.
 
 ### Plain References (No Reactivity)
 - Use regular `let` or `const` for timers, Sets, Maps (not reactive). Example: `let toastTimer = null; const celebratedRows = new Set();`
@@ -157,12 +163,20 @@ Use inline event handlers (`onclick`, `onkeydown`). Svelte 5 handles click deleg
 <div onkeydown={(e) => e.key === "Escape" && dismiss()}>Dialog</div>
 ```
 
-## Testing (Not Currently Implemented)
+## Testing
 
-Future tests should follow:
-- Unit: test game logic (generateGrid, isRowComplete, getWaitingNumber) in isolation.
-- Component: render PlayerBoard, mock localStorage, verify toast/popup.
-- E2E: player flow (generate → click → bingo).
+### Unit Tests (Implemented)
+- **Framework**: Vitest 4.1.5 with happy-dom
+- **Test Files**: `src/lib/game-logic.test.js` (26 tests), `src/lib/settings-store.test.js` (12 tests) — 38 total passing
+- **Coverage**: Game logic (generateGrid shape/constraints, isRowComplete, getWaitingNumber, persistence with validators), settings (load/save/reset with error handling)
+- **Scripts**: `npm test` (run once), `npm run test:watch` (continuous)
+- **Pattern**: Use vitest's `describe` / `it` blocks, `expect()` assertions. Test both happy path and error cases (corrupt JSON, missing localStorage).
+
+### Component Tests (Planned)
+Future: render PlayerBoard, mock localStorage, verify toast/popup behaviors.
+
+### E2E Tests (Planned)
+Future: Playwright for player flow (generate → click → bingo) and host flow (draw → master board updates).
 
 ## Configuration
 
@@ -177,4 +191,4 @@ Set in `.env.local` (not committed).
 - **adapter-static**: Generates static HTML + JS in `build/`.
 - **basePath**: Dual-mode: `""` (Cloudflare, dev) or `/loto` (GitHub Pages via `BUILD_PROFILE=gh`).
 
-Last reviewed: 2026-04-26
+Last reviewed: 2026-04-27
