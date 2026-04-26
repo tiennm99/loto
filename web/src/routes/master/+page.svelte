@@ -202,7 +202,7 @@
             {@const isLow = num <= 49}
             <span
               class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9
-                     text-sm sm:text-base font-bold tabular-nums rounded-full
+                     text-sm sm:text-base font-black tabular-nums rounded-full
                      border-[3px] bg-amber-50 dark:bg-amber-100
                      text-rose-700 dark:text-rose-800
                      {isLow
@@ -243,7 +243,7 @@
                 <div
                   class="flex items-center justify-center
                          w-[82%] h-[82%] rounded-full
-                         text-lg sm:text-xl font-bold tabular-nums
+                         text-lg sm:text-xl font-black tabular-nums
                          border-[3px] transition-all
                          {!isCalled
                            ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
