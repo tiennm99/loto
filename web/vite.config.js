@@ -1,26 +1,34 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig, loadEnv } from "vite";
 
-const isCodeserver = process.env.VITE_DEV_PROFILE === "codeserver";
-const host = process.env.CODESERVER_HOST;
-const port = Number(process.env.CODESERVER_PORT ?? 3000);
+export default defineConfig(({ mode }) => {
+  // .env.local lives outside process.env at config-eval time; loadEnv reads it.
+  const env = loadEnv(mode, process.cwd(), "");
+  const isCodeserver = process.env.VITE_DEV_PROFILE === "codeserver";
+  const host = env.CODESERVER_HOST;
+  const port = Number(env.CODESERVER_PORT ?? 3000);
 
-const codeserverServer = host
-  ? {
+  return {
+    plugins: [tailwindcss(), sveltekit()],
+    server: {
       port,
       host: true,
       strictPort: true,
-      allowedHosts: [host],
-      hmr: {
-        host,
-        protocol: "wss",
-        clientPort: 443,
-        path: `/absproxy/${port}/`,
-      },
-    }
-  : { port: 3000, host: true };
-
-export default {
-  plugins: [tailwindcss(), sveltekit()],
-  server: isCodeserver ? codeserverServer : { port: 3000 },
-};
+      // Always allow the codeserver host if .env.local sets one — covers
+      // both `npm run dev` (no proxy config) and `npm run dev:codeserver`.
+      ...(host ? { allowedHosts: [host] } : {}),
+      // HMR through the proxy only in the explicit codeserver profile.
+      ...(isCodeserver && host
+        ? {
+            hmr: {
+              host,
+              protocol: "wss",
+              clientPort: 443,
+              path: `/absproxy/${port}/`,
+            },
+          }
+        : {}),
+    },
+  };
+});
