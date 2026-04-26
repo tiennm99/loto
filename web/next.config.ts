@@ -20,7 +20,9 @@ function codeserverConfig() {
 }
 
 const cs = isCodeserver ? codeserverConfig() : null;
-const basePath = cs?.basePath ?? (isProd ? "/loto" : "");
+// NEXT_BASE_PATH wins so custom-domain / fork deploys don't have to edit code.
+const basePath =
+  process.env.NEXT_BASE_PATH ?? cs?.basePath ?? (isProd ? "/loto" : "");
 
 const nextConfig: NextConfig = {
   output: "export",

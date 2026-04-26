@@ -76,44 +76,88 @@ export function generateGrid(): number[][] {
   return cell;
 }
 
+function safeParse<T>(raw: string | null, validate: (v: unknown) => v is T): T | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return validate(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function isNumberMatrix(v: unknown): v is number[][] {
+  return (
+    Array.isArray(v) &&
+    v.length === NUM_ROWS &&
+    v.every(
+      (row) =>
+        Array.isArray(row) &&
+        row.length === NUM_COLS &&
+        row.every((n) => typeof n === "number")
+    )
+  );
+}
+
+function isBoolMatrix(v: unknown): v is boolean[][] {
+  return (
+    Array.isArray(v) &&
+    v.length === NUM_ROWS &&
+    v.every(
+      (row) =>
+        Array.isArray(row) &&
+        row.length === NUM_COLS &&
+        row.every((b) => typeof b === "boolean")
+    )
+  );
+}
+
 export function saveGrid(grid: number[][], prefix = "loto"): void {
-  localStorage.setItem(`${prefix}_grid`, JSON.stringify(grid));
+  try {
+    localStorage.setItem(`${prefix}_grid`, JSON.stringify(grid));
+  } catch {
+    // localStorage disabled or quota exceeded — ignore, app still works in-memory
+  }
 }
 
 export function loadGrid(prefix = "loto"): number[][] | null {
-  const data = localStorage.getItem(`${prefix}_grid`);
-  if (!data) return null;
   try {
-    return JSON.parse(data);
+    return safeParse(localStorage.getItem(`${prefix}_grid`), isNumberMatrix);
   } catch {
     return null;
   }
 }
 
 export function saveCrossedState(crossed: boolean[][], prefix = "loto"): void {
-  localStorage.setItem(`${prefix}_crossed`, JSON.stringify(crossed));
+  try {
+    localStorage.setItem(`${prefix}_crossed`, JSON.stringify(crossed));
+  } catch {
+    // see saveGrid
+  }
 }
 
 export function loadCrossedState(prefix = "loto"): boolean[][] | null {
-  const data = localStorage.getItem(`${prefix}_crossed`);
-  if (!data) return null;
   try {
-    return JSON.parse(data);
+    return safeParse(localStorage.getItem(`${prefix}_crossed`), isBoolMatrix);
   } catch {
     return null;
   }
 }
 
-/** Check if a row has all its numbers crossed */
+/** Check if a row has all its numbers crossed (and has at least one number) */
 export function isRowComplete(
   grid: number[][],
   crossed: boolean[][],
   row: number
 ): boolean {
-  for (let col = 0; col < 9; col++) {
-    if (grid[row][col] > 0 && !crossed[row]?.[col]) return false;
+  let hasNumber = false;
+  for (let col = 0; col < NUM_COLS; col++) {
+    if (grid[row][col] > 0) {
+      hasNumber = true;
+      if (!crossed[row]?.[col]) return false;
+    }
   }
-  return true;
+  return hasNumber;
 }
 
 /** Find the single remaining uncrossed number in a row, or null if != 1 remaining */
@@ -123,7 +167,7 @@ export function getWaitingNumber(
   row: number
 ): number | null {
   let remaining: number | null = null;
-  for (let col = 0; col < 9; col++) {
+  for (let col = 0; col < NUM_COLS; col++) {
     if (grid[row][col] > 0 && !crossed[row]?.[col]) {
       if (remaining !== null) return null;
       remaining = grid[row][col];
