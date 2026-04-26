@@ -31,7 +31,7 @@ State is entirely client-side. Each page/card instance uses a unique localStorag
 
 ## Deployment
 
-- **Production**: dual auto-deploy on push to `main` — Cloudflare Pages at `loto.miti99.com` (CF dashboard, root basePath) and GitHub Pages at `tiennm99.github.io/loto` (`.github/workflows/deploy-github-pages.yml`, `/loto` basePath via `npm run build:gh`).
+- **Production**: Cloudflare Pages at `loto.miti99.com` (canonical, CF dashboard, root basePath). GitHub Pages serves only a redirect to the canonical URL via `.github/workflows/deploy-github-pages.yml`.
 - **Development**: `npm run dev` (local), `npm run dev:codeserver` (code-server via proxy).
 - **Build**: `npm run build` generates static export to `build/` directory.
 
