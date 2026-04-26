@@ -63,15 +63,32 @@ body {
 }
 
 .section-label {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-weight: 700;
-  padding: 6px 0;
+  padding: 6px 12px;
   color: #1565c0;
   background-color: rgb(227 242 253 / 0.6);
   font-style: italic;
+  white-space: nowrap;
+}
+/* Cross-hatch ✚✚✚ flanks on both sides of the label text — flex:1 fills
+   the remaining width so the text stays centered with comfy padding. */
+.section-label::before,
+.section-label::after {
+  content: "";
+  flex: 1;
+  height: 8px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 6px,
+    #1e88e5 6px 8px,
+    transparent 8px 14px
+  );
 }
 @media (prefers-color-scheme: dark) {
   .section-label {
