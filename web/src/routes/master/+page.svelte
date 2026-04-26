@@ -178,7 +178,7 @@
                    ? 'border-pink-500 dark:border-pink-400 shadow-pink-500/30'
                    : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
         >
-          <span class="text-5xl sm:text-6xl font-black tabular-nums text-rose-700 dark:text-rose-800">
+          <span class="text-5xl sm:text-6xl font-black tabular-nums text-rose-700">
             {lastCalled}
           </span>
         </div>
