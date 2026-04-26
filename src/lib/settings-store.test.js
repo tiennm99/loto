@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_SETTINGS,
   loadSettings,
@@ -10,11 +10,50 @@ import {
 
 const KEY = "loto_settings";
 
+/** Minimal MediaQueryList stub. matches=false unless we override. */
+function mockMatchMedia(matches = false) {
+  /** @type {Set<(e: MediaQueryListEvent) => void>} */
+  const listeners = new Set();
+  const mql = {
+    matches,
+    media: "(prefers-color-scheme: dark)",
+    addEventListener: (/** @type {string} */ _t, fn) => listeners.add(fn),
+    removeEventListener: (/** @type {string} */ _t, fn) => listeners.delete(fn),
+    addListener: () => {},
+    removeListener: () => {},
+    onchange: null,
+    dispatchEvent: () => true,
+  };
+  /** @param {boolean} newMatches */
+  const fire = (newMatches) => {
+    mql.matches = newMatches;
+    listeners.forEach((fn) =>
+      fn(/** @type {any} */ ({ matches: newMatches })),
+    );
+  };
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => mql),
+  );
+  // happy-dom puts matchMedia on window; stub there too for safety.
+  window.matchMedia = /** @type {any} */ (vi.fn(() => mql));
+  return { mql, fire, listenerCount: () => listeners.size };
+}
+
 beforeEach(() => {
   localStorage.clear();
-  // Restore in-memory state to defaults between tests so order doesn't matter.
-  settings.emptyCellColor = DEFAULT_SETTINGS.emptyCellColor;
+  for (const k of /** @type {const} */ ([
+    "emptyCellColor",
+    "theme",
+    "masterMode",
+    "autoCallEnabled",
+    "autoCallSpeed",
+  ])) {
+    /** @type {any} */ (settings)[k] = /** @type {any} */ (DEFAULT_SETTINGS)[k];
+  }
   document.documentElement.style.removeProperty("--empty-cell-bg");
+  document.documentElement.classList.remove("dark");
+  mockMatchMedia(false);
 });
 
 describe("settings-store — defaults", () => {
@@ -22,12 +61,22 @@ describe("settings-store — defaults", () => {
     expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(true);
   });
 
-  it("default empty-cell color is Tân Tân blue (#1e88e5)", () => {
-    expect(DEFAULT_SETTINGS.emptyCellColor).toBe("#1e88e5");
+  it("default empty-cell color is Excel Standard Purple (#7030A0)", () => {
+    expect(DEFAULT_SETTINGS.emptyCellColor).toBe("#7030A0");
+  });
+
+  it("default theme is auto", () => {
+    expect(DEFAULT_SETTINGS.theme).toBe("auto");
+  });
+
+  it("masterMode + autoCallEnabled default false; autoCallSpeed default 5", () => {
+    expect(DEFAULT_SETTINGS.masterMode).toBe(false);
+    expect(DEFAULT_SETTINGS.autoCallEnabled).toBe(false);
+    expect(DEFAULT_SETTINGS.autoCallSpeed).toBe(5);
   });
 });
 
-describe("settings-store — loadSettings", () => {
+describe("settings-store — loadSettings (color)", () => {
   it("uses defaults when localStorage is empty and applies CSS var", () => {
     loadSettings();
     expect(settings.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
@@ -45,7 +94,7 @@ describe("settings-store — loadSettings", () => {
     ).toBe("#abcdef");
   });
 
-  it("ignores an invalid stored color and keeps the in-memory default", () => {
+  it("ignores an invalid stored color and keeps the default", () => {
     localStorage.setItem(KEY, JSON.stringify({ emptyCellColor: "not-a-color" }));
     loadSettings();
     expect(settings.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
@@ -63,7 +112,7 @@ describe("settings-store — loadSettings", () => {
     expect(settings.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
   });
 
-  it("rejects 3-digit hex shorthand (#fff is not valid per regex)", () => {
+  it("rejects 3-digit hex shorthand (#fff)", () => {
     localStorage.setItem(KEY, JSON.stringify({ emptyCellColor: "#fff" }));
     loadSettings();
     expect(settings.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
@@ -76,14 +125,78 @@ describe("settings-store — loadSettings", () => {
   });
 });
 
+describe("settings-store — loadSettings (per-key fallback)", () => {
+  it("preserves a single old key (color only) without wiping it", () => {
+    localStorage.setItem(KEY, JSON.stringify({ emptyCellColor: "#1e88e5" }));
+    loadSettings();
+    expect(settings.emptyCellColor).toBe("#1e88e5");
+    expect(settings.theme).toBe(DEFAULT_SETTINGS.theme);
+    expect(settings.masterMode).toBe(DEFAULT_SETTINGS.masterMode);
+  });
+
+  it("loads valid theme values", () => {
+    for (const t of /** @type {const} */ (["auto", "light", "dark"])) {
+      localStorage.setItem(KEY, JSON.stringify({ theme: t }));
+      loadSettings();
+      expect(settings.theme).toBe(t);
+    }
+  });
+
+  it("falls back to default theme on invalid value", () => {
+    localStorage.setItem(KEY, JSON.stringify({ theme: "neon" }));
+    loadSettings();
+    expect(settings.theme).toBe(DEFAULT_SETTINGS.theme);
+  });
+
+  it("loads boolean masterMode and autoCallEnabled", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ masterMode: true, autoCallEnabled: true }),
+    );
+    loadSettings();
+    expect(settings.masterMode).toBe(true);
+    expect(settings.autoCallEnabled).toBe(true);
+  });
+
+  it("rejects non-boolean for masterMode", () => {
+    localStorage.setItem(KEY, JSON.stringify({ masterMode: "yes" }));
+    loadSettings();
+    expect(settings.masterMode).toBe(DEFAULT_SETTINGS.masterMode);
+  });
+
+  it("loads autoCallSpeed in range 1..10", () => {
+    for (const n of [1, 5, 10]) {
+      localStorage.setItem(KEY, JSON.stringify({ autoCallSpeed: n }));
+      loadSettings();
+      expect(settings.autoCallSpeed).toBe(n);
+    }
+  });
+
+  it("rejects out-of-range and non-integer autoCallSpeed", () => {
+    for (const bad of [0, 11, 5.5, -1, "5", null]) {
+      localStorage.setItem(KEY, JSON.stringify({ autoCallSpeed: bad }));
+      loadSettings();
+      expect(settings.autoCallSpeed).toBe(DEFAULT_SETTINGS.autoCallSpeed);
+    }
+  });
+});
+
 describe("settings-store — saveSettings", () => {
-  it("persists current in-memory settings to localStorage", () => {
+  it("persists ALL keys, not just color", () => {
     settings.emptyCellColor = "#112233";
+    settings.theme = "dark";
+    settings.masterMode = true;
+    settings.autoCallEnabled = true;
+    settings.autoCallSpeed = 7;
     saveSettings();
     const raw = localStorage.getItem(KEY);
     expect(raw).not.toBeNull();
     expect(JSON.parse(/** @type {string} */ (raw))).toEqual({
       emptyCellColor: "#112233",
+      theme: "dark",
+      masterMode: true,
+      autoCallEnabled: true,
+      autoCallSpeed: 7,
     });
   });
 
@@ -97,13 +210,72 @@ describe("settings-store — saveSettings", () => {
 });
 
 describe("settings-store — resetSettings", () => {
-  it("returns settings to defaults and persists the reset", () => {
+  it("returns ALL settings to defaults and persists", () => {
     settings.emptyCellColor = "#000000";
+    settings.theme = "dark";
+    settings.masterMode = true;
     saveSettings();
     resetSettings();
     expect(settings.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
-    expect(JSON.parse(/** @type {string} */ (localStorage.getItem(KEY)))).toEqual({
-      emptyCellColor: DEFAULT_SETTINGS.emptyCellColor,
-    });
+    expect(settings.theme).toBe(DEFAULT_SETTINGS.theme);
+    expect(settings.masterMode).toBe(DEFAULT_SETTINGS.masterMode);
+    const stored = JSON.parse(
+      /** @type {string} */ (localStorage.getItem(KEY)),
+    );
+    expect(stored.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
+    expect(stored.theme).toBe(DEFAULT_SETTINGS.theme);
+  });
+});
+
+describe("settings-store — applyTheme via load/save", () => {
+  it('theme="light" removes dark class', () => {
+    document.documentElement.classList.add("dark"); // pretend dark was active
+    settings.theme = "light";
+    saveSettings();
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+
+  it('theme="dark" adds dark class', () => {
+    settings.theme = "dark";
+    saveSettings();
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+  });
+
+  it('theme="auto" mirrors matchMedia.matches=true', () => {
+    mockMatchMedia(true);
+    settings.theme = "auto";
+    saveSettings();
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+  });
+
+  it('theme="auto" mirrors matchMedia.matches=false', () => {
+    mockMatchMedia(false);
+    settings.theme = "auto";
+    saveSettings();
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+
+  it('theme="auto" re-applies on matchMedia change event', () => {
+    const { fire } = mockMatchMedia(false);
+    settings.theme = "auto";
+    saveSettings();
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    fire(true);
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    fire(false);
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+
+  it('switching auto → dark detaches matchMedia listener', () => {
+    const { fire, listenerCount } = mockMatchMedia(false);
+    settings.theme = "auto";
+    saveSettings();
+    expect(listenerCount()).toBe(1);
+    settings.theme = "dark";
+    saveSettings();
+    expect(listenerCount()).toBe(0);
+    // After detach, OS pref change must NOT toggle the class anymore.
+    fire(false);
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
   });
 });

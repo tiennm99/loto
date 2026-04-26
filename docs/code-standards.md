@@ -41,8 +41,8 @@ Use the `.svelte.js` extension for modules that export rune-based reactive state
 ### Utilities
 - Utility-first: `className="px-4 py-2 rounded-lg text-white"`.
 - Responsive: `sm:`, `md:`, `lg:` prefixes for breakpoints.
-- Dark mode: `dark:bg-slate-800`, `dark:text-white`.
-- Animations: Custom keyframes in `globals.css`, apply via `animate-fade-in`.
+- Dark mode: Explicit `@variant dark (.dark *)` in `app.css` declares dark-mode selector; use `dark:bg-slate-800 dark:text-white`. Settings store toggles `<html class="dark">` rather than relying on `@media (prefers-color-scheme: dark)`.
+- Animations: Custom keyframes in `app.css`, apply via `animate-fade-in`.
 
 ### Layout
 - Flexbox for alignment: `flex flex-col items-center justify-center`.
@@ -167,8 +167,8 @@ Use inline event handlers (`onclick`, `onkeydown`). Svelte 5 handles click deleg
 
 ### Unit Tests (Implemented)
 - **Framework**: Vitest 4.1.5 with happy-dom
-- **Test Files**: `src/lib/game-logic.test.js` (26 tests), `src/lib/settings-store.test.js` (12 tests) — 38 total passing
-- **Coverage**: Game logic (generateGrid shape/constraints, isRowComplete, getWaitingNumber, persistence with validators), settings (load/save/reset with error handling)
+- **Test Files**: `src/lib/game-logic.test.js` (26 tests), `src/lib/settings-store.test.js` (27 tests) — 53 total passing
+- **Coverage**: Game logic (generateGrid shape/constraints, isRowComplete, getWaitingNumber, persistence with validators), settings (load/save/reset with error handling, theme detection, master mode toggle, auto-call speed, color validation)
 - **Scripts**: `npm test` (run once), `npm run test:watch` (continuous)
 - **Pattern**: Use vitest's `describe` / `it` blocks, `expect()` assertions. Test both happy path and error cases (corrupt JSON, missing localStorage).
 
@@ -192,3 +192,4 @@ Set in `.env.local` (not committed).
 - **basePath**: Dual-mode: `""` (Cloudflare, dev) or `/loto` (GitHub Pages via `BUILD_PROFILE=gh`).
 
 Last reviewed: 2026-04-27
+Last synced: 2026-04-27 (6-phase refactor)
