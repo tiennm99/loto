@@ -58,7 +58,10 @@ function loadState(): MasterState | null {
   }
 }
 
-const BOARD = buildBoard();
+const BOARD: ReadonlyArray<ReadonlyArray<number>> = Object.freeze(
+  buildBoard().map((row) => Object.freeze(row))
+);
+const BOARD_FLAT: ReadonlyArray<number> = Object.freeze(BOARD.flatMap((r) => r));
 
 export default function MasterPage() {
   const [state, setState] = useState<MasterState | null>(null);
@@ -179,9 +182,12 @@ export default function MasterPage() {
 
         {/* Master board 9x10 */}
         {state ? (
-          <div className="rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700">
+          <div
+            aria-label="Bảng theo dõi số đã xổ"
+            className="rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700"
+          >
             <div className="master-grid">
-              {BOARD.flat().map((num, idx) => {
+              {BOARD_FLAT.map((num, idx) => {
                 const hasNumber = num > 0;
                 const isCalled = hasNumber && calledSet.has(num);
 
