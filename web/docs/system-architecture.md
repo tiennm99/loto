@@ -13,8 +13,9 @@ Entry
   │
   └─ /master (Host Page)
       ├─ Load loto_master (called/remaining)
-      ├─ Display 9×10 master board (numbers 1–90)
-      ├─ Draw button shows next called number
+      ├─ Display 11×9 master board (numbers 1–90, aligned by ones-digit;
+      │   col 0 = 1–9, col 8 = 80–90; each called cell shows draw order)
+      ├─ Draw button shows next called number (highlighted in red on board)
       ├─ Display host's own card (loto_master_card prefix)
       └─ New Game button resets called/remaining
 ```
@@ -27,7 +28,9 @@ grid: number[][]          // 9×9 numbers (0 = empty)
 crossed: boolean[][]      // 9×9 marked state
 ```
 
-Each row has exactly 5 non-zero numbers (distributed across columns via weighted random).
+Each row has exactly 5 non-zero numbers AND each column has exactly 5
+(constraint-aware picker — no slack). Numbers within a column are sorted
+ascending top-to-bottom (lô tô hội chợ Tân Tân convention).
 
 ### Host State (`storagePrefix="loto_master"`)
 ```
