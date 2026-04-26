@@ -1,6 +1,7 @@
 <script>
   import { base } from "$app/paths";
   import PlayerBoard from "$lib/PlayerBoard.svelte";
+  import SettingsButton from "$lib/SettingsButton.svelte";
 
   let showInstructions = $state(false);
 </script>
@@ -8,7 +9,10 @@
 <div class="flex flex-col flex-1 items-center px-3 py-8 sm:py-12">
   <div class="w-full max-w-lg">
     <!-- Header -->
-    <header class="text-center mb-8">
+    <header class="relative text-center mb-8">
+      <div class="absolute right-0 top-0">
+        <SettingsButton />
+      </div>
       <h1
         class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent"
       >

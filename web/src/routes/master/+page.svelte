@@ -70,6 +70,7 @@
 <script>
   import { base } from "$app/paths";
   import PlayerBoard from "$lib/PlayerBoard.svelte";
+  import SettingsButton from "$lib/SettingsButton.svelte";
 
   let state = $state(/** @type {{called: number[], remaining: number[]} | null} */ (null));
   let lastCalled = $state(/** @type {number | null} */ (null));
@@ -114,7 +115,10 @@
 <div class="flex flex-col flex-1 items-center px-3 py-8 sm:py-12">
   <div class="w-full max-w-2xl">
     <!-- Header -->
-    <header class="text-center mb-6">
+    <header class="relative text-center mb-6">
+      <div class="absolute right-0 top-0">
+        <SettingsButton />
+      </div>
       <h1
         class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
       >
@@ -210,6 +214,7 @@
             {@const isCalled = order !== undefined}
             {@const isLast = isCalled && num === lastCalled}
             <div
+              style:background-color={hasNumber ? null : "var(--empty-cell-bg)"}
               class="relative flex items-center justify-center
                      aspect-square text-sm sm:text-base font-bold
                      border-r border-b border-slate-200/80 dark:border-slate-700/60
@@ -220,7 +225,7 @@
                            ? 'bg-red-500 dark:bg-red-600 text-white ring-2 ring-red-300 dark:ring-red-400 ring-inset z-10'
                            : 'bg-orange-500 dark:bg-orange-600 text-white'
                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200'
-                       : 'bg-slate-100 dark:bg-slate-900/60'}"
+                       : ''}"
             >
               {hasNumber ? num : ""}
               {#if isCalled}
