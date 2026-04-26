@@ -34,5 +34,5 @@ npm run build         # default — root basePath, for Cloudflare Pages
 npm run build:gh      # /loto basePath, for tiennm99.github.io/loto manual export
 ```
 
-Static export to `build/`. Deployed to Cloudflare Pages from `master`
+Static export to `build/`. Deployed to Cloudflare Pages from `main`
 (set up via the CF dashboard — see `docs/deployment-guide.md`).

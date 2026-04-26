@@ -16,7 +16,7 @@ either profile without code changes.
 ## Production Deployment — Cloudflare Pages
 
 Primary deploy. Set up via the Cloudflare dashboard once; subsequent
-pushes to `master` trigger automatic builds + deploys.
+pushes to `main` trigger automatic builds + deploys.
 
 1. dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git
    → pick the repo
@@ -24,7 +24,7 @@ pushes to `master` trigger automatic builds + deploys.
    - Framework preset: SvelteKit
    - Build command: `npm run build`
    - Build output directory: `build`
-   - Production branch: `master`
+   - Production branch: `main`
 3. After first deploy, add the custom domain:
    Project → Custom domains → `loto.miti99.com`. Cloudflare gives DNS
    records to add at your registrar (or auto-configures if `miti99.com` is
