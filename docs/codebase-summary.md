@@ -6,15 +6,14 @@
 | File | Purpose |
 |------|---------|
 | `src/routes/+layout.svelte` | Root HTML layout. Sets Vietnamese lang, imports Geist font, applies global flex layout. |
-| `src/routes/+page.svelte` | Player page (`/`). Header + SettingsButton, PlayerBoard, conditional MasterPanel (when `settings.masterMode`), PageFooter. Indigo→purple gradient branding. |
-| `src/routes/master/+page.svelte` | Host page (`/master`). Thin shell: header + back link + MasterPanel + PageFooter. All host logic lives in `MasterPanel.svelte`. |
+| `src/routes/+page.svelte` | Player page (`/`) — the ONLY page. Header + SettingsButton, PlayerBoard, conditional MasterPanel (when `settings.masterMode`), PageFooter. Indigo→purple gradient branding. |
 
 ### Shared Components
 | File | Purpose |
 |------|---------|
 | `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:5 on mobile; wider on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, purple empty cells by default. Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
 | `src/lib/SettingsButton.svelte` | Gear icon + modal. 4 fieldsets: Giao diện (theme auto/light/dark), Chế độ quản trò (master mode toggle), Tự động xổ (auto-call + speed 1–10s), Màu ô trống (10 Excel color swatches). Reset-to-default button. Mounted on both `/` and `/master` headers. |
-| `src/lib/MasterPanel.svelte` | Host controls. New game / draw, "Số vừa xổ" hero token, "Thứ tự đã xổ" history list, host's own player card. No 11×9 tracking board (player card is enough). "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.masterMode === true`, or directly on `/master`. |
+| `src/lib/MasterPanel.svelte` | Host controls. New game / draw, "Số vừa xổ" hero token, "Thứ tự đã xổ" history list, 11×9 last-digit-aligned tracking grid (with circular tokens + draw-order overlay). No host's own player card (the player already has one above). "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.masterMode === true`. |
 | `src/lib/PageFooter.svelte` | Footer with tagline ("Made by miti99 with ❤️ SVG icon") + link. Mounted on `/` and `/master`. |
 
 ### Game Logic
@@ -44,6 +43,7 @@
 | `jsconfig.json` | Path alias `$lib`, no checkJs. |
 | `.gitignore` | Excludes node_modules, build, .env.local, etc. |
 | `.env.example` | codeserver profile vars (CODESERVER_HOST, CODESERVER_PORT). |
+| `static/_redirects` | Cloudflare Pages: `/* / 301` — every unknown path 301-redirects to homepage. Static assets are served first so this only fires on misses. |
 
 ## Key Data Structures
 
@@ -58,22 +58,18 @@
 | `loto_grid` | Player's card numbers. |
 | `loto_crossed` | Player's marked cells. |
 | `loto_master` | Host's drawn/remaining numbers. |
-| `loto_master_card_grid` | Host's player card numbers. |
-| `loto_master_card_crossed` | Host's marked cells. |
 | `loto_settings` | Global UI settings: `{ theme, masterMode, autoCallEnabled, autoCallSpeed, emptyCellColor }`. |
+
+`loto_master_card_*` keys are no longer written (host's own player card removed) but old saved data is left untouched.
 
 ## Component Hierarchy
 
 ```
 RootLayout
-├── HomePage (/)
-│   ├── PlayerBoard (storagePrefix="loto")
-│   ├── [if settings.masterMode]
-│   │   └── MasterPanel (state, controls, draw history)
-│   └── PageFooter
-└── MasterPage (/master)
-    ├── MasterPanel (state, controls, draw history)
-    ├── Back link
+└── HomePage (/)   ← single page; any other URL redirects to /
+    ├── PlayerBoard (storagePrefix="loto")
+    ├── [if settings.masterMode]
+    │   └── MasterPanel (controls, history, 11×9 tracking grid)
     └── PageFooter
 ```
 

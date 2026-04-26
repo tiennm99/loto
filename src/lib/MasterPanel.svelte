@@ -1,6 +1,34 @@
 <script module>
   const STORAGE_KEY = "loto_master";
 
+  /**
+   * 11x9 board, aligned by ones-digit. Row = ones digit, col = tens digit.
+   * Col 0 holds 1..9, col 8 holds 80..90 (90 sits alone in row 10 col 8).
+   * Empty slots = 0.
+   * @returns {number[][]}
+   */
+  function buildBoard() {
+    /** @type {number[][]} */
+    const board = [];
+    for (let row = 0; row < 11; row++) {
+      /** @type {number[]} */
+      const cells = [];
+      for (let col = 0; col < 9; col++) {
+        let num = 0;
+        if (row === 10) {
+          if (col === 8) num = 90;
+        } else if (row === 0) {
+          if (col > 0) num = col * 10;
+        } else {
+          num = col === 0 ? row : col * 10 + row;
+        }
+        cells.push(num);
+      }
+      board.push(cells);
+    }
+    return board;
+  }
+
   /** @returns {{ called: number[], remaining: number[] }} */
   function createFreshState() {
     const all = Array.from({ length: 90 }, (_, i) => i + 1);
@@ -29,10 +57,12 @@
       return null;
     }
   }
+
+  const BOARD = Object.freeze(buildBoard().map((row) => Object.freeze(row)));
+  const BOARD_FLAT = Object.freeze(BOARD.flatMap((r) => r));
 </script>
 
 <script>
-  import PlayerBoard from "$lib/PlayerBoard.svelte";
   import { settings } from "$lib/settings-store.svelte.js";
 
   let state = $state(
@@ -52,6 +82,11 @@
   $effect(() => {
     if (state) saveState(state);
   });
+
+  // Map number -> 1-based draw order for fast Kinh! verification.
+  const callOrder = $derived(
+    new Map((state?.called ?? []).map((n, i) => [n, i + 1])),
+  );
 
   // Auto-call interval. Single $effect that depends on autoRunning,
   // settings.autoCallSpeed, AND settings.autoCallEnabled — Svelte tears
@@ -203,21 +238,60 @@
   </div>
 {/if}
 
-{#if !state}
+<!-- 11x9 master tracking board -->
+{#if state}
+  <div
+    aria-label="Bảng theo dõi số đã xổ"
+    class="rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700"
+  >
+    <div class="master-grid">
+      {#each BOARD_FLAT as num, idx (idx)}
+        {@const hasNumber = num > 0}
+        {@const order = hasNumber ? callOrder.get(num) : undefined}
+        {@const isCalled = order !== undefined}
+        {@const isLast = isCalled && num === lastCalled}
+        {@const isLow = hasNumber && num <= 49}
+        <div
+          style:background-color={hasNumber ? null : "var(--empty-cell-bg)"}
+          class="relative flex items-center justify-center
+                 aspect-square
+                 border-r border-b border-slate-200/80 dark:border-slate-700/60
+                 bg-white dark:bg-slate-800 select-none
+                 {isLast ? 'z-10' : ''}"
+        >
+          {#if hasNumber}
+            <!-- Token: cream inner when called (pink ≤49 / green ≥50 ring),
+                 gray-ringed and dim when uncalled. -->
+            <div
+              class="flex items-center justify-center
+                     w-[82%] h-[82%] rounded-full
+                     text-lg sm:text-xl font-black tabular-nums
+                     border-[3px] transition-all
+                     {!isCalled
+                       ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
+                       : isLow
+                         ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-pink-500 dark:text-pink-400'
+                         : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-500 dark:text-emerald-400'}
+                     {isLast
+                       ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
+                       : ''}"
+            >
+              {num}
+            </div>
+            {#if isCalled}
+              <span
+                class="absolute top-0.5 right-0.5 text-[9px] sm:text-[10px] font-semibold leading-none text-slate-500 dark:text-slate-400 tabular-nums"
+              >
+                {order}
+              </span>
+            {/if}
+          {/if}
+        </div>
+      {/each}
+    </div>
+  </div>
+{:else}
   <div class="text-center text-slate-400 dark:text-slate-500 py-10 text-sm">
     Nhấn "Ván mới" để bắt đầu
   </div>
 {/if}
-
-<!-- Master's own playing card -->
-<div class="mt-10">
-  <div class="text-center mb-4">
-    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200">
-      Bảng của quản trò
-    </h3>
-    <p class="text-xs text-slate-400 dark:text-slate-500">
-      Quản trò cũng có thể chơi cùng
-    </p>
-  </div>
-  <PlayerBoard storagePrefix="loto_master_card" />
-</div>
