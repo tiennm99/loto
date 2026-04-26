@@ -1,25 +1,50 @@
 # Deployment Guide
 
-## Production Deployment (GitHub Pages)
+## Production Deployment
 
-### Automatic Deploy
-The app auto-deploys from the `master` branch via `.github/workflows/deploy.yml`.
+### GitHub Pages (default)
 
-**Workflow**:
-1. Push to `master`
-2. GitHub Actions runs `npm run build`
-3. Static export written to `out/` directory
-4. Pages deployed to `https://{user}.github.io/loto`
+Auto-deploys from `master` via `.github/workflows/deploy.yml`. Static export is
+written to `out/`, then uploaded as a Pages artifact. Reachable at
+`https://{user}.github.io/loto`.
 
-**Note**: basePath is set to `/loto` in production (`next.config.mjs:23`).
+basePath is set to `/loto` because GH Pages serves the project under that path
+prefix. See `next.config.mjs`.
 
-### Manual Deploy (if needed)
+### Cloudflare Pages
+
+Two ways to wire it up:
+
+**Option A — Dashboard:**
+1. dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git → pick the repo
+2. Build settings:
+   - Framework preset: `Next.js (Static HTML Export)`
+   - Build command: `npm run build`
+   - Build output directory: `out`
+   - Production branch: `master`
+3. No env vars needed — `next.config.mjs` detects `CF_PAGES=1` (auto-injected by
+   Cloudflare) and switches basePath to root automatically.
+
+**Option B — GitHub Actions (`.github/workflows/deploy-cloudflare-pages.yml`):**
+
+Add two repo secrets:
+- `CLOUDFLARE_API_TOKEN` — dash → My Profile → API Tokens → Create with the
+  `Pages — Edit` template
+- `CLOUDFLARE_ACCOUNT_ID` — visible in the dash sidebar
+
+Then push to `master` and the workflow uses `cloudflare/wrangler-action@v3` to
+publish `out/` to a Pages project named `loto`. The workflow sets
+`NEXT_BASE_PATH=""` explicitly so the build produces root-relative asset paths.
+
+The two providers can run in parallel — they don't conflict. Disable whichever
+you stop wanting by deleting its workflow file.
+
+### Manual Deploy
+
 ```bash
 npm run build
-# out/ directory ready for upload
+# out/ directory ready for upload to any static host
 ```
-
-Then deploy `out/` folder to GitHub Pages or any static host.
 
 ## Development Environment
 
