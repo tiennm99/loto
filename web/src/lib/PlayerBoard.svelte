@@ -171,9 +171,6 @@
         <div class="section-divider-vertical" aria-hidden="true"></div>
         <div class="flex-1">
           {#each SECTIONS as startRow, sectionIdx (sectionIdx)}
-            {#if sectionIdx > 0}
-              <div class="section-divider" aria-hidden="true"></div>
-            {/if}
             <div class="section-label">{SECTION_LABELS[sectionIdx]}</div>
             <div class="loto-grid">
               {#each grid.slice(startRow, startRow + 3).flat() as num, idx (idx)}
