@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+// @ts-check
 
 const isProd = process.env.NODE_ENV === "production";
 const isCodeserver = process.env.NEXT_DEV_PROFILE === "codeserver";
@@ -24,7 +24,8 @@ const cs = isCodeserver ? codeserverConfig() : null;
 const basePath =
   process.env.NEXT_BASE_PATH ?? cs?.basePath ?? (isProd ? "/loto" : "");
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: "export",
   basePath,
   assetPrefix: basePath || undefined,

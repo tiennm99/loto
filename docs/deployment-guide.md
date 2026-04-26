@@ -11,7 +11,7 @@ The app auto-deploys from the `master` branch via `.github/workflows/deploy.yml`
 3. Static export written to `out/` directory
 4. Pages deployed to `https://{user}.github.io/loto`
 
-**Note**: basePath is set to `/loto` in production (`next.config.ts:23`).
+**Note**: basePath is set to `/loto` in production (`next.config.mjs:23`).
 
 ### Manual Deploy (if needed)
 ```bash
@@ -55,7 +55,7 @@ Replace `your-machine.example.com` with your actual hostname/IP (must match the 
 npm run dev:codeserver
 ```
 
-This sets `NEXT_DEV_PROFILE=codeserver`, triggering the code-server config path in `next.config.ts`.
+This sets `NEXT_DEV_PROFILE=codeserver`, triggering the code-server config path in `next.config.mjs`.
 
 **4. Access via browser**:
 Navigate to:
@@ -88,7 +88,7 @@ Generates:
 - `.next/` — Build cache (not needed for deployment)
 
 ### Export Settings
-- `output: "export"` in `next.config.ts`
+- `output: "export"` in `next.config.mjs`
 - No server-side rendering
 - All pages pre-rendered to HTML + JS bundles
 

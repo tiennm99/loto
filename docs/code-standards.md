@@ -2,12 +2,12 @@
 
 ## File Naming & Structure
 
-- **Kebab-case** for all files: `player-board.tsx`, `game-logic.ts`.
+- **Kebab-case** for all files: `player-board.jsx`, `game-logic.js`.
 - **Descriptive names**: Long names are preferred for self-documentation. Avoid ambiguity.
 - **Single responsibility**: Each file has one primary export (component or utilities).
 - **Max 200 lines per file**: Split larger components into smaller focused ones.
 
-## React & TypeScript Conventions
+## React & JavaScript Conventions
 
 ### Hooks
 - **useState**: For local UI state (grid, crossed, form inputs).
@@ -15,10 +15,12 @@
 - **useCallback**: For event handlers to stabilize function identity across renders.
 - **useRef**: For mutable values that don't trigger renders (timers, celebratedRows set).
 
-### Typing
-- Explicit `export interface Props { ... }` for component props.
-- Use `Readonly<{ children: React.ReactNode }>` for layout children.
+### Typing (JSDoc)
+- Author types in JSDoc comments — `jsconfig.json` has `checkJs: true`, so `tsc --noEmit` validates them.
+- Component props: `@typedef {Object} Props { ... }` followed by `@param {Props} props` on the function.
+- Layout children: `@param {{ children: React.ReactNode }} props`.
 - Avoid `any`; use precise types (e.g., `number[][]` for grid).
+- Generics: `@template T` then reference `T` in `@param` / `@returns`.
 
 ### Client-Only Constraint
 - All interactive pages must have `"use client"` at the top.
@@ -47,15 +49,23 @@
 ## localStorage Patterns
 
 ### Saving
-```typescript
-function saveGrid(grid: number[][], prefix = "loto"): void {
+```js
+/**
+ * @param {number[][]} grid
+ * @param {string} [prefix]
+ */
+function saveGrid(grid, prefix = "loto") {
   localStorage.setItem(`${prefix}_grid`, JSON.stringify(grid));
 }
 ```
 
 ### Loading
-```typescript
-function loadGrid(prefix = "loto"): number[][] | null {
+```js
+/**
+ * @param {string} [prefix]
+ * @returns {number[][] | null}
+ */
+function loadGrid(prefix = "loto") {
   const data = localStorage.getItem(`${prefix}_grid`);
   if (!data) return null;
   try {
@@ -81,18 +91,22 @@ function loadGrid(prefix = "loto"): number[][] | null {
 | camelCase | `handleCellClick`, `storagePrefix` | variables, functions, props |
 | PascalCase | `PlayerBoard`, `MasterPage` | components, types |
 | UPPER_SNAKE | `STORAGE_KEY`, `NUM_ROWS` | constants |
-| kebab-case | `player-board.tsx` | file names |
+| kebab-case | `player-board.jsx` | file names |
 
 ## Comment Style
 
 - Document **why**, not **what**. The code shows what it does.
 - Use `/** JSDoc */` for exported functions.
-- Inline comments for complex logic (e.g., weighted random selection in `lib/game-logic.ts:19–28`).
+- Inline comments for complex logic (e.g., weighted random selection in `lib/game-logic.js:19–28`).
 
 ### Example
-```typescript
-/** Weighted random selection of a column index */
-function randomANumberInRow(weights: number[]): number {
+```js
+/**
+ * Weighted random selection of a column index.
+ * @param {number[]} weights
+ * @returns {number}
+ */
+function randomANumberInRow(weights) {
   // Convert weights to cumulative distribution for O(n) lookup
   const tempWeight = [...weights];
   for (let i = 1; i < tempWeight.length; i++) {
@@ -108,7 +122,7 @@ function randomANumberInRow(weights: number[]): number {
 2. Third-party imports
 3. Local component/utility imports
 
-```typescript
+```js
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import PlayerBoard from "@/components/player-board";
