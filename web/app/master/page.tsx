@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import PlayerBoard from "../loto-player-board";
 
 const STORAGE_KEY = "loto_master";
 
@@ -211,6 +212,19 @@ export default function MasterPage() {
             Nhấn &ldquo;Ván mới&rdquo; để bắt đầu
           </div>
         )}
+
+        {/* Master's own playing card */}
+        <div className="mt-10">
+          <div className="text-center mb-4">
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
+              Bảng của quản trò
+            </h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              Quản trò cũng có thể chơi cùng
+            </p>
+          </div>
+          <PlayerBoard storagePrefix="loto_master_card" />
+        </div>
 
         {/* Footer */}
         <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600">
