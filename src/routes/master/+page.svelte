@@ -223,18 +223,18 @@
                      {isLast ? 'z-10' : ''}"
             >
               {#if hasNumber}
-                <!-- Token: cream/beige inner, ring colored by value (pink ≤49, green ≥50). -->
+                <!-- Token: cream inner when called (pink ≤49 / green ≥50 ring),
+                     gray-ringed and dim when uncalled. -->
                 <div
                   class="flex items-center justify-center
                          w-[82%] h-[82%] rounded-full
-                         text-sm sm:text-base font-bold tabular-nums
+                         text-lg sm:text-xl font-bold tabular-nums
                          border-[3px] transition-all
-                         {isLow
-                           ? 'border-pink-500 dark:border-pink-400'
-                           : 'border-emerald-500 dark:border-emerald-400'}
-                         {isCalled
-                           ? 'bg-amber-50 dark:bg-amber-100 text-rose-700 dark:text-rose-800'
-                           : 'bg-slate-50/60 dark:bg-slate-700/40 text-slate-400 dark:text-slate-500 opacity-60'}
+                         {!isCalled
+                           ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
+                           : isLow
+                             ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-rose-700 dark:text-rose-800'
+                             : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-rose-700 dark:text-rose-800'}
                          {isLast
                            ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
                            : ''}"
