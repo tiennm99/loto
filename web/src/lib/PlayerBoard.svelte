@@ -140,9 +140,9 @@
   // visual segmentation.
   const SECTIONS = /** @type {const} */ ([0, 3, 6]);
   const SECTION_LABELS = [
-    "Minh Tân",
-    "Loại đặc biệt",
-    "Tấn tài tấn lộc",
+    "Tân Tân",
+    "An khang thịnh vượng",
+    "Tân Tân tốt nhất",
   ];
 </script>
 
@@ -180,7 +180,7 @@
             {#if !hasNumber}
               <div
                 aria-hidden="true"
-                class="relative flex items-center justify-center aspect-square border-r border-b border-slate-200/80 dark:border-slate-700/60"
+                class="relative aspect-[3/5] border-r border-b border-slate-300/60 dark:border-slate-700/60"
                 style:background-color="var(--empty-cell-bg)"
               ></div>
             {:else}
@@ -189,16 +189,16 @@
                 aria-label="Số {num}{isCrossed ? ', đã đánh dấu' : ''}"
                 aria-pressed={isCrossed}
                 onclick={() => handleCellClick(row, col)}
-                class="relative flex items-center justify-center
-                       aspect-square text-base sm:text-xl font-bold
-                       border-r border-b border-slate-200/80 dark:border-slate-700/60
+                class="tan-tan-num relative flex items-center justify-center
+                       aspect-[3/5] text-2xl sm:text-3xl
+                       border-r border-b border-slate-300/60 dark:border-slate-700/60
                        transition-all select-none cursor-pointer
                        focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
                        {isCrossed
                          ? rowComplete
-                           ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 dark:text-emerald-400'
-                           : 'cell-crossed bg-red-50 dark:bg-red-950/30 text-red-400 dark:text-red-500'
-                         : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
+                           ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
+                           : 'cell-crossed bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-500'
+                         : 'bg-white dark:bg-slate-800 text-black dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
               >
                 {num}
               </button>

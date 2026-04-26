@@ -12,7 +12,7 @@
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Minh Tân / Loại đặc biệt / Tấn tài tấn lộc). Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
+| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:5) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, blue empty cells. Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
 | `src/lib/SettingsButton.svelte` | Gear icon + modal. Color picker + 8 preset swatches for empty-cell color. Reset-to-default button. Mounted on both `/` and `/master` headers. |
 
 ### Game Logic
