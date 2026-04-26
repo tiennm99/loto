@@ -18,8 +18,8 @@ That format is intentionally out of scope.
 - **Visual layout**: card displayed as 3 stacked 3×9 mini-cards with
   traditional separator labels — *Tân Tân*, *An khang thịnh vượng*,
   *Tân Tân tốt nhất* — matching the physical Tân Tân BAMBOORAFT paper
-  sheet (tall non-square cells, condensed bold black numbers on white,
-  blue empty-cell background by default).
+  sheet (tall non-square cells on mobile, wider on sm+; condensed bold black numbers on white,
+  purple empty-cell background by default — Excel Standard Purple `#7030A0`).
 - **Column ranges**: col 0 = 1–9, col 1 = 10–19, …, col 7 = 70–79,
   col 8 = 80–90.
 - **Within a column**: numbers placed top-to-bottom in **ascending** order.
@@ -31,8 +31,11 @@ That format is intentionally out of scope.
   a master board with circular tokens (pink ring for 1–49, green for 50–90,
   cream fill on called, dim on uncalled, red ring + scale on the most
   recent draw), and may also play their own card.
-- **Settings**: gear icon in headers opens a modal with a color picker for
-  the empty/blank cell color (default brown matches physical card).
+- **Settings**: gear icon in headers opens a modal with 4 fieldsets:
+  - Giao diện: theme switcher (auto / light / dark; auto mirrors OS pref)
+  - Chế độ quản trò: toggle to show MasterPanel on `/`
+  - Tự động xổ: enable auto-call; speed slider (1–10 seconds)
+  - Màu ô trống: color picker + 10 Excel preset swatches
   Persisted to `loto_settings`.
 
 ### Out of scope
@@ -96,7 +99,13 @@ State is entirely client-side. Each page/card instance uses a unique localStorag
 - [x] Mobile-responsive (base + sm breakpoints).
 - [x] HMR works on code-server via proxy.
 - [x] Player card rendered as 3 stacked Tân Tân mini-cards with separator labels.
-- [x] Settings modal with empty-cell color picker; applies to both player and master grids; persisted.
+- [x] Settings modal with 4 fieldsets (theme, master mode, auto-call, color); applies to both grids; persisted.
+- [x] Theme switcher (auto / light / dark) with explicit dark class selector on `<html>`.
+- [x] Master mode toggle to show MasterPanel on player page.
+- [x] Auto-call timer (1–10s speed) with start/stop button.
+- [x] Mobile-responsive layout (aspect-square sm:aspect-[3/5] cells, text scaling).
+- [x] MasterPanel extracted; mounted conditionally on `/` and directly on `/master`.
+- [x] PageFooter with tagline + link on both pages.
 
 ## Visual Language
 
@@ -115,4 +124,5 @@ State is entirely client-side. Each page/card instance uses a unique localStorag
 - Multiplayer sync (real-time via WebSocket)
 - i18n beyond Vietnamese
 
-Last reviewed: 2026-04-26 (scope locked: Lô tô hội chợ Tân Tân)
+Last reviewed: 2026-04-27 (scope locked: Lô tô hội chợ Tân Tân + theme/master/auto-call)
+Last synced: 2026-04-27 (6-phase refactor)

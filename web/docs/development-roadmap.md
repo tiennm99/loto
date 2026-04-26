@@ -15,15 +15,21 @@ The app is fully functional for core gameplay (Lô tô hội chợ Tân Tân var
   Kinh verification
 - Player card rendered as 3 stacked Tân Tân mini-cards
   (Minh Tân / Loại đặc biệt / Tấn tài tấn lộc) with cross-hatch dividers
-- Settings modal: empty-cell color picker (color picker + 8 presets +
-  reset), applies to player + master grids, persisted to `loto_settings`
+- Settings modal: 4 fieldsets (theme auto/light/dark, master mode toggle,
+  auto-call speed 1–10s, 10 color presets), persisted to `loto_settings`
+- Theme switcher (auto detects OS pref, explicit light/dark modes)
+- Master mode toggle (shows MasterPanel on `/`)
+- Auto-call timer with speed slider
+- Mobile-responsive cells (aspect-ratio + text scaling)
+- MasterPanel extracted component (reused on `/` and `/master`)
+- PageFooter with tagline + creator link
 - Host's own player card (isolated instance)
 - localStorage persistence
 - Dark mode
 - Mobile responsive
 - Offline capable
-- Unit tests (Vitest: 26 game-logic tests + 12 settings-store tests, 38 total passing)
-  covering constraint validation, persistence, and error handling
+- Unit tests (Vitest: 26 game-logic tests + 27 settings-store tests, 53 total passing)
+  covering constraint validation, persistence, theme/master-mode/auto-call logic, and error handling
 
 ## Idea Phase
 
@@ -33,8 +39,6 @@ Play celebratory chime or "Kinh!" voice snippet when row completes. Could use We
 ### Undo Last Cell
 Allow player to undo the most recent cross/uncross action. Requires change history or state snapshot. **Status**: Idea (low priority)
 
-### Theme Switcher
-Explicit light/dark toggle button instead of relying on OS preference. **Status**: Idea (Tailwind already supports OS toggle)
 
 ### PWA Install
 Add service worker and manifest for "Install App" prompt on Android/iOS. **Status**: Idea (would require server-side components)
@@ -104,3 +108,4 @@ All decisions follow **YAGNI** (You Aren't Gonna Need It), **KISS** (Keep It Sim
 Future work gates on **real user demand**, not speculation.
 
 Last reviewed: 2026-04-27
+Last synced: 2026-04-27 (6-phase refactor)

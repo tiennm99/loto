@@ -6,31 +6,33 @@
 | File | Purpose |
 |------|---------|
 | `src/routes/+layout.svelte` | Root HTML layout. Sets Vietnamese lang, imports Geist font, applies global flex layout. |
-| `src/routes/+page.svelte` | Player page (`/`). Instructions toggle, PlayerBoard component, indigo gradient branding. |
-| `src/routes/master/+page.svelte` | Host page (`/master`). Controls (new game, draw number), 11×9 last-digit-aligned master board with circular tokens (pink ring for 1–49, green for 50–90; cream fill when called, dim when uncalled; red ring + scale on last-called) and draw-order overlay, host's player card. |
+| `src/routes/+page.svelte` | Player page (`/`). Header + SettingsButton, PlayerBoard, conditional MasterPanel (when `settings.masterMode`), PageFooter. Indigo→purple gradient branding. |
+| `src/routes/master/+page.svelte` | Host page (`/master`). Thin shell: header + back link + MasterPanel + PageFooter. All host logic lives in `MasterPanel.svelte`. |
 
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:5) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, blue empty cells. Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
-| `src/lib/SettingsButton.svelte` | Gear icon + modal. Color picker + 8 preset swatches for empty-cell color. Reset-to-default button. Mounted on both `/` and `/master` headers. |
+| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:5 on mobile; wider on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, purple empty cells by default. Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
+| `src/lib/SettingsButton.svelte` | Gear icon + modal. 4 fieldsets: Giao diện (theme auto/light/dark), Chế độ quản trò (master mode toggle), Tự động xổ (auto-call + speed 1–10s), Màu ô trống (10 Excel color swatches). Reset-to-default button. Mounted on both `/` and `/master` headers. |
+| `src/lib/MasterPanel.svelte` | Host controls. New game / draw, "Số vừa xổ" hero token, "Thứ tự đã xổ" history list, host's own player card. No 11×9 tracking board (player card is enough). "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.masterMode === true`, or directly on `/master`. |
+| `src/lib/PageFooter.svelte` | Footer with tagline ("Made by miti99 with ❤️ SVG icon") + link. Mounted on `/` and `/master`. |
 
 ### Game Logic
 | File | Purpose |
 |------|---------|
 | `src/lib/game-logic.js` | Stateless utilities: generateGrid (constraint-aware picker — exact 5 per row & per col, ascending-sorted columns), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
-| `src/lib/settings-store.svelte.js` | Reactive global UI settings via Svelte 5 runes. `emptyCellColor` (hex) persisted to localStorage `loto_settings`. Pushes value to `--empty-cell-bg` CSS var on `:root`. |
+| `src/lib/settings-store.svelte.js` | Reactive global UI settings via Svelte 5 runes. Stores 5 keys: `theme` (enum: "auto" / "light" / "dark"), `masterMode` (bool), `autoCallEnabled` (bool), `autoCallSpeed` (1–10), `emptyCellColor` (hex). Persisted to localStorage `loto_settings`. Pushes values to CSS vars and `<html class="dark">` on `:root`. Per-key validators preserve old data. |
 
 ### Styling
 | File | Purpose |
 |------|---------|
-| `src/app.css` | Root styles: Tailwind @import, CSS variables (light/dark), `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast), `.cell-crossed` diagonal. |
+| `src/app.css` | Root styles: Tailwind @import, CSS variables (light/dark), Tailwind v4 `@variant dark (.dark *)` for explicit dark-mode class selector, `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast), `.cell-crossed` diagonal. |
 
 ### Tests
 | File | Purpose |
 |------|---------|
 | `src/lib/game-logic.test.js` | 26 unit tests: generateGrid shape (9×9, 5 per row/col, no duplicates), column ranges & ascending sort, row completion, waiting number detection, persistence (saveGrid/loadGrid/saveCrossedState/loadCrossedState with validators). |
-| `src/lib/settings-store.test.js` | 12 unit tests: defaults, loadSettings (restore from localStorage, apply CSS var, handle empty/corrupt), saveSettings, resetSettings, color validation. |
+| `src/lib/settings-store.test.js` | 27 unit tests: defaults, loadSettings (restore 5 keys from localStorage, apply CSS vars, toggle dark class, handle empty/corrupt), saveSettings, resetSettings, theme toggle (auto → OS pref detection), master mode, auto-call + speed, color validation. |
 
 ### Configuration
 | File | Purpose |
@@ -58,19 +60,21 @@
 | `loto_master` | Host's drawn/remaining numbers. |
 | `loto_master_card_grid` | Host's player card numbers. |
 | `loto_master_card_crossed` | Host's marked cells. |
-| `loto_settings` | Global UI settings: `{ emptyCellColor: "#rrggbb" }`. |
+| `loto_settings` | Global UI settings: `{ theme, masterMode, autoCallEnabled, autoCallSpeed, emptyCellColor }`. |
 
 ## Component Hierarchy
 
 ```
 RootLayout
 ├── HomePage (/)
-│   ├── Instructions toggle
-│   └── PlayerBoard (storagePrefix="loto")
+│   ├── PlayerBoard (storagePrefix="loto")
+│   ├── [if settings.masterMode]
+│   │   └── MasterPanel (state, controls, draw history)
+│   └── PageFooter
 └── MasterPage (/master)
-    ├── Controls (new game, draw)
-    ├── Master board (11×9, last-digit aligned, draw-order overlay)
-    └── PlayerBoard (storagePrefix="loto_master_card")
+    ├── MasterPanel (state, controls, draw history)
+    ├── Back link
+    └── PageFooter
 ```
 
 ## Key Functions
@@ -81,8 +85,8 @@ RootLayout
 | `generateGrid()` | game-logic.js | Builds 9×9; ascending-sorted numbers per column. |
 | `isRowComplete()` | game-logic.js | Boolean: all non-zero cells in row crossed? |
 | `getWaitingNumber()` | game-logic.js | Returns the single uncrossed number in row, or null. |
-| `buildBoard()` | master/+page.svelte | Builds 11×9 master grid; row = ones-digit, col = tens-digit; col 0 holds 1–9, col 8 holds 80–90. |
 | `handleCellClick()` | PlayerBoard.svelte | Toggle crossed[row][col]. |
 | `saveGrid()` / `loadGrid()` | game-logic.js | localStorage with prefix-based keys. |
 
 Last reviewed: 2026-04-27
+Last synced: 2026-04-27 (6-phase refactor)

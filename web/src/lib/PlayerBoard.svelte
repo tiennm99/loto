@@ -140,9 +140,9 @@
   // visual segmentation.
   const SECTIONS = /** @type {const} */ ([0, 3, 6]);
   const SECTION_LABELS = [
-    "Tân Tân",
-    "An khang thịnh vượng",
-    "Tân Tân tốt nhất",
+    "Lô tô",
+    "TN1 (2014-2017)",
+    "Độc-Đỉnh-Điên",
   ];
 </script>
 
@@ -181,7 +181,7 @@
                 {#if !hasNumber}
                   <div
                     aria-hidden="true"
-                    class="relative aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40"
+                    class="relative aspect-square sm:aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40"
                     style:background-color="var(--empty-cell-bg)"
                   ></div>
                 {:else}
@@ -191,7 +191,8 @@
                     aria-pressed={isCrossed}
                     onclick={() => handleCellClick(row, col)}
                     class="tan-tan-num relative flex items-center justify-center
-                           aspect-[3/5] text-2xl sm:text-3xl
+                           aspect-square sm:aspect-[3/5]
+                           text-base sm:text-2xl md:text-3xl
                            border border-slate-400/50 dark:border-slate-600/40
                            transition-all select-none cursor-pointer
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
@@ -208,8 +209,9 @@
             </div>
           {/each}
           <div class="section-label">
-            <span>
-              Made with ❤️ by <a
+            <span class="flex items-center gap-1">
+              Made by
+              <a
                 href="https://miti99.com"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -217,6 +219,17 @@
               >
                 miti99
               </a>
+              with
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-label="trái tim"
+                class="inline w-3.5 h-3.5 text-red-500"
+              >
+                <path
+                  d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4.5 4.5 8.5C19 16.65 12 21 12 21z"
+                ></path>
+              </svg>
             </span>
           </div>
         </div>

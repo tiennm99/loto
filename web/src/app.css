@@ -1,18 +1,21 @@
 @import "tailwindcss";
 
+/* Class-based dark-mode variant. The settings store toggles `class="dark"`
+   on <html>, mirroring OS preference when theme="auto" or honoring the
+   user's explicit pick when theme="light"/"dark". */
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #1e293b;
-  /* Default empty-cell color matches a Tân Tân BAMBOORAFT paper card.
-     Overridden at runtime by the settings store via documentElement.style. */
-  --empty-cell-bg: #1e88e5;
+  /* Default empty-cell color: Excel "Standard Color: Purple". Overridden
+     at runtime by the settings store via documentElement.style. */
+  --empty-cell-bg: #7030A0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #e2e8f0;
-  }
+:where(.dark) {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
 }
 
 body {
@@ -55,11 +58,9 @@ body {
   );
   background-color: rgb(227 242 253 / 0.7);
 }
-@media (prefers-color-scheme: dark) {
-  .section-divider,
-  .section-divider-vertical {
-    background-color: rgb(13 71 161 / 0.4);
-  }
+:where(.dark) .section-divider,
+:where(.dark) .section-divider-vertical {
+  background-color: rgb(13 71 161 / 0.4);
 }
 
 .section-label {
@@ -90,11 +91,9 @@ body {
     transparent 8px 14px
   );
 }
-@media (prefers-color-scheme: dark) {
-  .section-label {
-    color: #64b5f6;
-    background-color: rgb(13 71 161 / 0.4);
-  }
+:where(.dark) .section-label {
+  color: #64b5f6;
+  background-color: rgb(13 71 161 / 0.4);
 }
 
 /* Tân Tân BAMBOORAFT-style number — tall, condensed, heavy black. Stack

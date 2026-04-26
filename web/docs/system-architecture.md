@@ -4,22 +4,23 @@
 
 ```
 Entry (+layout.svelte)
-  ├─ onMount: loadSettings() — restore emptyCellColor from loto_settings,
-  │   apply to --empty-cell-bg CSS variable before pages render
+  ├─ onMount: loadSettings() — restore all 5 settings keys from loto_settings,
+  │   apply CSS vars, toggle <html class="dark"> on theme/OS pref, setup auto-call effect
   │
   ├─ / (Player Page)
   │   ├─ Load loto_grid, loto_crossed from localStorage
-  │   ├─ Display 9×9 grid (empty cells use --empty-cell-bg from settings)
+  │   ├─ Display 9×9 PlayerBoard (empty cells use --empty-cell-bg from settings)
   │   ├─ Generate new grid on button click
   │   ├─ Mark/unmark cells on click
-  │   └─ Show bingo popup + "Chờ X" toasts
+  │   ├─ Show bingo popup + "Chờ X" toasts
+  │   ├─ [if settings.masterMode === true]
+  │   │   └─ Mount MasterPanel (host controls + draw history)
+  │   └─ PageFooter (tagline + miti99 link)
   │
   └─ /master (Host Page)
-      ├─ Load loto_master (called/remaining)
-      ├─ Display 11×9 master board (empty cells use --empty-cell-bg)
-      ├─ Draw button shows next called number (highlighted in red)
-      ├─ Display host's own card (loto_master_card prefix)
-      └─ New Game button resets called/remaining
+      ├─ MasterPanel (state, controls, draw history; same as above)
+      ├─ Back link to /
+      └─ PageFooter
 ```
 
 ## State Model
@@ -34,10 +35,20 @@ Each row has exactly 5 non-zero numbers AND each column has exactly 5
 (constraint-aware picker — no slack). Numbers within a column are sorted
 ascending top-to-bottom (lô tô hội chợ Tân Tân convention).
 
+### Settings (`loto_settings`)
+```
+theme: "auto" | "light" | "dark"  // Display mode
+masterMode: boolean               // Show MasterPanel on /
+autoCallEnabled: boolean          // Enable auto-call timer
+autoCallSpeed: number (1–10)      // Speed in seconds
+emptyCellColor: "#rrggbb"         // Hex color (default #7030A0 Excel Purple)
+```
+
 ### Host State (`storagePrefix="loto_master"`)
 ```
 called: number[]          // [5, 23, 67, ...] — drawn in order
 remaining: number[]       // [1, 2, 3, ...] minus called — shuffled initially
+autoRunning: boolean      // Auto-call timer active
 ```
 
 ### Host's Card (`storagePrefix="loto_master_card"`)
@@ -134,3 +145,4 @@ Files that are client-only:
 All state is localStorage. No API calls. Fully functional offline after initial load.
 
 Last reviewed: 2026-04-27
+Last synced: 2026-04-27 (6-phase refactor)

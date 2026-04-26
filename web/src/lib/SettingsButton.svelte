@@ -1,6 +1,5 @@
 <script>
   import {
-    DEFAULT_SETTINGS,
     resetSettings,
     saveSettings,
     settings,
@@ -8,30 +7,63 @@
 
   let open = $state(false);
 
-  // Curated swatches: brown (default Minh Tân), warm cream, slate,
-  // amber, emerald, indigo, plum, deep pink — covers the common asks
-  // (paper-feel, neutral, vivid).
-  const PRESETS = [
-    DEFAULT_SETTINGS.emptyCellColor,
-    "#f5e6c8",
-    "#475569",
-    "#f59e0b",
-    "#10b981",
-    "#6366f1",
-    "#9333ea",
-    "#e11d48",
-  ];
+  // Office "Standard Colors" palette (10 swatches). Default is Purple — index 9.
+  const PRESETS = /** @type {const} */ ([
+    "#C00000", // Dark Red
+    "#FF0000", // Red
+    "#FFC000", // Orange
+    "#FFFF00", // Yellow
+    "#92D050", // Light Green
+    "#00B050", // Green
+    "#00B0F0", // Light Blue
+    "#0070C0", // Blue
+    "#002060", // Dark Blue
+    "#7030A0", // Purple (default)
+  ]);
+
+  const THEMES = /** @type {const} */ ([
+    ["auto", "Tự động"],
+    ["light", "Sáng"],
+    ["dark", "Tối"],
+  ]);
 
   /** @param {string} hex */
-  function pick(hex) {
+  function pickColor(hex) {
     settings.emptyCellColor = hex;
     saveSettings();
   }
 
   function onPickerInput(/** @type {Event} */ e) {
-    const v = /** @type {HTMLInputElement} */ (e.currentTarget).value;
-    settings.emptyCellColor = v;
+    settings.emptyCellColor = /** @type {HTMLInputElement} */ (
+      e.currentTarget
+    ).value;
     saveSettings();
+  }
+
+  /** @param {"auto"|"light"|"dark"} t */
+  function pickTheme(t) {
+    settings.theme = t;
+    saveSettings();
+  }
+
+  function toggleMaster() {
+    settings.masterMode = !settings.masterMode;
+    saveSettings();
+  }
+
+  function toggleAuto() {
+    settings.autoCallEnabled = !settings.autoCallEnabled;
+    saveSettings();
+  }
+
+  function onSpeedInput(/** @type {Event} */ e) {
+    const n = Number(
+      /** @type {HTMLInputElement} */ (e.currentTarget).value,
+    );
+    if (Number.isInteger(n) && n >= 1 && n <= 10) {
+      settings.autoCallSpeed = n;
+      saveSettings();
+    }
   }
 
   function close() {
@@ -87,16 +119,15 @@
     aria-labelledby="settings-title"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
   >
-    <!-- Backdrop: click-to-close, hidden from a11y tree (the "Xong" button is the labelled close). -->
+    <!-- Backdrop: click-to-close, hidden from a11y tree. Window-level
+         Escape handler in $effect covers keyboard close. -->
     <div
       aria-hidden="true"
       onclick={close}
-      onkeydown={(e) => e.key === "Enter" && close()}
-      role="presentation"
       class="absolute inset-0"
     ></div>
     <div
-      class="relative mx-4 max-w-sm w-full rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl animate-pop-in"
+      class="relative mx-4 max-w-sm w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl animate-pop-in"
     >
       <h2
         id="settings-title"
@@ -108,6 +139,100 @@
         Tuỳ chỉnh giao diện bảng lô tô
       </p>
 
+      <!-- Theme -->
+      <fieldset class="mb-5">
+        <legend
+          class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
+        >
+          Giao diện
+        </legend>
+        <div class="grid grid-cols-3 gap-2">
+          {#each THEMES as [v, label] (v)}
+            {@const selected = settings.theme === v}
+            <button
+              type="button"
+              aria-pressed={selected}
+              onclick={() => pickTheme(v)}
+              class="px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all
+                     {selected
+                       ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
+                       : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
+            >
+              {label}
+            </button>
+          {/each}
+        </div>
+      </fieldset>
+
+      <!-- Master mode -->
+      <fieldset class="mb-5">
+        <legend
+          class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
+        >
+          Chế độ quản trò
+        </legend>
+        <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
+          Hiện bảng quản trò bên dưới bảng người chơi
+        </p>
+        <button
+          type="button"
+          aria-pressed={settings.masterMode}
+          onclick={toggleMaster}
+          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all
+                 {settings.masterMode
+                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
+        >
+          {settings.masterMode ? "Đang bật" : "Đang tắt"}
+        </button>
+      </fieldset>
+
+      <!-- Auto-call (only relevant when master mode is on) -->
+      {#if settings.masterMode}
+      <fieldset class="mb-5">
+        <legend
+          class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
+        >
+          Tự động xổ
+        </legend>
+        <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
+          Tự xổ số liên tiếp khi đang ở chế độ quản trò
+        </p>
+        <button
+          type="button"
+          aria-pressed={settings.autoCallEnabled}
+          onclick={toggleAuto}
+          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all mb-3
+                 {settings.autoCallEnabled
+                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
+        >
+          {settings.autoCallEnabled ? "Đang bật" : "Đang tắt"}
+        </button>
+        {#if settings.autoCallEnabled}
+          <label class="block">
+            <span class="text-xs text-slate-600 dark:text-slate-300">
+              Tốc độ: <strong class="tabular-nums"
+                >{settings.autoCallSpeed}</strong
+              > giây/số
+            </span>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              step="1"
+              value={settings.autoCallSpeed}
+              oninput={onSpeedInput}
+              aria-label="Tốc độ tự động xổ"
+              aria-valuetext="{settings.autoCallSpeed} giây mỗi số"
+              class="w-full mt-1 accent-indigo-500"
+            />
+          </label>
+        {/if}
+      </fieldset>
+      {/if}
+
+      <!-- Empty cell color -->
       <fieldset class="mb-5">
         <legend
           class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
@@ -130,14 +255,15 @@
           </code>
         </div>
 
-        <div class="grid grid-cols-8 gap-2">
+        <div class="grid grid-cols-5 gap-2">
           {#each PRESETS as hex (hex)}
-            {@const selected = settings.emptyCellColor.toLowerCase() === hex.toLowerCase()}
+            {@const selected =
+              settings.emptyCellColor.toLowerCase() === hex.toLowerCase()}
             <button
               type="button"
               aria-label="Đặt màu {hex}"
               aria-pressed={selected}
-              onclick={() => pick(hex)}
+              onclick={() => pickColor(hex)}
               style:background-color={hex}
               class="aspect-square rounded-lg border-2 transition-all
                      {selected
