@@ -164,8 +164,6 @@
       aria-label="Bảng lô tô"
       class="rounded-md overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30"
     >
-      <!-- Top frame -->
-      <div class="section-divider" aria-hidden="true"></div>
       <div class="flex">
         <!-- Left frame -->
         <div class="section-divider-vertical" aria-hidden="true"></div>
@@ -209,12 +207,11 @@
               {/each}
             </div>
           {/each}
+          <div class="section-label">Tân Tân tốt nhất</div>
         </div>
         <!-- Right frame -->
         <div class="section-divider-vertical" aria-hidden="true"></div>
       </div>
-      <!-- Bottom frame -->
-      <div class="section-divider" aria-hidden="true"></div>
     </div>
 
     {#if toast}
