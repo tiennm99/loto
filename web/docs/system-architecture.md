@@ -86,9 +86,9 @@ All pages use `"use client"` because:
 - Hydration requires client-only state initialization
 
 Files with `"use client"`:
-- `app/page.tsx`
-- `app/master/page.tsx`
-- `components/player-board.tsx`
+- `app/page.jsx`
+- `app/master/page.jsx`
+- `components/player-board.jsx`
 
 ## Data Flow: Mark a Cell
 

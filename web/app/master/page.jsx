@@ -6,11 +6,22 @@ import PlayerBoard from "@/components/player-board";
 
 const STORAGE_KEY = "loto_master";
 
-/** Build the 9x10 board: columns 0-8 map to number ranges 1-9, 10-19, ..., 80-90 */
-function buildBoard(): number[][] {
-  const board: number[][] = [];
+/**
+ * @typedef {Object} MasterState
+ * @property {number[]} called numbers drawn so far, in order
+ * @property {number[]} remaining numbers left to draw, pre-shuffled
+ */
+
+/**
+ * Build the 9x10 board: columns 0-8 map to number ranges 1-9, 10-19, ..., 80-90.
+ * @returns {number[][]}
+ */
+function buildBoard() {
+  /** @type {number[][]} */
+  const board = [];
   for (let row = 0; row < 10; row++) {
-    const cells: number[] = [];
+    /** @type {number[]} */
+    const cells = [];
     for (let col = 0; col < 9; col++) {
       const num = col === 0 ? row + 1 : col * 10 + row;
       // Column 0: 1-9 (row 9 is empty), Columns 1-8: 10-19, ..., 80-89 (row 9 has 90 for col 8)
@@ -29,12 +40,8 @@ function buildBoard(): number[][] {
   return board;
 }
 
-interface MasterState {
-  called: number[];
-  remaining: number[];
-}
-
-function createFreshState(): MasterState {
+/** @returns {MasterState} */
+function createFreshState() {
   const all = Array.from({ length: 90 }, (_, i) => i + 1);
   // Shuffle
   for (let i = all.length - 1; i > 0; i--) {
@@ -44,11 +51,13 @@ function createFreshState(): MasterState {
   return { called: [], remaining: all };
 }
 
-function saveState(state: MasterState): void {
+/** @param {MasterState} state */
+function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function loadState(): MasterState | null {
+/** @returns {MasterState | null} */
+function loadState() {
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return null;
   try {
@@ -58,14 +67,14 @@ function loadState(): MasterState | null {
   }
 }
 
-const BOARD: ReadonlyArray<ReadonlyArray<number>> = Object.freeze(
-  buildBoard().map((row) => Object.freeze(row))
-);
-const BOARD_FLAT: ReadonlyArray<number> = Object.freeze(BOARD.flatMap((r) => r));
+const BOARD = Object.freeze(buildBoard().map((row) => Object.freeze(row)));
+const BOARD_FLAT = Object.freeze(BOARD.flatMap((r) => r));
 
 export default function MasterPage() {
-  const [state, setState] = useState<MasterState | null>(null);
-  const [lastCalled, setLastCalled] = useState<number | null>(null);
+  /** @type {[MasterState | null, (s: MasterState | null) => void]} */
+  const [state, setState] = useState(/** @type {MasterState | null} */ (null));
+  /** @type {[number | null, (n: number | null) => void]} */
+  const [lastCalled, setLastCalled] = useState(/** @type {number | null} */ (null));
 
   useEffect(() => {
     const saved = loadState();

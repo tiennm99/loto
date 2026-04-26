@@ -11,20 +11,28 @@ import {
   saveGrid,
 } from "@/lib/game-logic";
 
-interface PlayerBoardProps {
-  /** localStorage key prefix; allows multiple independent boards (e.g. user vs master) */
-  storagePrefix?: string;
-}
+/**
+ * @typedef {Object} PlayerBoardProps
+ * @property {string} [storagePrefix] localStorage key prefix; allows multiple
+ *   independent boards (e.g. user vs master)
+ */
 
-export default function PlayerBoard({ storagePrefix = "loto" }: PlayerBoardProps) {
-  const [grid, setGrid] = useState<number[][] | null>(null);
-  const [crossed, setCrossed] = useState<boolean[][]>([]);
+/** @param {PlayerBoardProps} props */
+export default function PlayerBoard({ storagePrefix = "loto" } = {}) {
+  /** @type {[number[][] | null, (g: number[][] | null) => void]} */
+  const [grid, setGrid] = useState(/** @type {number[][] | null} */ (null));
+  /** @type {[boolean[][], React.Dispatch<React.SetStateAction<boolean[][]>>]} */
+  const [crossed, setCrossed] = useState(/** @type {boolean[][]} */ ([]));
   const [showCongrats, setShowCongrats] = useState(false);
-  const [congratsRow, setCongratsRow] = useState<number>(-1);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const celebratedRows = useRef<Set<number>>(new Set());
-  const notifiedWaitingRows = useRef<Set<number>>(new Set());
+  const [congratsRow, setCongratsRow] = useState(-1);
+  /** @type {[string | null, (s: string | null) => void]} */
+  const [toast, setToast] = useState(/** @type {string | null} */ (null));
+  /** @type {React.MutableRefObject<ReturnType<typeof setTimeout> | null>} */
+  const toastTimer = useRef(null);
+  /** @type {React.MutableRefObject<Set<number>>} */
+  const celebratedRows = useRef(new Set());
+  /** @type {React.MutableRefObject<Set<number>>} */
+  const notifiedWaitingRows = useRef(new Set());
 
   const dismissToast = useCallback(() => {
     setToast(null);
@@ -35,7 +43,8 @@ export default function PlayerBoard({ storagePrefix = "loto" }: PlayerBoardProps
   }, []);
 
   const showToast = useCallback(
-    (msg: string) => {
+    /** @param {string} msg */
+    (msg) => {
       dismissToast();
       setToast(msg);
       toastTimer.current = setTimeout(() => setToast(null), 5000);
@@ -115,13 +124,20 @@ export default function PlayerBoard({ storagePrefix = "loto" }: PlayerBoardProps
     dismissToast();
   }, [grid, dismissToast, storagePrefix]);
 
-  const handleCellClick = useCallback((row: number, col: number) => {
-    setCrossed((prev) => {
-      const next = prev.map((r) => [...r]);
-      next[row][col] = !next[row][col];
-      return next;
-    });
-  }, []);
+  const handleCellClick = useCallback(
+    /**
+     * @param {number} row
+     * @param {number} col
+     */
+    (row, col) => {
+      setCrossed((prev) => {
+        const next = prev.map((r) => [...r]);
+        next[row][col] = !next[row][col];
+        return next;
+      });
+    },
+    []
+  );
 
   return (
     <>
