@@ -191,8 +191,15 @@
         </div>
         <div class="flex flex-wrap gap-1.5">
           {#each state.called as num, i (i)}
+            {@const isLow = num <= 49}
             <span
-              class="inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-md bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300"
+              class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9
+                     text-sm sm:text-base font-bold tabular-nums rounded-full
+                     border-[3px] bg-amber-50 dark:bg-amber-100
+                     text-rose-700 dark:text-rose-800
+                     {isLow
+                       ? 'border-pink-500 dark:border-pink-400'
+                       : 'border-emerald-500 dark:border-emerald-400'}"
             >
               {num}
             </span>
