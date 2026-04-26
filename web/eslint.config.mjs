@@ -1,9 +1,24 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
+import js from "@eslint/js";
+import svelte from "eslint-plugin-svelte";
+import globals from "globals";
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  globalIgnores([".next/**", "out/**", "build/**"]),
-]);
-
-export default eslintConfig;
+export default [
+  js.configs.recommended,
+  ...svelte.configs["flat/recommended"],
+  {
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: { ...globals.browser, ...globals.node },
+    },
+  },
+  {
+    ignores: [
+      "build/**",
+      ".svelte-kit/**",
+      "node_modules/**",
+      "plans/**",
+      "docs/**",
+    ],
+  },
+];

@@ -39,7 +39,7 @@ Host and players connect via WebSocket to sync called numbers and state. Require
 - Remote tournaments
 - Master board auto-updates all players in real-time
 
-**Consideration**: Out of scope for static export. Requires major refactor (Next.js API routes + WebSocket server). Deferred indefinitely.
+**Consideration**: Out of scope for static export. Requires major refactor (SvelteKit API routes + WebSocket server). Deferred indefinitely.
 
 ### i18n Beyond Vietnamese
 Internationalization (English, Chinese, etc.). Requires extraction of all Vietnamese strings and i18n library (next-intl). **Status**: Considered (low demand for non-Vietnamese users)
@@ -53,17 +53,17 @@ Full undo/redo stack with history navigation. Adds complexity to state managemen
 - Game logic: `generateGrid()`, `isRowComplete()`, `getWaitingNumber()`
 - localStorage helpers: `saveGrid()`, `loadGrid()`, etc.
 
-**Tech**: Jest + @testing-library/react
+**Tech**: Vitest (Vite's native test runner)
 
 ### Component Tests
-- PlayerBoard with mocked localStorage
+- PlayerBoard with mocked localStorage, $state/$derived verification
 - Master page with different game states
 
 ### E2E Tests
 - Player flow: generate card → click cells → verify bingo popup
 - Host flow: new game → draw numbers → verify board state
 
-**Tech**: Playwright or Cypress
+**Tech**: Playwright
 
 ## Future Enhancements (Speculative)
 
@@ -88,11 +88,12 @@ Support 8×8 or 10×10 grids. Major refactor (NUM_ROWS, NUM_COLS constants, weig
 
 ## Decision Rationale
 
-All decisions follow **YAGNI** (You Aren't Gonna Need It):
-- No multiplayer sync → adds server dependency, breaks static export model
-- No i18n → Vietnamese-only community, localizing adds complexity without demand
-- No testing → small codebase, manual testing covers critical paths; add tests when code grows or bugs surface
-- No undo/redo → simple game, mistakes are part of play experience
+All decisions follow **YAGNI** (You Aren't Gonna Need It), **KISS** (Keep It Simple), **DRY** (Don't Repeat Yourself):
+- No multiplayer sync → adds server dependency, breaks static export (Cloudflare Pages)
+- No i18n → Vietnamese-only community, localizing adds complexity
+- No testing → small codebase (<300 LOC), manual testing covers critical paths; add when code grows
+- No undo/redo → simple game, mistakes are play experience
+- Svelte 5 runes → cleaner reactivity than hooks, smaller mental model
 
 Future work gates on **real user demand**, not speculation.
 
