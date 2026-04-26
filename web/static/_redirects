@@ -1,0 +1,4 @@
+# Cloudflare Pages: any unknown path → 301 redirect to homepage.
+# Static asset files are served first, so this only fires on misses.
+# Keeps old /master bookmarks (and any future stray URL) on the app.
+/* / 301
