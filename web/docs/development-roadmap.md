@@ -1,35 +1,8 @@
 # Development Roadmap
 
-This document tracks **future work only**. Completed features live in git commit history, not here.
-
-## Currently Implemented Features
-
-The app is fully functional for core gameplay (Lô tô hội chợ Tân Tân variant):
-- 9×9 player card with **exactly 5 per row and 5 per column**, columns
-  ascending top-to-bottom
-- Cell marking (toggle crossed state); player can keep playing after Kinh
-- Bingo detection and "Kinh!" celebration popup
-- "Chờ X" waiting notifications
-- Host number drawing from 1–90 deck
-- 11×9 last-digit-aligned master board with draw-order overlay for fast
-  Kinh verification
-- Player card rendered as 3 stacked Tân Tân mini-cards
-  (Minh Tân / Loại đặc biệt / Tấn tài tấn lộc) with cross-hatch dividers
-- Settings modal: 4 fieldsets (theme auto/light/dark, master mode toggle,
-  auto-call speed 1–10s, 10 color presets), persisted to `loto_settings`
-- Theme switcher (auto detects OS pref, explicit light/dark modes)
-- Master mode toggle (shows MasterPanel on `/`)
-- Auto-call timer with speed slider
-- Mobile-responsive cells (aspect-ratio + text scaling)
-- MasterPanel extracted component (reused on `/` and `/master`)
-- PageFooter with tagline + creator link
-- Host's own player card (isolated instance)
-- localStorage persistence
-- Dark mode
-- Mobile responsive
-- Offline capable
-- Unit tests (Vitest: 26 game-logic tests + 27 settings-store tests, 53 total passing)
-  covering constraint validation, persistence, theme/master-mode/auto-call logic, and error handling
+This document tracks **future work only**. Completed features live in
+git commit history and `plans/`, not here. For "what's in the app right
+now", see `docs/project-overview-pdr.md` and `docs/codebase-summary.md`.
 
 ## Idea Phase
 
@@ -63,7 +36,7 @@ Full undo/redo stack with history navigation. Adds complexity to state managemen
 
 ### Component Tests (Planned)
 - PlayerBoard with mocked localStorage, $state/$derived verification
-- Master page with different game states
+- MasterPanel with different game states
 
 ### E2E Tests
 - Player flow: generate card → click cells → verify bingo popup

@@ -7,20 +7,15 @@ Entry (+layout.svelte)
   ├─ onMount: loadSettings() — restore all 5 settings keys from loto_settings,
   │   apply CSS vars, toggle <html class="dark"> on theme/OS pref, setup auto-call effect
   │
-  ├─ / (Player Page)
-  │   ├─ Load loto_grid, loto_crossed from localStorage
-  │   ├─ Display 9×9 PlayerBoard (empty cells use --empty-cell-bg from settings)
-  │   ├─ Generate new grid on button click
-  │   ├─ Mark/unmark cells on click
-  │   ├─ Show bingo popup + "Chờ X" toasts
-  │   ├─ [if settings.masterMode === true]
-  │   │   └─ Mount MasterPanel (host controls + draw history)
-  │   └─ PageFooter (tagline + miti99 link)
-  │
-  └─ /master (Host Page)
-      ├─ MasterPanel (state, controls, draw history; same as above)
-      ├─ Back link to /
-      └─ PageFooter
+  └─ / (single page)
+      ├─ Load loto_grid, loto_crossed from localStorage
+      ├─ Display 9×9 PlayerBoard (empty cells use --empty-cell-bg from settings)
+      ├─ Generate new grid on button click
+      ├─ Mark/unmark cells on click
+      ├─ Show bingo popup + "Chờ X" toasts
+      ├─ [if settings.masterMode === true]
+      │   └─ Mount MasterPanel (host controls + draw history)
+      └─ PageFooter (tagline + miti99 link)
 ```
 
 ## State Model
@@ -67,32 +62,38 @@ All keys are JSON stringified. Corruption is silent (returns null).
 
 ## basePath & Asset Resolution
 
-### Production Mode
+### Production (Cloudflare Pages, default)
 ```
-NODE_ENV=production
+npm run build
+basePath="" (root)
+Output: build/index.html
+Deploy: loto.miti99.com (root domain)
+```
+
+### Production (GitHub Pages, manual)
+```
+npm run build:gh
 basePath="/loto"
-Output: /loto/index.html, /loto/_next/...
-GitHub Pages serves: https://user.github.io/loto
+Output: build/index.html with /loto prefix
+Deploy: https://tiennm99.github.io/loto
 ```
 
-### Development Mode (Local)
+### Development (Local)
 ```
-NEXT_DEV_PROFILE not set
+npm run dev
 basePath="" (empty)
-Dev server: http://localhost:3000
+Dev server: http://localhost:5173
 ```
 
-### Code-Server Mode
+### Development (Code-Server)
 ```
-NEXT_DEV_PROFILE=codeserver
-CODESERVER_HOST=<proxy-host>
-CODESERVER_PORT=3000 (or env)
+npm run dev:codeserver
+.env.local: CODESERVER_HOST + CODESERVER_PORT
 basePath="/absproxy/{PORT}"
-HMR Origin: CODESERVER_HOST
-Access: https://<proxy>/absproxy/3000/
+Access: https://<proxy>/absproxy/{PORT}/
 ```
 
-**Note**: `/absproxy/{port}` preserves the basePath through the proxy. `/proxy/{port}` strips it before forwarding, breaking HMR.
+**Note**: Use `/absproxy/{port}` — `/proxy/{port}` strips the path prefix and breaks the SvelteKit base path.
 
 ## Client-Only Architecture
 
@@ -102,9 +103,9 @@ All pages are client-only (no SSR) because:
 - State initialization (grid, crossed) must run in browser
 
 Files that are client-only:
-- `src/routes/+page.svelte` (player page)
-- `src/routes/master/+page.svelte` (host page)
-- `src/lib/PlayerBoard.svelte` (shared component)
+- `src/routes/+page.svelte` (single page)
+- `src/lib/PlayerBoard.svelte` (player card component)
+- `src/lib/MasterPanel.svelte` (host panel, mounted when `settings.masterMode`)
 
 ## Data Flow: Mark a Cell
 

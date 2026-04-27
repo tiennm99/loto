@@ -127,8 +127,8 @@ function randomANumberInRow(weights) {
 
 ## Internal Navigation
 
-- Use `import { base } from '$app/paths'` for internal links to preserve basePath across deployments.
-- Example: `<a href="{base}/master">Host page</a>` works on root (`""`) and subpath (`/loto`) equally.
+- Use `import { base } from '$app/paths'` for internal links/asset URLs to preserve basePath across deployments.
+- Example: `<img src="{base}/icon.svg">` resolves on both root (`""`) and subpath (`/loto`) builds.
 
 ## Import Organization
 

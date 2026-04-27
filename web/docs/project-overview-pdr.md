@@ -71,11 +71,11 @@ That format is intentionally out of scope.
 
 ## Architecture Overview
 
-Two public pages:
-1. **`/`** — Player page. Generate a card, click cells to mark them, see bingo popup and waiting toasts.
-2. **`/master`** — Host page. Control number drawing, view 9×10 master board (tracking called vs uncalled), and host's own player card.
+Single page (`/`):
+- Always renders the player card (generate, mark, bingo popup, "Chờ N" toasts).
+- When `settings.masterMode === true`, mounts MasterPanel below the player card — host controls, draw history, and the host's own player card.
 
-State is entirely client-side. Each page/card instance uses a unique localStorage prefix (e.g., `"loto"` for player, `"loto_master"` for host's state, `"loto_master_card"` for host's player card).
+State is entirely client-side. Each card / panel instance uses a unique localStorage prefix (`"loto"` for the player card, `"loto_master"` for host draw state, `"loto_master_card"` for the host's own card).
 
 ## Deployment
 
@@ -104,8 +104,8 @@ State is entirely client-side. Each page/card instance uses a unique localStorag
 - [x] Master mode toggle to show MasterPanel on player page.
 - [x] Auto-call timer (1–10s speed) with start/stop button.
 - [x] Mobile-responsive layout (aspect-square sm:aspect-[3/5] cells, text scaling).
-- [x] MasterPanel extracted; mounted conditionally on `/` and directly on `/master`.
-- [x] PageFooter with tagline + link on both pages.
+- [x] MasterPanel extracted; mounted conditionally on `/` when master mode is on.
+- [x] PageFooter with tagline + link.
 
 ## Visual Language
 
