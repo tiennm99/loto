@@ -11,8 +11,9 @@
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:4 on mobile; 3:5 on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, purple empty cells (dark mode dims via `filter:brightness(0.85)`). Handles crossed state, animated cross-out (200 ms `cross-draw` keyframe), `active:scale-90` press, 10 ms haptic on tap. Two header actions: "Tạo bảng mới" / "Xoá đánh dấu". First-run state shows a faded preview card. Bingo popup tiers: row 1 = standard celebration; row 3+ = falling-emoji confetti rain via CSS `confetti-fall`. Toast "Chờ N" + audio. Accepts `storagePrefix` prop for multi-card isolation. |
-| `src/lib/SettingsButton.svelte` | Gear icon + modal (responsive `max-w-sm sm:max-w-md`). 5 fieldsets: Giao diện (theme pills), Chế độ quản trò (switch row), Tự động xổ (switch + speed slider), Âm thanh (two switches + voice picker), Màu ô trống (10 Excel color swatches + custom picker). Boolean toggles use a shared `switchRow` snippet (`role="switch"` + keyboard support). Reset-to-default button. Mounted on `/`. |
+| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:4 on mobile; 3:5 on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack w/ self-hosted Roboto Condensed), white number cells, purple empty cells (dark mode dims via `filter:brightness(0.85)`). Handles crossed state, animated cross-out (200 ms `cross-draw` keyframe), `active:scale-90` press, 10 ms haptic on tap. Two header actions: "Tạo bảng mới" / "Xoá đánh dấu". First-run state shows a faded preview card. Bingo popup tiers: row 1 = standard celebration; row 3+ = falling-emoji confetti rain via CSS `confetti-fall`. Toast "Chờ N" + audio. Accepts `storagePrefix` prop for multi-card isolation. |
+| `src/lib/SettingsButton.svelte` | Gear icon + modal (responsive `max-w-sm sm:max-w-md`). 6 fieldsets: Giao diện (theme pills), Chế độ (3-way mode picker w/ SVG glyphs: player/master/both), Chế độ quản trò (switch row), Tự động xổ (switch + speed slider), Âm thanh (two switches + voice picker), Màu ô trống (10 Excel swatches + custom input in bordered card w/ "Tuỳ chỉnh"/"Mẫu" sub-headers). Boolean toggles use a shared `switchRow` snippet (`role="switch"` + keyboard support). Reset-to-default button. Mounted on `/`. |
+| `src/lib/MasterEmptyState.svelte` | Empty board placeholder for first-run master (mirrors PlayerBoard's preview UX). Displays faded 11×9 grid with "Ấn để bắt đầu ván mới" hint. |
 | `src/lib/MasterPanel.svelte` | Host controls. New game / draw, large "Số vừa xổ" hero token (160 px mobile, 224 px sm+) with `aria-live="assertive"` + auto `scrollIntoView` on each new draw, "Thứ tự đã xổ" history list, 11×9 last-digit-aligned tracking grid (with circular tokens + draw-order overlay). Publishes draws to `call-bus` for player auto-tick. "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.mode !== "player"`; the wrapping section uses `transition:slide` for smooth toggle-in. |
 | `src/lib/PageFooter.svelte` | Footer with tagline ("Made by miti99 with ❤️ SVG icon") + link. Mounted on `/`. |
 
@@ -38,20 +39,23 @@
 | `src/lib/settings-store.test.js` | 31 unit tests: defaults (incl. voice keys), loadSettings (restore 8 keys, apply CSS vars, toggle dark class, handle empty/corrupt), saveSettings, resetSettings, theme toggle (auto → OS pref detection), master mode, auto-call + speed, color validation, voice round-trip + invalid-id fallback. |
 | `src/lib/vietnamese-number.test.js` | 40 unit tests: ones (0–9), teens (10–19 incl. mười lăm), 20–90 incl. mốt and lăm exceptions, out-of-range fall-through. |
 
-### Configuration
+### Configuration & PWA
 | File | Purpose |
 |------|---------|
-| `svelte.config.js` | adapter-static (HTML export), dual basePath via BUILD_PROFILE env. |
-| `vite.config.js` | Tailwind + SvelteKit plugins. codeserver HMR config (port, allowedHosts, hmr). |
-| `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite. Scripts: dev, dev:codeserver, build, build:gh, lint, test, test:watch. |
-| `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). Declares Svelte 5 rune globals (lines 16–22). |
+| `svelte.config.js` | adapter-static (HTML export), dual basePath via BUILD_PROFILE env, SvelteKit PWA plugin config. |
+| `vite.config.js` | Tailwind + SvelteKit + PWA plugins. codeserver HMR config (port, allowedHosts, hmr). |
+| `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite, @vite-pwa/sveltekit. Scripts: dev, dev:codeserver, build, build:gh, lint, test, test:watch. |
+| `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). Declares Svelte 5 rune globals. |
 | `jsconfig.json` | Path alias `$lib`, no checkJs. |
 | `.gitignore` | Excludes node_modules, build, .env.local, etc. |
 | `.env.example` | codeserver profile vars (CODESERVER_HOST, CODESERVER_PORT). |
-| `static/_redirects` | Cloudflare Pages: `/* / 301` — every unknown path 301-redirects to homepage. Static assets are served first so this only fires on misses. |
-| `static/audio/{voiceId}/*.mp3` | Pre-generated Vietnamese voice clips (1–90 + cho + kinh per voice). Generated once by `scripts/generate-audio.py` (edge-tts). Runtime never calls TTS. |
-| `static/audio/manifest.json` | Voice list `{ id, edgeName, label, gender }[]`. Written by the generator, imported by `audio-manifest.js`. |
-| `scripts/generate-audio.py` | One-shot Python script: discovers every `vi-*` edge-tts voice, generates 92 clips per voice, writes manifest. Run after voice/wording changes. |
+| `static/_redirects` | Cloudflare Pages: `/* / 301` — every unknown path 301-redirects to homepage. |
+| `static/manifest.webmanifest` | PWA manifest: name, short_name, icons (192/512px), theme colors, display: standalone, scope, start_url. |
+| `static/icons/{192,512}.png` | PWA icons (auto-generated by @vite-pwa/sveltekit from source). |
+| `static/audio/{voiceId}/*.mp3` | Pre-generated Vietnamese voice clips (1–90 + cho + kinh per voice). Generated by `scripts/generate-audio.py`. SW caches at runtime (CacheFirst). |
+| `static/audio/manifest.json` | Voice list `{ id, edgeName, label, gender }[]`. |
+| `scripts/generate-audio.py` | One-shot Python script: generates 92 clips per voice, writes manifest. |
+| Service Worker (auto) | @vite-pwa/sveltekit generates `/pwa-manifest.json`, `/sw.js`. App shell precache ~353 KB. Auto-update mode with reload toast. |
 
 ## Key Data Structures
 
@@ -94,4 +98,4 @@ RootLayout
 | `saveGrid()` / `loadGrid()` | game-logic.js | localStorage with prefix-based keys. |
 
 Last reviewed: 2026-04-27
-Last synced: 2026-04-27 (6-phase refactor)
+Last synced: 2026-04-27 (UI polish v2 + PWA: font, mode picker, color picker, empty state, PWA stack)

@@ -80,6 +80,7 @@
 
 <script>
   import { broadcastDraw, resetBus } from "$lib/call-bus.svelte.js";
+  import MasterEmptyState from "$lib/MasterEmptyState.svelte";
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playNumber } from "$lib/voice.js";
 
@@ -344,7 +345,5 @@
     </div>
   </div>
 {:else}
-  <div class="text-center text-slate-500 dark:text-slate-400 py-10 text-base">
-    Nhấn "Ván mới" để bắt đầu
-  </div>
+  <MasterEmptyState />
 {/if}
