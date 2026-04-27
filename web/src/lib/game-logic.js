@@ -28,7 +28,11 @@ const NUM_PER_ROW = 5;
  */
 function randomNumbersInCol(num, col) {
   const arr = [...NUM_IN_COL[col]];
-  arr.sort(() => 0.5 - Math.random());
+  // Fisher-Yates — `arr.sort(() => 0.5 - Math.random())` is biased.
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
   // Pick `num` at random, then return them ascending so they sit
   // top-to-bottom in the column (lô tô hội chợ convention).
   return arr.slice(0, num).sort((a, b) => a - b);
@@ -159,16 +163,25 @@ export function generateGrid() {
   return cell;
 }
 
+/** Hard cap on stored JSON length to keep a poisoned origin (browser
+ *  extension, shared device) from stalling the UI on mount. A full 9×9
+ *  number matrix serializes to ~250 bytes; 32 KB leaves >100× headroom. */
+const MAX_STORAGE_BYTES = 32_768;
+
 /**
  * Parse JSON and validate its shape with a runtime guard. Returns null on
- * either parse failure or validation failure.
+ * size-cap, parse, or validation failure. The reviver strips
+ * `__proto__` keys as defense-in-depth against future spread/assign use.
  * @param {string | null} raw
  * @param {(v: any) => boolean} validate
  */
 function safeParse(raw, validate) {
   if (!raw) return null;
+  if (raw.length > MAX_STORAGE_BYTES) return null;
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw, (k, v) =>
+      k === "__proto__" || k === "constructor" ? undefined : v,
+    );
     return validate(parsed) ? parsed : null;
   } catch {
     return null;
@@ -249,6 +262,29 @@ export function loadCrossedState(prefix = "loto") {
   } catch {
     return null;
   }
+}
+
+/**
+ * Locate the first non-crossed cell holding `num` on the grid.
+ * Returns `null` when the number is absent or already crossed everywhere.
+ * Used by the master→player auto-tick path.
+ *
+ * @param {number[][]} grid
+ * @param {boolean[][]} crossed
+ * @param {number} num
+ * @returns {{ row: number, col: number } | null}
+ */
+export function findUncrossedCell(grid, crossed, num) {
+  if (num <= 0) return null;
+  for (let r = 0; r < grid.length; r++) {
+    const row = grid[r];
+    for (let c = 0; c < row.length; c++) {
+      if (row[c] === num && !crossed[r]?.[c]) {
+        return { row: r, col: c };
+      }
+    }
+  }
+  return null;
 }
 
 /**

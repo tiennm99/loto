@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  findUncrossedCell,
   generateGrid,
   getWaitingNumber,
   isRowComplete,
@@ -254,5 +255,42 @@ describe("getWaitingNumber", () => {
     const grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0]];
     const crossed = [[false, false, false, false, false, false, false, false, false]];
     expect(getWaitingNumber(grid, crossed, 0)).toBeNull();
+  });
+});
+
+describe("findUncrossedCell", () => {
+  const grid = [
+    [0, 11, 0, 33, 0, 55, 0, 77, 88],
+    [1, 0, 22, 0, 44, 0, 66, 0, 89],
+    [0, 12, 23, 0, 0, 56, 0, 78, 0],
+  ];
+
+  it("returns coords of the matching cell when uncrossed", () => {
+    const crossed = grid.map((row) => row.map(() => false));
+    expect(findUncrossedCell(grid, crossed, 33)).toEqual({ row: 0, col: 3 });
+    expect(findUncrossedCell(grid, crossed, 1)).toEqual({ row: 1, col: 0 });
+  });
+
+  it("returns null when the number isn't on the card", () => {
+    const crossed = grid.map((row) => row.map(() => false));
+    expect(findUncrossedCell(grid, crossed, 99)).toBeNull();
+    expect(findUncrossedCell(grid, crossed, 5)).toBeNull();
+  });
+
+  it("returns null when the cell is already crossed", () => {
+    const crossed = grid.map((row) => row.map(() => false));
+    crossed[0][3] = true; // 33 already marked
+    expect(findUncrossedCell(grid, crossed, 33)).toBeNull();
+  });
+
+  it("ignores empty (0) cells even when num=0", () => {
+    const crossed = grid.map((row) => row.map(() => false));
+    expect(findUncrossedCell(grid, crossed, 0)).toBeNull();
+  });
+
+  it("scans rows top-down, columns left-right", () => {
+    // Both row 0 col 1 and row 2 col 1 hold 11/12 — first match wins.
+    expect(findUncrossedCell(grid, grid.map((row) => row.map(() => false)), 11))
+      .toEqual({ row: 0, col: 1 });
   });
 });

@@ -21,7 +21,9 @@
   /* Section accent — used by both the label text and the cross-hatch in
      dividers/label flanks, so they always read as one unified band. */
   --section-accent: #1565c0;
-  --section-band-bg: rgb(227 242 253 / 0.7);
+  /* Pale blue band with a hint of warmth so it doesn't fight the
+     amber top-glow at the topmost section label. */
+  --section-band-bg: rgb(232 240 250 / 0.78);
 }
 
 .dark {
@@ -193,4 +195,29 @@ body {
   );
   pointer-events: none;
   animation: cross-draw 200ms ease-out;
+}
+/* Winning-row slash uses emerald instead of red so a completed row
+   reads as "win" rather than "marked off". */
+.cell-crossed-win::after {
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1.5px),
+    #10b981,
+    transparent calc(50% + 1.5px)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-pop-in,
+  .animate-bounce-slow,
+  .animate-spin-slow,
+  .animate-spin-slow-reverse,
+  .animate-toast,
+  .confetti,
+  .cell-crossed::after {
+    animation: none !important;
+  }
+  /* Keep the crossed slash visible (no draw animation, but still drawn). */
+  .cell-crossed::after { clip-path: none; }
 }

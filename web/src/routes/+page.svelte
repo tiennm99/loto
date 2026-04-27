@@ -40,13 +40,11 @@
         aria-label="Bảng quản trò"
         transition:slide={{ duration: 250 }}
       >
-        {#if settings.mode === "both"}
-          <h2
-            class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-orange-500 dark:text-orange-400"
-          >
-            Quản trò
-          </h2>
-        {/if}
+        <h2
+          class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-orange-500 dark:text-orange-400"
+        >
+          Quản trò
+        </h2>
         <MasterPanel />
       </section>
     {/if}
