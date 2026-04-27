@@ -8,19 +8,56 @@
 :root {
   --background: #f8fafc;
   --foreground: #1e293b;
+  /* Soft warm-amber glow at the top, fading out — echoes the festive
+     rose/amber gradient in the header and gives the page some warmth. */
+  --bg-glow: radial-gradient(
+    ellipse 70% 40% at 50% -10%,
+    rgba(251, 191, 36, 0.18) 0%,
+    transparent 75%
+  );
   /* Default empty-cell color: Excel "Standard Color: Purple". Overridden
      at runtime by the settings store via documentElement.style. */
   --empty-cell-bg: #7030A0;
+  /* Section accent — used by both the label text and the cross-hatch in
+     dividers/label flanks, so they always read as one unified band. */
+  --section-accent: #1565c0;
+  --section-band-bg: rgb(227 242 253 / 0.7);
 }
 
-:where(.dark) {
-  --background: #0f172a;
+.dark {
+  /* Near-black navy — clearly darker than slate-900 (#0f172a) so the
+     theme switch reads instantly. */
+  --background: #050813;
   --foreground: #e2e8f0;
+  /* Indigo top-glow + faint rose lower-glow — adds depth and matches the
+     header gradient against the deep-navy base. */
+  --bg-glow:
+    radial-gradient(
+      ellipse 70% 40% at 50% -10%,
+      rgba(99, 102, 241, 0.22) 0%,
+      transparent 75%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 50% 110%,
+      rgba(244, 63, 94, 0.10) 0%,
+      transparent 70%
+    );
+  --section-accent: #64b5f6;
+  --section-band-bg: rgb(13 71 161 / 0.4);
 }
 
-body {
-  background: var(--background);
+/* Apply to html so the base color always paints the full viewport, even
+   when body content is shorter than the screen. Body adds the glow on
+   top — `transparent` falls back to html's color. */
+html {
+  background-color: var(--background);
   color: var(--foreground);
+}
+body {
+  background-color: transparent;
+  background-image: var(--bg-glow);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 /* Equal-width grid cells */
@@ -43,37 +80,33 @@ body {
   background-image: repeating-linear-gradient(
     90deg,
     transparent 0 6px,
-    #1e88e5 6px 8px,
+    var(--section-accent) 6px 8px,
     transparent 8px 14px
   );
-  background-color: rgb(227 242 253 / 0.7);
+  background-color: var(--section-band-bg);
 }
 .section-divider-vertical {
   width: 8px;
   background-image: repeating-linear-gradient(
     0deg,
     transparent 0 6px,
-    #1e88e5 6px 8px,
+    var(--section-accent) 6px 8px,
     transparent 8px 14px
   );
-  background-color: rgb(227 242 253 / 0.7);
-}
-:where(.dark) .section-divider,
-:where(.dark) .section-divider-vertical {
-  background-color: rgb(13 71 161 / 0.4);
+  background-color: var(--section-band-bg);
 }
 
 .section-label {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.75rem;
-  letter-spacing: 0.18em;
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 700;
-  padding: 6px 12px;
-  color: #1565c0;
-  background-color: rgb(227 242 253 / 0.6);
+  padding: 7px 12px;
+  color: var(--section-accent);
+  background-color: var(--section-band-bg);
   font-style: italic;
   white-space: nowrap;
 }
@@ -87,13 +120,9 @@ body {
   background-image: repeating-linear-gradient(
     90deg,
     transparent 0 6px,
-    #1e88e5 6px 8px,
+    var(--section-accent) 6px 8px,
     transparent 8px 14px
   );
-}
-:where(.dark) .section-label {
-  color: #64b5f6;
-  background-color: rgb(13 71 161 / 0.4);
 }
 
 /* Tân Tân BAMBOORAFT-style number — tall, condensed, heavy black. Stack

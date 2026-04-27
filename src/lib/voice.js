@@ -107,9 +107,10 @@ export function playWaiting(n) {
   cancelPlayback();
   const token = Symbol("playWaiting");
   activeToken = token;
+  const speakNumber = settings.voiceWaitingNumber;
   (async () => {
     await playClip(clipUrl("cho"), token);
-    await playClip(clipUrl(String(n)), token);
+    if (speakNumber) await playClip(clipUrl(String(n)), token);
   })();
 }
 
