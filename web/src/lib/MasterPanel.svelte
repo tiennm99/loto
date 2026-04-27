@@ -64,6 +64,7 @@
 
 <script>
   import { settings } from "$lib/settings-store.svelte.js";
+  import { cancelPlayback, playNumber } from "$lib/voice.js";
 
   let state = $state(
     /** @type {{called: number[], remaining: number[]} | null} */ (null),
@@ -109,8 +110,13 @@
     return () => clearInterval(id);
   });
 
+  // Stop any in-flight clip when the component unmounts (e.g. master mode
+  // toggled off mid-clip) so audio doesn't outlive the panel.
+  $effect(() => () => cancelPlayback());
+
   function handleNewGame() {
     if (state && !confirm("Bạn có muốn tạo ván mới không?")) return;
+    cancelPlayback();
     autoRunning = false;
     state = createFreshState();
     lastCalled = null;
@@ -124,6 +130,7 @@
       remaining: state.remaining.slice(1),
     };
     lastCalled = next;
+    if (settings.voiceEnabledMaster) playNumber(next);
   }
 
   function toggleAuto() {

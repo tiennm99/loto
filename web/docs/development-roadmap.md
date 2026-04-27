@@ -6,9 +6,6 @@ now", see `docs/project-overview-pdr.md` and `docs/codebase-summary.md`.
 
 ## Idea Phase
 
-### Sound Effects on Bingo
-Play celebratory chime or "Kinh!" voice snippet when row completes. Could use Web Audio API or `<audio>` tag. **Status**: Idea (no demand yet)
-
 ### Undo Last Cell
 Allow player to undo the most recent cross/uncross action. Requires change history or state snapshot. **Status**: Idea (low priority)
 

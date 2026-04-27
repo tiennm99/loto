@@ -1,4 +1,5 @@
 <script>
+  import { VOICES } from "$lib/audio-manifest.js";
   import {
     resetSettings,
     saveSettings,
@@ -64,6 +65,22 @@
       settings.autoCallSpeed = n;
       saveSettings();
     }
+  }
+
+  function toggleVoiceMaster() {
+    settings.voiceEnabledMaster = !settings.voiceEnabledMaster;
+    saveSettings();
+  }
+
+  function toggleVoicePlayer() {
+    settings.voiceEnabledPlayer = !settings.voiceEnabledPlayer;
+    saveSettings();
+  }
+
+  /** @param {string} id */
+  function pickVoice(id) {
+    settings.voice = id;
+    saveSettings();
   }
 
   function close() {
@@ -231,6 +248,64 @@
         {/if}
       </fieldset>
       {/if}
+
+      <!-- Voice / sound -->
+      <fieldset class="mb-5">
+        <legend
+          class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
+        >
+          Âm thanh
+        </legend>
+        <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
+          Đọc số bằng tiếng Việt
+        </p>
+
+        <button
+          type="button"
+          aria-pressed={settings.voiceEnabledMaster}
+          onclick={toggleVoiceMaster}
+          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all mb-2
+                 {settings.voiceEnabledMaster
+                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
+        >
+          Quản trò: {settings.voiceEnabledMaster ? "Bật" : "Tắt"}
+        </button>
+
+        <button
+          type="button"
+          aria-pressed={settings.voiceEnabledPlayer}
+          onclick={toggleVoicePlayer}
+          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all
+                 {settings.voiceEnabledPlayer
+                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
+        >
+          Người chơi (Chờ / Kinh): {settings.voiceEnabledPlayer ? "Bật" : "Tắt"}
+        </button>
+
+        {#if VOICES.length > 1}
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 mb-1">
+            Giọng đọc
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            {#each VOICES as v (v.id)}
+              {@const selected = settings.voice === v.id}
+              <button
+                type="button"
+                aria-pressed={selected}
+                onclick={() => pickVoice(v.id)}
+                class="px-3 py-2 rounded-lg border-2 text-sm transition-all
+                       {selected
+                         ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
+                         : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
+              >
+                {v.label}
+              </button>
+            {/each}
+          </div>
+        {/if}
+      </fieldset>
 
       <!-- Empty cell color -->
       <fieldset class="mb-5">

@@ -35,10 +35,12 @@ That format is intentionally out of scope.
   a master board with circular tokens (pink ring for 1–49, green for 50–90,
   cream fill on called, dim on uncalled, red ring + scale on the most
   recent draw), and may also play their own card.
-- **Settings**: gear icon in headers opens a modal with 4 fieldsets:
+- **Settings**: gear icon in headers opens a modal with 5 fieldsets:
   - Giao diện: theme switcher (auto / light / dark; auto mirrors OS pref)
   - Chế độ quản trò: toggle to show MasterPanel on `/`
   - Tự động xổ: enable auto-call; speed slider (1–10 seconds)
+  - Âm thanh: voice toggles for master + player + Vietnamese voice picker
+    (every `vi-*` edge-tts voice; default Hoài Mỹ)
   - Màu ô trống: color picker + 10 Excel preset swatches
   Persisted to `loto_settings`.
 
@@ -70,6 +72,7 @@ That format is intentionally out of scope.
 - **Runtime**: Svelte 5 runes ($state, $derived, $effect, $props)
 - **Styling**: Tailwind CSS 4 (utility-first, animations)
 - **Persistence**: localStorage (no backend)
+- **Audio**: pre-generated MP3 clips bundled under `static/audio/{voiceId}/`. Built once by `scripts/generate-audio.py` using free `edge-tts` (Microsoft Neural). Runtime plays via plain HTML5 Audio — no TTS API at runtime.
 - **Deploy**: Cloudflare Pages (root domain), GitHub Pages fallback (`/loto`)
 - **Dev Profile**: code-server compatible via `/absproxy/{port}` basePath + HMR proxy config
 
@@ -94,6 +97,9 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 - [x] Player can click cells to toggle crossed state.
 - [x] Player can clear all marks on the current card without regenerating it (confirm prompt when marks exist).
 - [x] No row has 3 consecutive filled columns (soft constraint, rejection-sampled).
+- [x] Master speaks the called number aloud in Vietnamese (bundled MP3, no runtime TTS API).
+- [x] Player hears "Chờ N" when a row is one away and "Kinh" on bingo.
+- [x] Voice picker in settings — switch among every Vietnamese edge-tts voice.
 - [x] Bingo popup triggers when row is complete, shows row number and "Kinh!" message.
 - [x] Player may keep marking after a Kinh — no game-end lock.
 - [x] Toast notifications show "Chờ X" before bingo (one number remaining).

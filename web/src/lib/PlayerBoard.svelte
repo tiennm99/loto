@@ -8,6 +8,8 @@
     saveCrossedState,
     saveGrid,
   } from "$lib/game-logic.js";
+  import { settings } from "$lib/settings-store.svelte.js";
+  import { cancelPlayback, playBingo, playWaiting } from "$lib/voice.js";
 
   /**
    * @typedef {Object} Props
@@ -90,6 +92,7 @@
         notifiedWaitingRows.add(i);
         congratsRow = i + 1;
         showCongrats = true;
+        if (settings.voiceEnabledPlayer) playBingo();
         break;
       }
     }
@@ -101,14 +104,19 @@
       if (waitNum !== null && !notifiedWaitingRows.has(i)) {
         notifiedWaitingRows.add(i);
         showToast(`Chờ ${waitNum}`);
+        if (settings.voiceEnabledPlayer) playWaiting(waitNum);
       } else if (waitNum === null && notifiedWaitingRows.has(i)) {
         notifiedWaitingRows.delete(i);
       }
     }
   });
 
+  // Stop any in-flight clip on unmount so audio doesn't outlive the board.
+  $effect(() => () => cancelPlayback());
+
   function handleGenerate() {
     if (grid && !confirm("Bạn có muốn tạo lại bảng không?")) return;
+    cancelPlayback();
     const newGrid = generateGrid();
     const newCrossed = newGrid.map((row) => row.map(() => false));
     grid = newGrid;
@@ -124,6 +132,7 @@
     if (!grid) return;
     const hasMarks = crossed.some((row) => row.some(Boolean));
     if (hasMarks && !confirm("Bạn có muốn xoá tất cả đánh dấu không?")) return;
+    cancelPlayback();
     crossed = grid.map((row) => row.map(() => false));
     celebratedRows.clear();
     notifiedWaitingRows.clear();

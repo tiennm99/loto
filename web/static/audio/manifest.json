@@ -1,0 +1,16 @@
+{
+  "voices": [
+    {
+      "id": "hoai-my",
+      "edgeName": "vi-VN-HoaiMyNeural",
+      "label": "Hoai My (nữ)",
+      "gender": "female"
+    },
+    {
+      "id": "nam-minh",
+      "edgeName": "vi-VN-NamMinhNeural",
+      "label": "Nam Minh (nam)",
+      "gender": "male"
+    }
+  ]
+}

@@ -48,6 +48,9 @@ beforeEach(() => {
     "masterMode",
     "autoCallEnabled",
     "autoCallSpeed",
+    "voiceEnabledMaster",
+    "voiceEnabledPlayer",
+    "voice",
   ])) {
     /** @type {any} */ (settings)[k] = /** @type {any} */ (DEFAULT_SETTINGS)[k];
   }
@@ -73,6 +76,56 @@ describe("settings-store — defaults", () => {
     expect(DEFAULT_SETTINGS.masterMode).toBe(false);
     expect(DEFAULT_SETTINGS.autoCallEnabled).toBe(false);
     expect(DEFAULT_SETTINGS.autoCallSpeed).toBe(5);
+  });
+
+  it("voice toggles default ON; voice id picks first manifest entry", () => {
+    expect(DEFAULT_SETTINGS.voiceEnabledMaster).toBe(true);
+    expect(DEFAULT_SETTINGS.voiceEnabledPlayer).toBe(true);
+    expect(typeof DEFAULT_SETTINGS.voice).toBe("string");
+    expect(DEFAULT_SETTINGS.voice.length).toBeGreaterThan(0);
+  });
+
+  it("voice round-trips through localStorage and survives reload", () => {
+    settings.voice = "nam-minh";
+    settings.voiceEnabledMaster = false;
+    saveSettings();
+    settings.voice = "hoai-my";
+    settings.voiceEnabledMaster = true;
+    loadSettings();
+    expect(settings.voice).toBe("nam-minh");
+    expect(settings.voiceEnabledMaster).toBe(false);
+  });
+
+  it("invalid voice id falls back to default; other settings survive", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        ...DEFAULT_SETTINGS,
+        voice: "made-up-voice-id",
+        autoCallSpeed: 7,
+      }),
+    );
+    loadSettings();
+    expect(settings.voice).toBe(DEFAULT_SETTINGS.voice);
+    expect(settings.autoCallSpeed).toBe(7);
+  });
+
+  it("non-boolean voiceEnabled* falls back to default", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        ...DEFAULT_SETTINGS,
+        voiceEnabledMaster: "yes",
+        voiceEnabledPlayer: 1,
+      }),
+    );
+    loadSettings();
+    expect(settings.voiceEnabledMaster).toBe(
+      DEFAULT_SETTINGS.voiceEnabledMaster,
+    );
+    expect(settings.voiceEnabledPlayer).toBe(
+      DEFAULT_SETTINGS.voiceEnabledPlayer,
+    );
   });
 });
 
@@ -188,6 +241,9 @@ describe("settings-store — saveSettings", () => {
     settings.masterMode = true;
     settings.autoCallEnabled = true;
     settings.autoCallSpeed = 7;
+    settings.voiceEnabledMaster = false;
+    settings.voiceEnabledPlayer = false;
+    settings.voice = "nam-minh";
     saveSettings();
     const raw = localStorage.getItem(KEY);
     expect(raw).not.toBeNull();
@@ -197,6 +253,9 @@ describe("settings-store — saveSettings", () => {
       masterMode: true,
       autoCallEnabled: true,
       autoCallSpeed: 7,
+      voiceEnabledMaster: false,
+      voiceEnabledPlayer: false,
+      voice: "nam-minh",
     });
   });
 

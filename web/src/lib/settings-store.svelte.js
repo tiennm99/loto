@@ -6,6 +6,8 @@
  * @module lib/settings-store
  */
 
+import { DEFAULT_VOICE, VOICE_IDS } from "$lib/audio-manifest.js";
+
 const STORAGE_KEY = "loto_settings";
 const HEX6 = /^#[0-9a-fA-F]{6}$/;
 const VALID_THEMES = /** @type {const} */ (["auto", "light", "dark"]);
@@ -21,6 +23,12 @@ export const DEFAULT_SETTINGS = Object.freeze({
   autoCallEnabled: false,
   /** Auto-call interval, seconds per number. Integer 1..10. */
   autoCallSpeed: 5,
+  /** Speak the called number aloud when master draws. */
+  voiceEnabledMaster: true,
+  /** Speak "Chờ N" / "Kinh" on player events. */
+  voiceEnabledPlayer: true,
+  /** Active voice id; matches an entry in audio manifest. */
+  voice: DEFAULT_VOICE,
 });
 
 export const settings = $state({ ...DEFAULT_SETTINGS });
@@ -44,6 +52,10 @@ function validSpeed(v) {
   return typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= 10
     ? v
     : null;
+}
+/** @param {unknown} v */
+function validVoiceId(v) {
+  return typeof v === "string" && VOICE_IDS.has(v) ? v : null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -111,6 +123,14 @@ export function loadSettings() {
         validBool(parsed.autoCallEnabled) ?? DEFAULT_SETTINGS.autoCallEnabled;
       settings.autoCallSpeed =
         validSpeed(parsed.autoCallSpeed) ?? DEFAULT_SETTINGS.autoCallSpeed;
+      settings.voiceEnabledMaster =
+        validBool(parsed.voiceEnabledMaster) ??
+        DEFAULT_SETTINGS.voiceEnabledMaster;
+      settings.voiceEnabledPlayer =
+        validBool(parsed.voiceEnabledPlayer) ??
+        DEFAULT_SETTINGS.voiceEnabledPlayer;
+      settings.voice =
+        validVoiceId(parsed.voice) ?? DEFAULT_SETTINGS.voice;
     }
   } catch {
     /* private mode / quota / corrupt JSON — fall back to defaults */
@@ -133,5 +153,8 @@ export function resetSettings() {
   settings.masterMode = DEFAULT_SETTINGS.masterMode;
   settings.autoCallEnabled = DEFAULT_SETTINGS.autoCallEnabled;
   settings.autoCallSpeed = DEFAULT_SETTINGS.autoCallSpeed;
+  settings.voiceEnabledMaster = DEFAULT_SETTINGS.voiceEnabledMaster;
+  settings.voiceEnabledPlayer = DEFAULT_SETTINGS.voiceEnabledPlayer;
+  settings.voice = DEFAULT_SETTINGS.voice;
   saveSettings();
 }
