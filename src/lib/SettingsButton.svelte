@@ -5,6 +5,7 @@
     saveSettings,
     settings,
   } from "$lib/settings-store.svelte.js";
+  import { clearAudioCache } from "$lib/voice.js";
 
   let open = $state(false);
 
@@ -79,6 +80,7 @@
 
   /** @param {string} id */
   function pickVoice(id) {
+    if (settings.voice !== id) clearAudioCache();
     settings.voice = id;
     saveSettings();
   }
@@ -182,26 +184,28 @@
       </fieldset>
 
       {#snippet switchRow(label, isOn, onToggle)}
-        <label
+        <!-- Whole row is the switch — role/tabindex/click here, not on the
+             inner pill, so tapping the label text also toggles. -->
+        <div
+          role="switch"
+          tabindex="0"
+          aria-checked={isOn}
+          onclick={onToggle}
+          onkeydown={(/** @type {KeyboardEvent} */ e) => {
+            if (e.key === " " || e.key === "Enter") {
+              e.preventDefault();
+              onToggle();
+            }
+          }}
           class="flex items-center justify-between gap-3 px-3 py-2 rounded-lg
                  border-2 border-slate-200 dark:border-slate-600 cursor-pointer
-                 hover:border-slate-300 dark:hover:border-slate-500 transition-colors"
+                 hover:border-slate-300 dark:hover:border-slate-500 transition-colors
+                 focus:outline-none focus:ring-2 focus:ring-indigo-400"
         >
           <span class="text-sm text-slate-700 dark:text-slate-200">{label}</span>
           <span
-            role="switch"
-            tabindex="0"
-            aria-checked={isOn}
-            onclick={onToggle}
-            onkeydown={(/** @type {KeyboardEvent} */ e) => {
-              if (e.key === " " || e.key === "Enter") {
-                e.preventDefault();
-                onToggle();
-              }
-            }}
+            aria-hidden="true"
             class="relative inline-block w-10 h-6 rounded-full transition-colors flex-none
-                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-                   focus:ring-offset-white dark:focus:ring-offset-slate-800
                    {isOn ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}"
           >
             <span
@@ -209,7 +213,7 @@
                      {isOn ? 'translate-x-4' : 'translate-x-0'}"
             ></span>
           </span>
-        </label>
+        </div>
       {/snippet}
 
       <!-- Master mode -->

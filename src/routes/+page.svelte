@@ -12,7 +12,10 @@
 >
   <div class="w-full max-w-2xl">
     <header class="relative text-center mb-6">
-      <div class="absolute right-0 top-0">
+      <!-- z-10: H1 has a CSS `drop-shadow` filter which creates a stacking
+           context. Without z-index here, that filtered H1 (later in tree
+           order) paints over the gear button and swallows clicks. -->
+      <div class="absolute right-0 top-0 z-10">
         <SettingsButton />
       </div>
       <h1
@@ -23,7 +26,7 @@
       <p
         class="text-[0.65rem] sm:text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 italic mt-1"
       >
-        Hội chợ Tân Tân
+        Hội chợ TN1
       </p>
     </header>
 

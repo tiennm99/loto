@@ -222,11 +222,19 @@
                 {@const rowComplete = hasNumber && rowCompleteness[row]}
 
                 {#if !hasNumber}
+                  <!-- Empty cell. Dark-mode dim is an overlay div, not a CSS
+                       filter, so we don't accidentally create a stacking
+                       context on every cell. -->
                   <div
                     aria-hidden="true"
-                    class="relative aspect-[3/4] sm:aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40 dark:[filter:brightness(0.85)_saturate(0.9)]"
+                    class="relative aspect-[3/4] sm:aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40"
                     style:background-color="var(--empty-cell-bg)"
-                  ></div>
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="hidden dark:block absolute inset-0 bg-black/15 pointer-events-none"
+                    ></span>
+                  </div>
                 {:else}
                   <button
                     type="button"
