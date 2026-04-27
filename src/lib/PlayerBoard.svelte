@@ -120,6 +120,17 @@
     dismissToast();
   }
 
+  function handleClear() {
+    if (!grid) return;
+    const hasMarks = crossed.some((row) => row.some(Boolean));
+    if (hasMarks && !confirm("Bạn có muốn xoá tất cả đánh dấu không?")) return;
+    crossed = grid.map((row) => row.map(() => false));
+    celebratedRows.clear();
+    notifiedWaitingRows.clear();
+    dismissToast();
+    showCongrats = false;
+  }
+
   /**
    * @param {number} row
    * @param {number} col
@@ -146,7 +157,7 @@
   ];
 </script>
 
-<div class="flex justify-center mb-6">
+<div class="flex flex-wrap justify-center gap-3 mb-6">
   <button
     onclick={handleGenerate}
     class="px-8 py-3 rounded-full font-semibold text-white
@@ -156,6 +167,19 @@
   >
     Tạo bảng mới
   </button>
+  {#if grid}
+    <button
+      onclick={handleClear}
+      class="px-6 py-3 rounded-full font-semibold
+             text-slate-700 dark:text-slate-200
+             bg-white dark:bg-slate-800
+             border-2 border-slate-300 dark:border-slate-600
+             hover:bg-slate-50 dark:hover:bg-slate-700
+             active:scale-95 transition-all"
+    >
+      Xoá đánh dấu
+    </button>
+  {/if}
 </div>
 
 {#if grid}
