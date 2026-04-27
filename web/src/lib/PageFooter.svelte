@@ -1,5 +1,5 @@
 <footer
-  class="mt-8 text-center text-xs text-slate-500 dark:text-slate-400 space-y-2"
+  class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400 space-y-2"
 >
   <p class="px-4">
     Lấy cảm hứng từ những buổi họp lớp thiếu bộ lô tô của TN1 (2014–2017)
