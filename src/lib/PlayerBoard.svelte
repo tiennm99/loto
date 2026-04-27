@@ -24,7 +24,13 @@
   let crossed = $state(/** @type {boolean[][]} */ ([]));
   let showCongrats = $state(false);
   let congratsRow = $state(-1);
+  let celebrationTier = $state(/** @type {1 | 2} */ (1));
   let toast = $state(/** @type {string | null} */ (null));
+
+  // 12 confetti emoji indices. Stable per-render — values don't matter,
+  // only the count drives the {#each}.
+  const CONFETTI = Array.from({ length: 12 }, (_, i) => i);
+  const CONFETTI_EMOJI = ["🎊", "✨", "🎉", "🥳"];
 
   // Plain refs (not reactive)
   /** @type {ReturnType<typeof setTimeout> | null} */
@@ -92,6 +98,7 @@
         notifiedWaitingRows.add(i);
         congratsRow = i + 1;
         showCongrats = true;
+        celebrationTier = celebratedRows.size >= 3 ? 2 : 1;
         if (settings.voiceEnabledPlayer) playBingo();
         break;
       }
@@ -145,6 +152,9 @@
    * @param {number} col
    */
   function handleCellClick(row, col) {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(10);
+    }
     crossed = crossed.map((r, ri) =>
       ri === row ? r.map((v, ci) => (ci === col ? !v : v)) : r
     );
@@ -214,7 +224,7 @@
                 {#if !hasNumber}
                   <div
                     aria-hidden="true"
-                    class="relative aspect-square sm:aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40"
+                    class="relative aspect-[3/4] sm:aspect-[3/5] border border-slate-400/50 dark:border-slate-600/40 dark:[filter:brightness(0.85)_saturate(0.9)]"
                     style:background-color="var(--empty-cell-bg)"
                   ></div>
                 {:else}
@@ -224,10 +234,10 @@
                     aria-pressed={isCrossed}
                     onclick={() => handleCellClick(row, col)}
                     class="tan-tan-num relative flex items-center justify-center
-                           aspect-square sm:aspect-[3/5]
-                           text-base sm:text-2xl md:text-3xl
+                           aspect-[3/4] sm:aspect-[3/5]
+                           text-lg sm:text-2xl md:text-3xl
                            border border-slate-400/50 dark:border-slate-600/40
-                           transition-all select-none cursor-pointer
+                           transition-all select-none cursor-pointer active:scale-90
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
                            {isCrossed
                              ? rowComplete
@@ -289,8 +299,53 @@
     {/if}
   </div>
 {:else}
-  <div class="text-center text-slate-400 dark:text-slate-500 py-20 text-sm">
-    Nhấn "Tạo bảng mới" để bắt đầu chơi
+  <div class="text-center py-10">
+    <div
+      aria-hidden="true"
+      class="mx-auto max-w-xs opacity-30 pointer-events-none mb-6
+             rounded-md overflow-hidden border border-slate-300 dark:border-slate-600"
+    >
+      <div class="grid grid-cols-9 gap-px bg-slate-300 dark:bg-slate-700">
+        {#each Array(27) as _, i (i)}
+          {@const filled = i % 3 === 0}
+          <div
+            class="aspect-square text-[0.55rem] flex items-center justify-center
+                   text-black {filled ? 'bg-white dark:bg-slate-800 dark:text-slate-100' : ''}"
+            style:background-color={filled ? undefined : "var(--empty-cell-bg)"}
+          >
+            {filled ? ((i * 7) % 90) + 1 : ""}
+          </div>
+        {/each}
+      </div>
+    </div>
+    <p class="text-sm text-slate-500 dark:text-slate-400 italic">
+      Nhấn
+      <span class="font-semibold text-rose-500 dark:text-rose-400 not-italic">"Tạo bảng mới"</span>
+      để bắt đầu chơi
+    </p>
+    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
+      🎫 Chúc cả nhà một ván vui vẻ
+    </p>
+  </div>
+{/if}
+
+{#if showCongrats && celebrationTier >= 2}
+  <!-- z-[60] sits above the bingo modal (z-50) so confetti reads through
+       the backdrop blur instead of being dimmed by it. -->
+  <div
+    aria-hidden="true"
+    class="fixed inset-0 z-[60] pointer-events-none overflow-hidden"
+  >
+    {#each CONFETTI as i (i)}
+      <span
+        class="confetti"
+        style:--x="{(i * 8.3 + (i % 3) * 11) % 100}%"
+        style:--delay="{(i * 37) % 400}ms"
+        style:--rot="{(i * 67) % 360}deg"
+      >
+        {CONFETTI_EMOJI[i % CONFETTI_EMOJI.length]}
+      </span>
+    {/each}
   </div>
 {/if}
 

@@ -1,4 +1,5 @@
 <script>
+  import { slide } from "svelte/transition";
   import MasterPanel from "$lib/MasterPanel.svelte";
   import PageFooter from "$lib/PageFooter.svelte";
   import PlayerBoard from "$lib/PlayerBoard.svelte";
@@ -15,18 +16,27 @@
         <SettingsButton />
       </div>
       <h1
-        class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent"
+        class="text-5xl sm:text-7xl font-black italic tracking-tight bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 bg-clip-text text-transparent drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]"
       >
         Lô tô
       </h1>
+      <p
+        class="text-[0.65rem] sm:text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 italic mt-1"
+      >
+        Hội chợ Tân Tân
+      </p>
     </header>
 
     <PlayerBoard />
 
     {#if settings.masterMode}
-      <section class="mt-10" aria-label="Bảng quản trò">
+      <section
+        class="mt-10"
+        aria-label="Bảng quản trò"
+        transition:slide={{ duration: 250 }}
+      >
         <h2
-          class="text-center text-xl sm:text-2xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+          class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-orange-500 dark:text-orange-400"
         >
           Quản trò
         </h2>

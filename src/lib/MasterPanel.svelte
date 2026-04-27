@@ -70,6 +70,7 @@
     /** @type {{called: number[], remaining: number[]} | null} */ (null),
   );
   let lastCalled = $state(/** @type {number | null} */ (null));
+  let heroEl = $state(/** @type {HTMLDivElement | null} */ (null));
   let autoRunning = $state(false);
 
   $effect(() => {
@@ -114,6 +115,20 @@
   // toggled off mid-clip) so audio doesn't outlive the panel.
   $effect(() => () => cancelPlayback());
 
+  // Scroll the "Số vừa xổ" hero into view on each new draw so the host
+  // doesn't have to chase it on a phone. Gated by a user-interaction flag
+  // so reloading with persisted state doesn't yank the page on mount.
+  let scrollOnNextDraw = false;
+
+  $effect(() => {
+    if (lastCalled !== null && heroEl && scrollOnNextDraw) {
+      scrollOnNextDraw = false;
+      requestAnimationFrame(() =>
+        heroEl?.scrollIntoView({ behavior: "smooth", block: "center" }),
+      );
+    }
+  });
+
   function handleNewGame() {
     if (state && !confirm("Bạn có muốn tạo ván mới không?")) return;
     cancelPlayback();
@@ -130,6 +145,7 @@
       remaining: state.remaining.slice(1),
     };
     lastCalled = next;
+    scrollOnNextDraw = true;
     if (settings.voiceEnabledMaster) playNumber(next);
   }
 
@@ -189,22 +205,26 @@
   {@const lastIsLow = lastCalled <= 49}
   <div class="flex flex-col items-center mb-6">
     <div
-      class="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1"
+      class="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2"
     >
       Số vừa xổ
     </div>
     <div
-      class="w-24 h-24 sm:w-28 sm:h-28 rounded-full
+      bind:this={heroEl}
+      role="status"
+      aria-live="assertive"
+      aria-atomic="true"
+      class="w-40 h-40 sm:w-56 sm:h-56 rounded-full
              bg-amber-50 dark:bg-amber-100
-             border-[6px] sm:border-[7px]
+             border-[8px] sm:border-[10px]
              flex items-center justify-center
-             shadow-xl
+             shadow-xl scroll-mt-4
              {lastIsLow
                ? 'border-pink-500 dark:border-pink-400 shadow-pink-500/30'
                : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
     >
       <span
-        class="text-5xl sm:text-6xl font-black tabular-nums
+        class="text-7xl sm:text-8xl font-black tabular-nums
                {lastIsLow
                  ? 'text-pink-500 dark:text-pink-400'
                  : 'text-emerald-500 dark:text-emerald-400'}"

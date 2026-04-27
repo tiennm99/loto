@@ -11,9 +11,9 @@
 ### Shared Components
 | File | Purpose |
 |------|---------|
-| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:5 on mobile; wider on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, purple empty cells by default. Handles crossed state, bingo popup, "Chờ X" toast. Two header actions: "Tạo bảng mới" (regenerate grid) and "Xoá đánh dấu" (clear all marks, keep grid — only shown when a grid exists). Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
-| `src/lib/SettingsButton.svelte` | Gear icon + modal. 5 fieldsets: Giao diện (theme auto/light/dark), Chế độ quản trò (master mode toggle), Tự động xổ (auto-call + speed 1–10s), Âm thanh (voice toggles for master + player + voice picker from manifest), Màu ô trống (10 Excel color swatches). Reset-to-default button. Mounted on `/`. |
-| `src/lib/MasterPanel.svelte` | Host controls. New game / draw, "Số vừa xổ" hero token, "Thứ tự đã xổ" history list, 11×9 last-digit-aligned tracking grid (with circular tokens + draw-order overlay). No host's own player card (the player already has one above). "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.masterMode === true`. |
+| `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:4 on mobile; 3:5 on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, purple empty cells (dark mode dims via `filter:brightness(0.85)`). Handles crossed state, animated cross-out (200 ms `cross-draw` keyframe), `active:scale-90` press, 10 ms haptic on tap. Two header actions: "Tạo bảng mới" / "Xoá đánh dấu". First-run state shows a faded preview card. Bingo popup tiers: row 1 = standard celebration; row 3+ = falling-emoji confetti rain via CSS `confetti-fall`. Toast "Chờ N" + audio. Accepts `storagePrefix` prop for multi-card isolation. |
+| `src/lib/SettingsButton.svelte` | Gear icon + modal (responsive `max-w-sm sm:max-w-md`). 5 fieldsets: Giao diện (theme pills), Chế độ quản trò (switch row), Tự động xổ (switch + speed slider), Âm thanh (two switches + voice picker), Màu ô trống (10 Excel color swatches + custom picker). Boolean toggles use a shared `switchRow` snippet (`role="switch"` + keyboard support). Reset-to-default button. Mounted on `/`. |
+| `src/lib/MasterPanel.svelte` | Host controls. New game / draw, large "Số vừa xổ" hero token (160 px mobile, 224 px sm+) with `aria-live="assertive"` + auto `scrollIntoView` on each new draw, "Thứ tự đã xổ" history list, 11×9 last-digit-aligned tracking grid (with circular tokens + draw-order overlay). No host's own player card (the player already has one above). "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.masterMode === true`; the wrapping section uses `transition:slide` for smooth toggle-in. |
 | `src/lib/PageFooter.svelte` | Footer with tagline ("Made by miti99 with ❤️ SVG icon") + link. Mounted on `/`. |
 
 ### Game Logic
@@ -28,7 +28,7 @@
 ### Styling
 | File | Purpose |
 |------|---------|
-| `src/app.css` | Root styles: Tailwind @import, CSS variables (light/dark), Tailwind v4 `@variant dark (.dark *)` for explicit dark-mode class selector, `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast), `.cell-crossed` diagonal. |
+| `src/app.css` | Root styles: Tailwind @import, CSS variables (light/dark), Tailwind v4 `@variant dark (.dark *)` for explicit dark-mode class selector, `.loto-grid` & `.master-grid` (9-col), animations (fade-in, pop-in, bounce-slow, spin-slow, toast, cross-draw 200 ms cell mark, confetti-fall 1.6 s), `.cell-crossed` diagonal, `.confetti` falling-emoji helper. |
 
 ### Tests
 | File | Purpose |

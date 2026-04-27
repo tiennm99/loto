@@ -100,6 +100,11 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 - [x] Master speaks the called number aloud in Vietnamese (bundled MP3, no runtime TTS API).
 - [x] Player hears "Chờ N" when a row is one away and "Kinh" on bingo.
 - [x] Voice picker in settings — switch among every Vietnamese edge-tts voice.
+- [x] Player numbers comfortably readable on a 360 px viewport.
+- [x] Cell tap on mobile gives haptic + active-press + animated cross-out feedback.
+- [x] Master "Số vừa xổ" hero is the page focal point and auto-scrolls into view on each draw.
+- [x] Cold first paint shows a faded preview card + welcome line, not a gray placeholder.
+- [x] Bingo celebration tiers: 3rd+ row triggers a CSS confetti rain on top of the popup.
 - [x] Bingo popup triggers when row is complete, shows row number and "Kinh!" message.
 - [x] Player may keep marking after a Kinh — no game-end lock.
 - [x] Toast notifications show "Chờ X" before bingo (one number remaining).
@@ -121,11 +126,13 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 
 ## Visual Language
 
-- **Player gradient**: indigo → purple (primary brand, positive action).
-- **Host gradient**: orange → red (higher-stakes, control action).
+- **Wordmark gradient**: rose → amber → rose, italic + drop-shadow — vintage carnival marquee feel.
+- **Player accent**: indigo → purple (primary brand, positive action).
+- **Host accent**: orange (subordinate to wordmark; not gradient).
 - **Completed rows**: emerald (success indicator).
 - **Waiting toast**: amber (attention, ephemeral).
-- **Emojis**: 🎉 ✨ 🎊 🥳 ❤️ (celebration, joy).
+- **Emojis**: 🎉 ✨ 🎊 🥳 ❤️ (celebration, joy). Confetti rain on 3rd+ bingo per card.
+- **Haptic**: 10 ms vibration on cell tap (mobile only, where supported).
 
 ## Future Considerations (Not Committed)
 
