@@ -88,6 +88,7 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 - [x] Player card is 9×9 with **exactly 5 per row and 5 per column**.
 - [x] Numbers within each column are **ascending top-to-bottom**.
 - [x] Player can click cells to toggle crossed state.
+- [x] Player can clear all marks on the current card without regenerating it (confirm prompt when marks exist).
 - [x] Bingo popup triggers when row is complete, shows row number and "Kinh!" message.
 - [x] Player may keep marking after a Kinh — no game-end lock.
 - [x] Toast notifications show "Chờ X" before bingo (one number remaining).
