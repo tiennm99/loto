@@ -4,17 +4,19 @@
 
 ```
 Entry (+layout.svelte)
-  ├─ onMount: loadSettings() — restore all 5 settings keys from loto_settings,
+  ├─ onMount: loadSettings() — restore all 9 settings keys from loto_settings,
   │   apply CSS vars, toggle <html class="dark"> on theme/OS pref, setup auto-call effect
   │
   └─ / (single page)
-      ├─ Load loto_grid, loto_crossed from localStorage
-      ├─ Display 9×9 PlayerBoard (empty cells use --empty-cell-bg from settings)
-      ├─ Generate new grid on button click
-      ├─ Mark/unmark cells on click
-      ├─ Show bingo popup + "Chờ X" toasts
-      ├─ [if settings.masterMode === true]
-      │   └─ Mount MasterPanel (host controls + draw history)
+      ├─ [if settings.mode !== "master"]
+      │   ├─ Load loto_grid, loto_crossed from localStorage
+      │   ├─ Display 9×9 PlayerBoard (empty cells use --empty-cell-bg from settings)
+      │   ├─ Listen to call-bus for auto-tick when master draws
+      │   ├─ Generate new grid on button click
+      │   ├─ Mark/unmark cells on click
+      │   └─ Show bingo popup + "Chờ X" toasts
+      ├─ [if settings.mode !== "player"]
+      │   └─ Mount MasterPanel (controls + draw history, publishes to call-bus)
       └─ PageFooter (tagline + miti99 link)
 ```
 
@@ -32,11 +34,15 @@ ascending top-to-bottom (lô tô hội chợ Tân Tân convention).
 
 ### Settings (`loto_settings`)
 ```
-theme: "auto" | "light" | "dark"  // Display mode
-masterMode: boolean               // Show MasterPanel on /
-autoCallEnabled: boolean          // Enable auto-call timer
-autoCallSpeed: number (1–10)      // Speed in seconds
-emptyCellColor: "#rrggbb"         // Hex color (default #7030A0 Excel Purple)
+theme: "auto" | "light" | "dark"    // Display mode
+mode: "player" | "master" | "both"  // Panel visibility (replaces masterMode)
+autoCallEnabled: boolean            // Enable auto-call timer
+autoCallSpeed: number (1–10)        // Speed in seconds
+emptyCellColor: "#rrggbb"           // Hex color (default #7030A0 Excel Purple)
+voiceEnabledMaster: boolean         // Speak called numbers (master view)
+voiceEnabledPlayer: boolean         // Speak "Chờ"/"Kinh" (player events)
+voiceWaitingNumber: boolean         // Include number after "Chờ"
+voice: string                       // Voice ID from audio manifest
 ```
 
 ### Host State (`storagePrefix="loto_master"`)
@@ -107,7 +113,19 @@ Files that are client-only:
 - `src/lib/PlayerBoard.svelte` (player card component)
 - `src/lib/MasterPanel.svelte` (host panel, mounted when `settings.masterMode`)
 
-## Data Flow: Mark a Cell
+## Data Flow: Master Draw (mode: "both")
+
+```
+1. Master taps "Xổ số" button in MasterPanel
+2. Draw logic removes number from remaining
+3. broadcastDraw(num) publishes to call-bus
+4. PlayerBoard's $effect listens to bus.lastDrawn
+5. Auto-marks cell in player's grid (if it exists)
+6. If row completes → bingo popup + auto "Kinh" voice
+7. MasterPanel displays hero token, appends to history
+```
+
+## Data Flow: Mark a Cell (Player)
 
 ```
 1. User clicks button in PlayerBoard
@@ -116,7 +134,7 @@ Files that are client-only:
 4. $effect listens to crossed → saveCrossedState()
 5. localStorage updated with new crossed state
 6. $derived updates rowCompleteness matrix
-7. If row complete → bingo popup; if waiting → toast
+7. If row complete → bingo popup; if waiting → "Chờ X" toast
 ```
 
 ## Data Flow: Initial Load
@@ -141,9 +159,27 @@ Files that are client-only:
 | toast | 5s forwards | "Chờ X" notification fade in/build |
 | cell-crossed::after | instant | Red diagonal line in marked cells |
 
+## Call Bus (Master ↔ Player Wiring)
+
+In `mode: "both"`, MasterPanel and PlayerBoard communicate via `call-bus.svelte.js`:
+
+```
+call-bus.svelte.js:
+├─ bus.lastDrawn = { num, at }     // Published by master draw
+├─ broadcastDraw(num)              // Called by MasterPanel on each draw
+└─ resetBus()                       // Called on new game
+
+PlayerBoard:
+└─ $effect(() => { bus.lastDrawn })  // Listens for draw broadcast
+   └─ Auto-marks cell if number exists on board
+   └─ Triggers bingo popup if row completes
+```
+
+Each draw creates a new object (even repeat numbers) to ensure reactive re-fire.
+
 ## Offline Capability
 
 All state is localStorage. No API calls. Fully functional offline after initial load.
 
 Last reviewed: 2026-04-27
-Last synced: 2026-04-27 (6-phase refactor)
+Last synced: 2026-04-27 (three-mode + auto-tick feature)

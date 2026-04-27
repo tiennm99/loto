@@ -11,22 +11,25 @@ import { DEFAULT_VOICE, VOICE_IDS } from "$lib/audio-manifest.js";
 const STORAGE_KEY = "loto_settings";
 const HEX6 = /^#[0-9a-fA-F]{6}$/;
 const VALID_THEMES = /** @type {const} */ (["auto", "light", "dark"]);
+const VALID_MODES = /** @type {const} */ (["player", "master", "both"]);
 
 export const DEFAULT_SETTINGS = Object.freeze({
   /** Excel "Standard Color: Purple". */
   emptyCellColor: "#7030A0",
   /** "auto" follows OS prefers-color-scheme; "light"/"dark" overrides it. */
   theme: /** @type {"auto"|"light"|"dark"} */ ("auto"),
-  /** When true, the master panel renders inline below the player board on `/`. */
-  masterMode: false,
+  /** Which panels are visible: player only, master only, or both inline. */
+  mode: /** @type {"player"|"master"|"both"} */ ("player"),
   /** When true, the master "Xổ số" button becomes "Bắt đầu/Dừng" + auto interval. */
   autoCallEnabled: false,
   /** Auto-call interval, seconds per number. Integer 1..10. */
   autoCallSpeed: 5,
   /** Speak the called number aloud when master draws. */
   voiceEnabledMaster: true,
-  /** Speak "Chờ N" / "Kinh" on player events. */
-  voiceEnabledPlayer: true,
+  /** Speak "Chờ" / "Kinh" on player events. */
+  voiceEnabledPlayer: false,
+  /** When voiceEnabledPlayer is on, also speak the awaited number after "Chờ". */
+  voiceWaitingNumber: false,
   /** Active voice id; matches an entry in audio manifest. */
   voice: DEFAULT_VOICE,
 });
@@ -46,6 +49,13 @@ function validTheme(v) {
 /** @param {unknown} v */
 function validBool(v) {
   return typeof v === "boolean" ? v : null;
+}
+/** @param {unknown} v */
+function validMode(v) {
+  return typeof v === "string" &&
+    VALID_MODES.includes(/** @type {any} */ (v))
+    ? /** @type {"player"|"master"|"both"} */ (v)
+    : null;
 }
 /** @param {unknown} v */
 function validSpeed(v) {
@@ -117,8 +127,14 @@ export function loadSettings() {
         validColor(parsed.emptyCellColor) ?? DEFAULT_SETTINGS.emptyCellColor;
       settings.theme =
         validTheme(parsed.theme) ?? DEFAULT_SETTINGS.theme;
-      settings.masterMode =
-        validBool(parsed.masterMode) ?? DEFAULT_SETTINGS.masterMode;
+      // Migration: legacy `masterMode: true` → `mode: "both"`. Anything
+      // else (false / missing / invalid) falls through to the default.
+      const parsedMode = validMode(parsed.mode);
+      settings.mode = parsedMode
+        ? parsedMode
+        : parsed.masterMode === true
+          ? "both"
+          : DEFAULT_SETTINGS.mode;
       settings.autoCallEnabled =
         validBool(parsed.autoCallEnabled) ?? DEFAULT_SETTINGS.autoCallEnabled;
       settings.autoCallSpeed =
@@ -129,6 +145,9 @@ export function loadSettings() {
       settings.voiceEnabledPlayer =
         validBool(parsed.voiceEnabledPlayer) ??
         DEFAULT_SETTINGS.voiceEnabledPlayer;
+      settings.voiceWaitingNumber =
+        validBool(parsed.voiceWaitingNumber) ??
+        DEFAULT_SETTINGS.voiceWaitingNumber;
       settings.voice =
         validVoiceId(parsed.voice) ?? DEFAULT_SETTINGS.voice;
     }
@@ -150,11 +169,12 @@ export function saveSettings() {
 export function resetSettings() {
   settings.emptyCellColor = DEFAULT_SETTINGS.emptyCellColor;
   settings.theme = DEFAULT_SETTINGS.theme;
-  settings.masterMode = DEFAULT_SETTINGS.masterMode;
+  settings.mode = DEFAULT_SETTINGS.mode;
   settings.autoCallEnabled = DEFAULT_SETTINGS.autoCallEnabled;
   settings.autoCallSpeed = DEFAULT_SETTINGS.autoCallSpeed;
   settings.voiceEnabledMaster = DEFAULT_SETTINGS.voiceEnabledMaster;
   settings.voiceEnabledPlayer = DEFAULT_SETTINGS.voiceEnabledPlayer;
+  settings.voiceWaitingNumber = DEFAULT_SETTINGS.voiceWaitingNumber;
   settings.voice = DEFAULT_SETTINGS.voice;
   saveSettings();
 }

@@ -4,6 +4,14 @@ This document tracks **future work only**. Completed features live in
 git commit history and `plans/`, not here. For "what's in the app right
 now", see `docs/project-overview-pdr.md` and `docs/codebase-summary.md`.
 
+## Shipped
+
+### Three-Mode Rendering + Master Auto-Tick (2026-04-27)
+- `mode: "player" | "master" | "both"` replaces `masterMode: boolean`
+- New `call-bus.svelte.js` coordinates master draws → player auto-tick in "both" mode
+- "Quản trò đọc số" voice now speaks Chờ/Kinh on master in "both" mode
+- One-shot migration: `masterMode: true` → `mode: "both"`
+
 ## Idea Phase
 
 ### Undo Last Cell

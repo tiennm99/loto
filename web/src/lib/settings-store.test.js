@@ -45,11 +45,12 @@ beforeEach(() => {
   for (const k of /** @type {const} */ ([
     "emptyCellColor",
     "theme",
-    "masterMode",
+    "mode",
     "autoCallEnabled",
     "autoCallSpeed",
     "voiceEnabledMaster",
     "voiceEnabledPlayer",
+    "voiceWaitingNumber",
     "voice",
   ])) {
     /** @type {any} */ (settings)[k] = /** @type {any} */ (DEFAULT_SETTINGS)[k];
@@ -72,15 +73,16 @@ describe("settings-store — defaults", () => {
     expect(DEFAULT_SETTINGS.theme).toBe("auto");
   });
 
-  it("masterMode + autoCallEnabled default false; autoCallSpeed default 5", () => {
-    expect(DEFAULT_SETTINGS.masterMode).toBe(false);
+  it("mode defaults to player; autoCallEnabled false; autoCallSpeed 5", () => {
+    expect(DEFAULT_SETTINGS.mode).toBe("player");
     expect(DEFAULT_SETTINGS.autoCallEnabled).toBe(false);
     expect(DEFAULT_SETTINGS.autoCallSpeed).toBe(5);
   });
 
-  it("voice toggles default ON; voice id picks first manifest entry", () => {
+  it("master voice ON, player voice + waiting-number OFF by default", () => {
     expect(DEFAULT_SETTINGS.voiceEnabledMaster).toBe(true);
-    expect(DEFAULT_SETTINGS.voiceEnabledPlayer).toBe(true);
+    expect(DEFAULT_SETTINGS.voiceEnabledPlayer).toBe(false);
+    expect(DEFAULT_SETTINGS.voiceWaitingNumber).toBe(false);
     expect(typeof DEFAULT_SETTINGS.voice).toBe("string");
     expect(DEFAULT_SETTINGS.voice.length).toBeGreaterThan(0);
   });
@@ -184,7 +186,7 @@ describe("settings-store — loadSettings (per-key fallback)", () => {
     loadSettings();
     expect(settings.emptyCellColor).toBe("#1e88e5");
     expect(settings.theme).toBe(DEFAULT_SETTINGS.theme);
-    expect(settings.masterMode).toBe(DEFAULT_SETTINGS.masterMode);
+    expect(settings.mode).toBe(DEFAULT_SETTINGS.mode);
   });
 
   it("loads valid theme values", () => {
@@ -201,20 +203,45 @@ describe("settings-store — loadSettings (per-key fallback)", () => {
     expect(settings.theme).toBe(DEFAULT_SETTINGS.theme);
   });
 
-  it("loads boolean masterMode and autoCallEnabled", () => {
-    localStorage.setItem(
-      KEY,
-      JSON.stringify({ masterMode: true, autoCallEnabled: true }),
-    );
+  it("loads autoCallEnabled boolean", () => {
+    localStorage.setItem(KEY, JSON.stringify({ autoCallEnabled: true }));
     loadSettings();
-    expect(settings.masterMode).toBe(true);
     expect(settings.autoCallEnabled).toBe(true);
   });
 
-  it("rejects non-boolean for masterMode", () => {
-    localStorage.setItem(KEY, JSON.stringify({ masterMode: "yes" }));
+  it("loads valid mode values", () => {
+    for (const m of /** @type {const} */ (["player", "master", "both"])) {
+      localStorage.setItem(KEY, JSON.stringify({ mode: m }));
+      loadSettings();
+      expect(settings.mode).toBe(m);
+    }
+  });
+
+  it("rejects invalid mode value", () => {
+    localStorage.setItem(KEY, JSON.stringify({ mode: "spectator" }));
     loadSettings();
-    expect(settings.masterMode).toBe(DEFAULT_SETTINGS.masterMode);
+    expect(settings.mode).toBe(DEFAULT_SETTINGS.mode);
+  });
+
+  it("migrates legacy masterMode=true → mode='both'", () => {
+    localStorage.setItem(KEY, JSON.stringify({ masterMode: true }));
+    loadSettings();
+    expect(settings.mode).toBe("both");
+  });
+
+  it("legacy masterMode=false maps to default mode (player)", () => {
+    localStorage.setItem(KEY, JSON.stringify({ masterMode: false }));
+    loadSettings();
+    expect(settings.mode).toBe("player");
+  });
+
+  it("explicit mode wins over legacy masterMode", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ mode: "master", masterMode: true }),
+    );
+    loadSettings();
+    expect(settings.mode).toBe("master");
   });
 
   it("loads autoCallSpeed in range 1..10", () => {
@@ -238,11 +265,12 @@ describe("settings-store — saveSettings", () => {
   it("persists ALL keys, not just color", () => {
     settings.emptyCellColor = "#112233";
     settings.theme = "dark";
-    settings.masterMode = true;
+    settings.mode = "both";
     settings.autoCallEnabled = true;
     settings.autoCallSpeed = 7;
     settings.voiceEnabledMaster = false;
-    settings.voiceEnabledPlayer = false;
+    settings.voiceEnabledPlayer = true;
+    settings.voiceWaitingNumber = true;
     settings.voice = "nam-minh";
     saveSettings();
     const raw = localStorage.getItem(KEY);
@@ -250,11 +278,12 @@ describe("settings-store — saveSettings", () => {
     expect(JSON.parse(/** @type {string} */ (raw))).toEqual({
       emptyCellColor: "#112233",
       theme: "dark",
-      masterMode: true,
+      mode: "both",
       autoCallEnabled: true,
       autoCallSpeed: 7,
       voiceEnabledMaster: false,
-      voiceEnabledPlayer: false,
+      voiceEnabledPlayer: true,
+      voiceWaitingNumber: true,
       voice: "nam-minh",
     });
   });
@@ -272,12 +301,12 @@ describe("settings-store — resetSettings", () => {
   it("returns ALL settings to defaults and persists", () => {
     settings.emptyCellColor = "#000000";
     settings.theme = "dark";
-    settings.masterMode = true;
+    settings.mode = "both";
     saveSettings();
     resetSettings();
     expect(settings.emptyCellColor).toBe(DEFAULT_SETTINGS.emptyCellColor);
     expect(settings.theme).toBe(DEFAULT_SETTINGS.theme);
-    expect(settings.masterMode).toBe(DEFAULT_SETTINGS.masterMode);
+    expect(settings.mode).toBe(DEFAULT_SETTINGS.mode);
     const stored = JSON.parse(
       /** @type {string} */ (localStorage.getItem(KEY)),
     );
