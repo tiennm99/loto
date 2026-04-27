@@ -23,6 +23,10 @@ That format is intentionally out of scope.
 - **Column ranges**: col 0 = 1–9, col 1 = 10–19, …, col 7 = 70–79,
   col 8 = 80–90.
 - **Within a column**: numbers placed top-to-bottom in **ascending** order.
+- **Visual rhythm (soft)**: the generator avoids rows with 3 consecutive
+  filled columns whenever possible (rejection-sampled per card). Hard
+  invariants (5 per row + 5 per col) always win if the constraint can't
+  be satisfied.
 - **Number pool**: 1–90.
 - **Win condition**: 1 row complete = **"Kinh!"**. After winning, the player
   may keep playing further rows (game does not end).
@@ -89,6 +93,7 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 - [x] Numbers within each column are **ascending top-to-bottom**.
 - [x] Player can click cells to toggle crossed state.
 - [x] Player can clear all marks on the current card without regenerating it (confirm prompt when marks exist).
+- [x] No row has 3 consecutive filled columns (soft constraint, rejection-sampled).
 - [x] Bingo popup triggers when row is complete, shows row number and "Kinh!" message.
 - [x] Player may keep marking after a Kinh — no game-end lock.
 - [x] Toast notifications show "Chờ X" before bingo (one number remaining).

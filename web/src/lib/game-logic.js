@@ -35,15 +35,45 @@ function randomNumbersInCol(num, col) {
 }
 
 /**
- * Choose which columns are filled in each row so that every row has exactly
- * NUM_PER_ROW filled cells AND every column ends up with exactly NUM_PER_ROW
- * filled cells. Forces any column whose remaining quota equals the number of
- * rows left — otherwise that column could not reach its target — then picks
- * the rest at random from columns with quota > 0. The forced set never
- * exceeds NUM_PER_ROW because total remaining quota = NUM_PER_ROW * rowsLeft.
+ * Sorted strictly-ascending column indices contain 3 consecutive integers?
+ * Soft "no triple" constraint enforcer for a single row.
+ * @param {number[]} cols
+ */
+function hasThreeInARow(cols) {
+  for (let i = 0; i + 2 < cols.length; i++) {
+    if (cols[i + 1] === cols[i] + 1 && cols[i + 2] === cols[i] + 2) return true;
+  }
+  return false;
+}
+
+/**
+ * Enumerate every k-sized combination of `arr` (preserves input order).
+ * @param {number[]} arr
+ * @param {number} k
  * @returns {number[][]}
  */
-function pickFilledCols() {
+function combinations(arr, k) {
+  if (k === 0) return [[]];
+  if (arr.length < k) return [];
+  /** @type {number[][]} */
+  const out = [];
+  for (let i = 0; i <= arr.length - k; i++) {
+    const head = arr[i];
+    for (const tail of combinations(arr.slice(i + 1), k - 1)) {
+      out.push([head, ...tail]);
+    }
+  }
+  return out;
+}
+
+/**
+ * One attempt at picking the row-by-row column selection. Per-row picker
+ * prefers triple-free completions; if any row's forced set is already a
+ * triple (or no completion is triple-free), that row falls back to an
+ * unconstrained pick so the hard column-quota invariant never breaks.
+ * @returns {number[][]}
+ */
+function pickFilledColsOnce() {
   const quota = new Array(NUM_COLS).fill(NUM_PER_ROW);
   /** @type {number[][]} */
   const result = [];
@@ -57,18 +87,54 @@ function pickFilledCols() {
       if (quota[col] === rowsLeft) forced.push(col);
       else if (quota[col] > 0) candidates.push(col);
     }
-    for (let i = candidates.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    const need = NUM_PER_ROW - forced.length;
+
+    /** @type {number[][]} */
+    const validCompletions = [];
+    if (!hasThreeInARow(forced)) {
+      for (const combo of combinations(candidates, need)) {
+        const merged = [...forced, ...combo].sort((a, b) => a - b);
+        if (!hasThreeInARow(merged)) validCompletions.push(merged);
+      }
     }
-    const selected = [
-      ...forced,
-      ...candidates.slice(0, NUM_PER_ROW - forced.length),
-    ].sort((a, b) => a - b);
+
+    let selected;
+    if (validCompletions.length > 0) {
+      selected =
+        validCompletions[Math.floor(Math.random() * validCompletions.length)];
+    } else {
+      for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+      selected = [...forced, ...candidates.slice(0, need)].sort((a, b) => a - b);
+    }
+
     for (const col of selected) quota[col]--;
     result.push(selected);
   }
   return result;
+}
+
+/**
+ * Choose which columns are filled in each row so that every row has exactly
+ * NUM_PER_ROW filled cells AND every column ends up with exactly NUM_PER_ROW
+ * filled cells. Soft constraint: no row has 3 consecutive filled columns.
+ *
+ * Strategy: per-row picker greedily prefers triple-free completions. Because
+ * early-row choices can still corner late rows into a forced triple, we wrap
+ * the whole pass in rejection sampling. If every attempt fails (extremely
+ * rare), the last attempt is returned — column quotas hold either way.
+ * @returns {number[][]}
+ */
+function pickFilledCols() {
+  const MAX_ATTEMPTS = 200;
+  let last = pickFilledColsOnce();
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (last.every((row) => !hasThreeInARow(row))) return last;
+    last = pickFilledColsOnce();
+  }
+  return last;
 }
 
 /**
