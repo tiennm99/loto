@@ -131,6 +131,27 @@ body {
 .animate-spin-slow-reverse { animation: spin-slow 3s linear infinite reverse; }
 .animate-toast { animation: toast 5s ease-in-out forwards; }
 
+@keyframes cross-draw {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* Falling-confetti burst for the 3rd-and-up bingo of a single card. */
+@keyframes confetti-fall {
+  0%   { transform: translateY(-10vh) rotate(0); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(var(--rot)); opacity: 0.85; }
+}
+
+.confetti {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  font-size: 2rem;
+  animation: confetti-fall 1.6s ease-in var(--delay) forwards;
+  will-change: transform, opacity;
+}
+
 .cell-crossed::after {
   content: "";
   position: absolute;
@@ -142,4 +163,5 @@ body {
     transparent calc(50% + 1.5px)
   );
   pointer-events: none;
+  animation: cross-draw 200ms ease-out;
 }

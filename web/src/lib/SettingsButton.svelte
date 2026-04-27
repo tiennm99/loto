@@ -144,7 +144,7 @@
       class="absolute inset-0"
     ></div>
     <div
-      class="relative mx-4 max-w-sm w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl animate-pop-in"
+      class="relative mx-4 max-w-sm sm:max-w-md w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl animate-pop-in"
     >
       <h2
         id="settings-title"
@@ -181,6 +181,37 @@
         </div>
       </fieldset>
 
+      {#snippet switchRow(label, isOn, onToggle)}
+        <label
+          class="flex items-center justify-between gap-3 px-3 py-2 rounded-lg
+                 border-2 border-slate-200 dark:border-slate-600 cursor-pointer
+                 hover:border-slate-300 dark:hover:border-slate-500 transition-colors"
+        >
+          <span class="text-sm text-slate-700 dark:text-slate-200">{label}</span>
+          <span
+            role="switch"
+            tabindex="0"
+            aria-checked={isOn}
+            onclick={onToggle}
+            onkeydown={(/** @type {KeyboardEvent} */ e) => {
+              if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                onToggle();
+              }
+            }}
+            class="relative inline-block w-10 h-6 rounded-full transition-colors flex-none
+                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
+                   focus:ring-offset-white dark:focus:ring-offset-slate-800
+                   {isOn ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}"
+          >
+            <span
+              class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform
+                     {isOn ? 'translate-x-4' : 'translate-x-0'}"
+            ></span>
+          </span>
+        </label>
+      {/snippet}
+
       <!-- Master mode -->
       <fieldset class="mb-5">
         <legend
@@ -191,17 +222,7 @@
         <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
           Hiện bảng quản trò bên dưới bảng người chơi
         </p>
-        <button
-          type="button"
-          aria-pressed={settings.masterMode}
-          onclick={toggleMaster}
-          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all
-                 {settings.masterMode
-                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
-        >
-          {settings.masterMode ? "Đang bật" : "Đang tắt"}
-        </button>
+        {@render switchRow("Hiện bảng quản trò", settings.masterMode, toggleMaster)}
       </fieldset>
 
       <!-- Auto-call (only relevant when master mode is on) -->
@@ -215,17 +236,9 @@
         <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
           Tự xổ số liên tiếp khi đang ở chế độ quản trò
         </p>
-        <button
-          type="button"
-          aria-pressed={settings.autoCallEnabled}
-          onclick={toggleAuto}
-          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all mb-3
-                 {settings.autoCallEnabled
-                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
-        >
-          {settings.autoCallEnabled ? "Đang bật" : "Đang tắt"}
-        </button>
+        <div class="mb-3">
+          {@render switchRow("Tự xổ số", settings.autoCallEnabled, toggleAuto)}
+        </div>
         {#if settings.autoCallEnabled}
           <label class="block">
             <span class="text-xs text-slate-600 dark:text-slate-300">
@@ -260,29 +273,11 @@
           Đọc số bằng tiếng Việt
         </p>
 
-        <button
-          type="button"
-          aria-pressed={settings.voiceEnabledMaster}
-          onclick={toggleVoiceMaster}
-          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all mb-2
-                 {settings.voiceEnabledMaster
-                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
-        >
-          Quản trò: {settings.voiceEnabledMaster ? "Bật" : "Tắt"}
-        </button>
+        <div class="mb-2">
+          {@render switchRow("Quản trò đọc số", settings.voiceEnabledMaster, toggleVoiceMaster)}
+        </div>
 
-        <button
-          type="button"
-          aria-pressed={settings.voiceEnabledPlayer}
-          onclick={toggleVoicePlayer}
-          class="w-full px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all
-                 {settings.voiceEnabledPlayer
-                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                   : 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'}"
-        >
-          Người chơi (Chờ / Kinh): {settings.voiceEnabledPlayer ? "Bật" : "Tắt"}
-        </button>
+        {@render switchRow("Báo Chờ / Kinh", settings.voiceEnabledPlayer, toggleVoicePlayer)}
 
         {#if VOICES.length > 1}
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 mb-1">
