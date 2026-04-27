@@ -39,6 +39,15 @@ function clipUrl(name) {
   return `${base}/audio/${settings.voice}/${name}.mp3`;
 }
 
+/**
+ * Drop all cached <audio> elements. Call when the active voice changes
+ * so the old voice's clips don't leak across a long session.
+ */
+export function clearAudioCache() {
+  cancelPlayback();
+  cache.clear();
+}
+
 export function cancelPlayback() {
   if (!isBrowser()) return;
   if (activeClip) {
