@@ -35,6 +35,12 @@
     ["both", "Cả hai"],
   ]);
 
+  const MODE_HINTS = /** @type {const} */ ({
+    player: "Chỉ bảng người chơi",
+    master: "Chỉ bảng quản trò (xổ số, theo dõi)",
+    both: "Cả hai bảng — quản trò tự đánh dấu cho người chơi",
+  });
+
   /** @param {string} hex */
   function pickColor(hex) {
     settings.emptyCellColor = hex;
@@ -254,6 +260,9 @@
             </button>
           {/each}
         </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">
+          {MODE_HINTS[settings.mode]}
+        </p>
       </fieldset>
 
       <!-- Auto-call (only relevant when master panel is visible) -->
@@ -271,7 +280,7 @@
           {@render switchRow("Tự xổ số", settings.autoCallEnabled, toggleAuto)}
         </div>
         {#if settings.autoCallEnabled}
-          <label class="block">
+          <label class="block mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-600">
             <span class="text-sm text-slate-700 dark:text-slate-200">
               Tốc độ: <strong class="tabular-nums"
                 >{settings.autoCallSpeed}</strong
@@ -304,14 +313,14 @@
           Đọc số bằng tiếng Việt
         </p>
 
-        <div class="mb-2">
-          {@render switchRow("Quản trò đọc số", settings.voiceEnabledMaster, toggleVoiceMaster)}
-          {#if settings.mode !== "player"}
+        {#if settings.mode !== "player"}
+          <div class="mb-2">
+            {@render switchRow("Quản trò đọc số", settings.voiceEnabledMaster, toggleVoiceMaster)}
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
               Đọc số đã xổ + báo Chờ/Kinh khi ở "Cả hai".
             </p>
-          {/if}
-        </div>
+          </div>
+        {/if}
 
         {@render switchRow("Báo Chờ / Kinh", settings.voiceEnabledPlayer, toggleVoicePlayer)}
 

@@ -48,11 +48,27 @@
     }
   }
 
+  /** Hard cap so a poisoned origin can't stall the UI on mount.
+   *  90-number called list serializes to ~500 bytes; 16 KB has 30× headroom. */
+  const MAX_STORAGE_BYTES = 16_384;
+
   function loadState() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
-      if (!data) return null;
-      return JSON.parse(data);
+      if (!data || data.length > MAX_STORAGE_BYTES) return null;
+      const parsed = JSON.parse(data, (k, v) =>
+        k === "__proto__" || k === "constructor" ? undefined : v,
+      );
+      // Minimal shape check — Array.isArray on both halves is enough
+      // for all callers; deeper validation isn't worth the complexity.
+      if (
+        !parsed ||
+        !Array.isArray(parsed.called) ||
+        !Array.isArray(parsed.remaining)
+      ) {
+        return null;
+      }
+      return parsed;
     } catch {
       return null;
     }
@@ -97,7 +113,8 @@
   // "user disabled auto setting mid-run" auto-stop as part of the same
   // dependency tracking.
   $effect(() => {
-    if (!autoRunning || !settings.autoCallEnabled) {
+    if (!autoRunning) return;
+    if (!settings.autoCallEnabled) {
       autoRunning = false;
       return;
     }
@@ -124,8 +141,14 @@
   $effect(() => {
     if (lastCalled !== null && heroEl && scrollOnNextDraw) {
       scrollOnNextDraw = false;
+      const reduceMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
       requestAnimationFrame(() =>
-        heroEl?.scrollIntoView({ behavior: "smooth", block: "center" }),
+        heroEl?.scrollIntoView({
+          behavior: reduceMotion ? "auto" : "smooth",
+          block: "center",
+        }),
       );
     }
   });
@@ -215,11 +238,11 @@
     <div
       bind:this={heroEl}
       role="status"
-      aria-live="assertive"
+      aria-live="polite"
       aria-atomic="true"
-      class="w-40 h-40 sm:w-56 sm:h-56 rounded-full
+      class="w-32 h-32 sm:w-56 sm:h-56 rounded-full
              bg-amber-50 dark:bg-amber-100
-             border-[8px] sm:border-[10px]
+             border-[6px] sm:border-[10px]
              flex items-center justify-center
              shadow-xl scroll-mt-4
              {lastIsLow
@@ -227,7 +250,7 @@
                : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
     >
       <span
-        class="text-7xl sm:text-8xl font-black tabular-nums
+        class="text-6xl sm:text-8xl font-black tabular-nums
                {lastIsLow
                  ? 'text-pink-500 dark:text-pink-400'
                  : 'text-emerald-500 dark:text-emerald-400'}"
@@ -256,7 +279,7 @@
         <span
           class="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10
                  text-base sm:text-lg font-black tabular-nums rounded-full
-                 border-[3px] bg-amber-50 dark:bg-amber-100
+                 border-2 bg-amber-50 dark:bg-amber-100
                  {isLow
                    ? 'border-pink-500 dark:border-pink-400 text-pink-600 dark:text-pink-500'
                    : 'border-emerald-500 dark:border-emerald-400 text-emerald-600 dark:text-emerald-500'}"

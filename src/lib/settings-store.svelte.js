@@ -12,6 +12,9 @@ const STORAGE_KEY = "loto_settings";
 const HEX6 = /^#[0-9a-fA-F]{6}$/;
 const VALID_THEMES = /** @type {const} */ (["auto", "light", "dark"]);
 const VALID_MODES = /** @type {const} */ (["player", "master", "both"]);
+/** Hard cap on stored settings JSON to keep poisoned origins from
+ *  stalling the UI on mount. Real settings serialize to ~200 bytes. */
+const MAX_STORAGE_BYTES = 8_192;
 
 export const DEFAULT_SETTINGS = Object.freeze({
   /** Excel "Standard Color: Purple". */
@@ -121,8 +124,12 @@ function applyAll() {
 export function loadSettings() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) ?? {};
+    if (raw && raw.length <= MAX_STORAGE_BYTES) {
+      // Strip `__proto__`/`constructor` as defense-in-depth in case
+      // future code spreads/assigns the parsed object.
+      const parsed = JSON.parse(raw, (k, v) =>
+        k === "__proto__" || k === "constructor" ? undefined : v,
+      ) ?? {};
       settings.emptyCellColor =
         validColor(parsed.emptyCellColor) ?? DEFAULT_SETTINGS.emptyCellColor;
       settings.theme =

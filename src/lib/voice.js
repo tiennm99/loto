@@ -36,7 +36,9 @@ function getAudio(url) {
 
 /** @param {string} name — clip basename without extension */
 function clipUrl(name) {
-  return `${base}/audio/${settings.voice}/${name}.mp3`;
+  // `settings.voice` is allowlist-validated and `name` is internal-only,
+  // but encode anyway as defense-in-depth in case either ever escapes.
+  return `${base}/audio/${encodeURIComponent(settings.voice)}/${encodeURIComponent(name)}.mp3`;
 }
 
 /**

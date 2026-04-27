@@ -1,6 +1,7 @@
 <script>
-  import { bus } from "$lib/call-bus.svelte.js";
+  import { bus, resetBus } from "$lib/call-bus.svelte.js";
   import {
+    findUncrossedCell,
     generateGrid,
     getWaitingNumber,
     isRowComplete,
@@ -12,14 +13,14 @@
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playBingo, playWaiting } from "$lib/voice.js";
 
-  /**
-   * @typedef {Object} Props
-   * @property {string} [storagePrefix] localStorage key prefix; allows multiple
-   *   independent boards (e.g. user vs master)
-   */
+  const STORAGE_PREFIX = "loto";
 
-  /** @type {Props} */
-  let { storagePrefix = "loto" } = $props();
+  function prefersReducedMotion() {
+    return (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    );
+  }
 
   let grid = $state(/** @type {number[][] | null} */ (null));
   let crossed = $state(/** @type {boolean[][]} */ ([]));
@@ -38,6 +39,10 @@
   let toastTimer = null;
   const celebratedRows = new Set();
   const notifiedWaitingRows = new Set();
+  // Last bus draw we acted on. Compared against bus.lastDrawn.at so the
+  // auto-tick effect only fires on a NEW draw — re-runs caused by
+  // crossed/grid changes (manual untick, clear, regen) skip cleanly.
+  let lastHandledDrawAt = 0;
 
   // Memoized per-row completeness — avoid 81×/render isRowComplete calls
   const rowCompleteness = $derived(
@@ -63,14 +68,14 @@
     }, 5000);
   }
 
-  // Initial load from localStorage. Re-runs if storagePrefix changes.
+  // Initial load from localStorage. Re-runs if STORAGE_PREFIX changes.
   $effect(() => {
-    const savedGrid = loadGrid(storagePrefix);
+    const savedGrid = loadGrid(STORAGE_PREFIX);
     if (!savedGrid) return;
 
     grid = savedGrid;
     const savedCrossed =
-      loadCrossedState(storagePrefix) ??
+      loadCrossedState(STORAGE_PREFIX) ??
       savedGrid.map((row) => row.map(() => false));
     crossed = savedCrossed;
 
@@ -85,7 +90,7 @@
 
   // Persist crossed state on change
   $effect(() => {
-    if (crossed.length > 0) saveCrossedState(crossed, storagePrefix);
+    if (crossed.length > 0) saveCrossedState(crossed, STORAGE_PREFIX);
   });
 
   // Detect newly completed and waiting rows. Two passes prevent skipped resets.
@@ -125,29 +130,44 @@
     }
   });
 
-  // Stop any in-flight clip on unmount so audio doesn't outlive the board.
-  $effect(() => () => cancelPlayback());
+  // Stop any in-flight clip + dismiss any pending toast on unmount so
+  // audio and timers don't outlive the board.
+  $effect(() => () => {
+    cancelPlayback();
+    dismissToast();
+  });
 
-  // Auto-tick on master draw (only in "both" mode). Set-only — never
-  // un-marks an already-crossed cell, so manual taps and auto-tick
-  // can't fight each other. Forward-only: only marks the most recent
-  // draw, doesn't backfill prior calls when mode flips to "both"
-  // mid-game (use the master's "Ván mới" if you need a fresh state).
+  // Bingo modal: window-level Escape so it works regardless of which
+  // element holds focus (the inline backdrop button rarely does).
+  $effect(() => {
+    if (!showCongrats) return;
+    /** @param {KeyboardEvent} e */
+    const onKey = (e) => {
+      if (e.key === "Escape") showCongrats = false;
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  // Auto-tick on master draw (only in "both" mode). The effect tracks
+  // `bus.lastDrawn` reactively, but `grid`/`crossed` are read inside a
+  // peek — we only want to fire when a NEW draw arrives, not when the
+  // user manually unticks, clears, or regenerates. Comparing
+  // `drawn.at` against the last-handled timestamp blocks re-marks.
   $effect(() => {
     const drawn = bus.lastDrawn;
     if (!drawn) return;
+    if (drawn.at === lastHandledDrawAt) return;
+    lastHandledDrawAt = drawn.at;
     if (settings.mode !== "both") return;
     if (!grid || crossed.length === 0) return;
-    for (let r = 0; r < grid.length; r++) {
-      for (let c = 0; c < grid[r].length; c++) {
-        if (grid[r][c] === drawn.num && !crossed[r][c]) {
-          crossed = crossed.map((row, ri) =>
-            ri === r ? row.map((v, ci) => (ci === c ? true : v)) : row,
-          );
-          return;
-        }
-      }
-    }
+    const target = findUncrossedCell(grid, crossed, drawn.num);
+    if (!target) return;
+    crossed = crossed.map((row, ri) =>
+      ri === target.row
+        ? row.map((v, ci) => (ci === target.col ? true : v))
+        : row,
+    );
   });
 
   function handleGenerate() {
@@ -157,11 +177,13 @@
     const newCrossed = newGrid.map((row) => row.map(() => false));
     grid = newGrid;
     crossed = newCrossed;
-    saveGrid(newGrid, storagePrefix);
-    saveCrossedState(newCrossed, storagePrefix);
+    saveGrid(newGrid, STORAGE_PREFIX);
+    saveCrossedState(newCrossed, STORAGE_PREFIX);
     celebratedRows.clear();
     notifiedWaitingRows.clear();
     dismissToast();
+    showCongrats = false;
+    resetBus();
   }
 
   function handleClear() {
@@ -174,6 +196,7 @@
     notifiedWaitingRows.clear();
     dismissToast();
     showCongrats = false;
+    resetBus();
   }
 
   /**
@@ -181,17 +204,16 @@
    * @param {number} col
    */
   function handleCellClick(row, col) {
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.vibrate &&
+      !prefersReducedMotion()
+    ) {
       navigator.vibrate(10);
     }
     crossed = crossed.map((r, ri) =>
       ri === row ? r.map((v, ci) => (ci === col ? !v : v)) : r
     );
-  }
-
-  /** @param {KeyboardEvent} e */
-  function onModalKeydown(e) {
-    if (e.key === "Escape") showCongrats = false;
   }
 
   // Tân Tân physical card: 3 stacked 3x9 mini-cards with these labels
@@ -278,7 +300,7 @@
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
                            {isCrossed
                              ? rowComplete
-                               ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                               ? 'cell-crossed cell-crossed-win bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-200'
                                : 'cell-crossed bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300'
                              : 'bg-white dark:bg-slate-800 text-black dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
                   >
@@ -288,30 +310,10 @@
               {/each}
             </div>
           {/each}
-          <div class="section-label">
-            <span class="flex items-center gap-1">
-              Made by
-              <a
-                href="https://miti99.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="underline hover:text-indigo-600 dark:hover:text-indigo-300"
-              >
-                miti99
-              </a>
-              with
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-label="trái tim"
-                class="inline w-3.5 h-3.5 text-red-500"
-              >
-                <path
-                  d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4.5 4.5 8.5C19 16.65 12 21 12 21z"
-                ></path>
-              </svg>
-            </span>
-          </div>
+          <!-- Decorative bottom band (matches the section-label hatch).
+               Attribution lives in the page footer, not here, to avoid
+               duplicating "Made by miti99". -->
+          <div class="section-label" aria-hidden="true"></div>
         </div>
         <!-- Right frame -->
         <div class="section-divider-vertical" aria-hidden="true"></div>
@@ -319,16 +321,19 @@
     </div>
 
     {#if toast}
+      <!-- Anchor toast ABOVE the grid (not centered over playable cells)
+           so it announces without blocking row taps. Pointer-events
+           still routed to the dismiss button only. -->
       <div
         role="status"
         aria-live="polite"
-        class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+        class="absolute left-1/2 -translate-x-1/2 -top-3 sm:-top-4 z-10 pointer-events-none"
       >
         <button
           type="button"
           onclick={dismissToast}
           aria-label="Đóng thông báo"
-          class="pointer-events-auto px-6 py-3 rounded-2xl bg-amber-500/90 dark:bg-amber-600/90 text-white text-xl sm:text-2xl font-black shadow-xl animate-toast"
+          class="pointer-events-auto px-5 py-2.5 rounded-2xl bg-amber-500/95 dark:bg-amber-600/95 text-white text-lg sm:text-xl font-black shadow-xl animate-toast"
         >
           {toast}
         </button>
@@ -397,7 +402,6 @@
       type="button"
       aria-label="Đóng"
       onclick={() => (showCongrats = false)}
-      onkeydown={onModalKeydown}
       class="absolute inset-0 cursor-default"
     ></button>
     <div
@@ -415,12 +419,16 @@
 
       <h2
         id="congrats-title"
-        class="mt-6 text-3xl font-black bg-gradient-to-r from-amber-500 via-pink-500 to-purple-500 bg-clip-text text-transparent"
+        class="mt-6 text-4xl font-black bg-gradient-to-r from-amber-500 via-pink-500 to-purple-500 bg-clip-text text-transparent"
       >
         Kinh!
       </h2>
-      <p class="mt-3 text-lg text-slate-700 dark:text-slate-200">
-        Hàng <span class="font-bold text-pink-500">{congratsRow}</span> đã đầy đủ!
+      <p class="mt-3 text-base text-slate-700 dark:text-slate-200">
+        Hàng
+        <span class="block text-5xl sm:text-6xl font-black text-pink-500 dark:text-pink-400 my-1 tabular-nums">
+          {congratsRow}
+        </span>
+        đã đầy đủ!
       </p>
       <p class="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
         Hãy hô to "Kinh!" 🎶
