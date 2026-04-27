@@ -12,9 +12,9 @@
 | File | Purpose |
 |------|---------|
 | `src/lib/PlayerBoard.svelte` | Reusable player card (9×9 grid rendered as 3 stacked 3×9 mini-cards: Tân Tân / An khang thịnh vượng / Tân Tân tốt nhất). Tall (3:5 on mobile; wider on sm+) cells with condensed bold black numbers (`tan-tan-num` font stack), white number cells, purple empty cells by default. Handles crossed state, bingo popup, "Chờ X" toast. Accepts `storagePrefix` prop for multi-card isolation. Empty cells use `--empty-cell-bg` CSS var from settings store. |
-| `src/lib/SettingsButton.svelte` | Gear icon + modal. 4 fieldsets: Giao diện (theme auto/light/dark), Chế độ quản trò (master mode toggle), Tự động xổ (auto-call + speed 1–10s), Màu ô trống (10 Excel color swatches). Reset-to-default button. Mounted on both `/` and `/master` headers. |
+| `src/lib/SettingsButton.svelte` | Gear icon + modal. 4 fieldsets: Giao diện (theme auto/light/dark), Chế độ quản trò (master mode toggle), Tự động xổ (auto-call + speed 1–10s), Màu ô trống (10 Excel color swatches). Reset-to-default button. Mounted on `/`. |
 | `src/lib/MasterPanel.svelte` | Host controls. New game / draw, "Số vừa xổ" hero token, "Thứ tự đã xổ" history list, 11×9 last-digit-aligned tracking grid (with circular tokens + draw-order overlay). No host's own player card (the player already has one above). "Xổ số" / "Bắt đầu / Dừng" button bound to auto-call. Mounted conditionally on `/` when `settings.masterMode === true`. |
-| `src/lib/PageFooter.svelte` | Footer with tagline ("Made by miti99 with ❤️ SVG icon") + link. Mounted on `/` and `/master`. |
+| `src/lib/PageFooter.svelte` | Footer with tagline ("Made by miti99 with ❤️ SVG icon") + link. Mounted on `/`. |
 
 ### Game Logic
 | File | Purpose |

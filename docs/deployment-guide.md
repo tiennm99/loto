@@ -35,9 +35,11 @@ No GitHub Actions involved; no repo secrets needed.
 ## GitHub Pages (redirect-only)
 
 `.github/workflows/deploy-github-pages.yml` no longer builds the app.
-It generates two tiny HTML pages (`/loto/index.html` and
-`/loto/master/index.html`) that immediately redirect to the canonical
-URL on Cloudflare Pages.
+It generates a tiny HTML page at `/loto/index.html` that immediately
+redirects to the canonical URL on Cloudflare Pages, plus a copy at
+`/loto/master/index.html` to catch legacy `/master` bookmarks (the app
+itself is single-page now; Cloudflare's `_redirects` collapses unknown
+paths back to `/`).
 
 The redirect uses both `<meta http-equiv="refresh">` (no-JS fallback)
 and a tiny inline script that preserves path / query / hash:
@@ -46,8 +48,9 @@ and a tiny inline script that preserves path / query / hash:
 location.replace("https://loto.miti99.com" + path + search + hash);
 ```
 
-So `tiennm99.github.io/loto/` → `loto.miti99.com/` and
-`tiennm99.github.io/loto/master` → `loto.miti99.com/master`.
+So `tiennm99.github.io/loto/` → `loto.miti99.com/` and any legacy
+`tiennm99.github.io/loto/master` link → `loto.miti99.com/` (after the
+intermediate `/master` redirect is collapsed by `_redirects`).
 
 The redirect runs on every push to `main`. If you want full GH Pages
 serving back (instead of the redirect), restore the prior version of
