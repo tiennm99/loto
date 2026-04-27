@@ -19,7 +19,7 @@
 ### Game Logic
 | File | Purpose |
 |------|---------|
-| `src/lib/game-logic.js` | Stateless utilities: generateGrid (constraint-aware picker — exact 5 per row & per col, ascending-sorted columns), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
+| `src/lib/game-logic.js` | Stateless utilities: generateGrid (constraint-aware picker — exact 5 per row & per col, ascending-sorted columns, soft "no 3 consecutive filled cols per row" via rejection sampling), saveGrid, loadGrid, saveCrossedState, loadCrossedState, isRowComplete, getWaitingNumber. |
 | `src/lib/settings-store.svelte.js` | Reactive global UI settings via Svelte 5 runes. Stores 5 keys: `theme` (enum: "auto" / "light" / "dark"), `masterMode` (bool), `autoCallEnabled` (bool), `autoCallSpeed` (1–10), `emptyCellColor` (hex). Persisted to localStorage `loto_settings`. Pushes values to CSS vars and `<html class="dark">` on `:root`. Per-key validators preserve old data. |
 
 ### Styling

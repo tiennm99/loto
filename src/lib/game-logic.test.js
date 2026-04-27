@@ -94,6 +94,20 @@ describe("generateGrid — column number ranges (lô tô hội chợ Tân Tân)"
     }
   });
 
+  it("no row has 3 consecutive filled columns (rejection-sampled soft constraint)", () => {
+    for (let trial = 0; trial < 300; trial++) {
+      const g = generateGrid();
+      for (let r = 0; r < NUM_ROWS; r++) {
+        for (let c = 0; c + 2 < NUM_COLS; c++) {
+          expect(
+            !(g[r][c] > 0 && g[r][c + 1] > 0 && g[r][c + 2] > 0),
+            `trial=${trial} row=${r} cols ${c},${c + 1},${c + 2}`,
+          ).toBe(true);
+        }
+      }
+    }
+  });
+
   it("col 0 only holds numbers from 1-9 (5 per card)", () => {
     const g = generateGrid();
     const col0 = g.map((r) => r[0]).filter((n) => n > 0);
