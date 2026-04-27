@@ -12,14 +12,18 @@ now", see `docs/project-overview-pdr.md` and `docs/codebase-summary.md`.
 - "Quản trò đọc số" voice now speaks Chờ/Kinh on master in "both" mode
 - One-shot migration: `masterMode: true` → `mode: "both"`
 
+### UI Polish v2 + Installable PWA (2026-04-27)
+- **Font**: Roboto Condensed self-hosted via @fontsource (Latin + Vietnamese subsets), swapped into `tan-tan-num` stack
+- **Empty State**: New `MasterEmptyState.svelte` component for first-run host (mirrors player UX)
+- **Mode Picker**: 3-way segmented toggle with inline SVG glyphs (player/master/both)
+- **Color Picker**: Bordered card with "Mẫu" (presets) + "Tuỳ chỉnh" (custom input) sections
+- **Header Polish**: Decorative dashes flanking subline (replaced all-caps tracking)
+- **PWA**: @vite-pwa/sveltekit generates SW + manifest. App shell precache (~353 KB). Audio runtime caching (CacheFirst). Auto-update w/ reload toast. Works offline at fairground (no signal venues)
+
 ## Idea Phase
 
 ### Undo Last Cell
 Allow player to undo the most recent cross/uncross action. Requires change history or state snapshot. **Status**: Idea (low priority)
-
-
-### PWA Install
-Add service worker and manifest for "Install App" prompt on Android/iOS. **Status**: Idea (would require server-side components)
 
 ## Considered Phase
 
@@ -86,4 +90,4 @@ All decisions follow **YAGNI** (You Aren't Gonna Need It), **KISS** (Keep It Sim
 Future work gates on **real user demand**, not speculation.
 
 Last reviewed: 2026-04-27
-Last synced: 2026-04-27 (6-phase refactor)
+Last synced: 2026-04-27 (UI polish v2 + PWA shipped)

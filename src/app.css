@@ -1,4 +1,10 @@
 @import "tailwindcss";
+/* Self-hosted Roboto Condensed Bold for the .tan-tan-num class
+   (player numbers + master hero). Fontsource declares per-subset
+   @font-face blocks with `unicode-range` so the browser only fetches
+   the Vietnamese subset when those codepoints are rendered. Bold
+   weight only — that's all .tan-tan-num uses. */
+@import "@fontsource/roboto-condensed/700.css";
 
 /* Class-based dark-mode variant. The settings store toggles `class="dark"`
    on <html>, mirroring OS preference when theme="auto" or honoring the
@@ -132,13 +138,16 @@ body {
    on platforms without one so the digits still read tall-and-tight. */
 .tan-tan-num {
   font-family:
+    "Roboto Condensed",
     "Arial Narrow",
     "Avenir Next Condensed",
-    "Roboto Condensed",
     "Liberation Sans Narrow",
     system-ui,
     sans-serif;
-  font-weight: 900;
+  /* fontsource ships Roboto Condensed at 700; bumping to 900 (the
+     previous max) would fall back to system fonts. 700 + tight
+     letter-spacing keeps the tall-condensed look. */
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
 }

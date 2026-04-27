@@ -1,6 +1,27 @@
+import { readFileSync } from "node:fs";
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { SvelteKitPWA } from "@vite-pwa/sveltekit";
 import { defineConfig, loadEnv } from "vite";
+
+// Precache the default voice's clips so the app is fully offline-capable
+// on first install (without bloating the install with every voice).
+// Alternate voices fall through to runtime CacheFirst on first play.
+const audioManifest = JSON.parse(
+  readFileSync("./static/audio/manifest.json", "utf8"),
+);
+const defaultVoiceId = audioManifest.voices[0]?.id ?? "hoai-my";
+const clipNames = [
+  ...Array.from({ length: 90 }, (_, i) => String(i + 1)),
+  "cho",
+  "kinh",
+];
+const defaultVoicePrecacheEntries = clipNames.map((n) => ({
+  url: `/audio/${defaultVoiceId}/${n}.mp3`,
+  // Static asset with a stable name; Workbox needs a revision string
+  // to track changes. Bump the prefix when audio is regenerated.
+  revision: `audio-v1-${defaultVoiceId}-${n}`,
+}));
 
 export default defineConfig(({ mode }) => {
   // .env.local lives outside process.env at config-eval time; loadEnv reads it.
@@ -10,7 +31,45 @@ export default defineConfig(({ mode }) => {
   const port = Number(env.CODESERVER_PORT ?? 3000);
 
   return {
-    plugins: [tailwindcss(), sveltekit()],
+    plugins: [
+      tailwindcss(),
+      sveltekit(),
+      SvelteKitPWA({
+        // Do NOT add `skipWaiting` without a reload-prompt UI — it would
+        // swap the SW mid-game and lose state.
+        registerType: "autoUpdate",
+        // Ship a hand-written manifest so the icons/theme stay aligned
+        // with /static; the plugin can also generate one but mixing is
+        // confusing.
+        strategies: "generateSW",
+        manifest: false,
+        includeAssets: ["icons/*.png", "audio/**/*.mp3"],
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,svg,png,woff2,webmanifest}"],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+          // App shell + DEFAULT voice clips → guaranteed offline. Other
+          // voices fall through to the CacheFirst runtime rule below
+          // (cached on first play, offline thereafter).
+          additionalManifestEntries: defaultVoicePrecacheEntries,
+          runtimeCaching: [
+            {
+              urlPattern: /\/audio\/.*\.mp3$/,
+              handler: "CacheFirst",
+              options: {
+                cacheName: "loto-audio",
+                expiration: {
+                  // Headroom for future voice growth: 4× current 184 clips.
+                  maxEntries: 400,
+                  maxAgeSeconds: 60 * 60 * 24 * 30,
+                },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
+        },
+        devOptions: { enabled: false },
+      }),
+    ],
     server: {
       port,
       host: true,

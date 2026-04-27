@@ -24,9 +24,12 @@
         Lô tô
       </h1>
       <p
-        class="text-xs sm:text-sm uppercase tracking-[0.28em] text-slate-600 dark:text-slate-300 italic mt-1.5 font-medium"
+        class="flex items-center justify-center gap-2 text-xs sm:text-sm
+               text-slate-600 dark:text-slate-300 mt-1.5 font-medium"
       >
-        Hội chợ TN1
+        <span aria-hidden="true" class="block w-6 sm:w-8 h-px bg-slate-400/60 dark:bg-slate-500/50"></span>
+        <span>🏮 Hội chợ TN1</span>
+        <span aria-hidden="true" class="block w-6 sm:w-8 h-px bg-slate-400/60 dark:bg-slate-500/50"></span>
       </p>
     </header>
 

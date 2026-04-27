@@ -18,10 +18,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9",
+    "@fontsource/roboto-condensed": "^5.2.8",
     "@sveltejs/adapter-static": "^3",
     "@sveltejs/kit": "^2",
     "@sveltejs/vite-plugin-svelte": "^6",
     "@tailwindcss/vite": "^4",
+    "@vite-pwa/sveltekit": "^1.1.0",
     "eslint": "^9",
     "eslint-plugin-svelte": "^2",
     "globals": "^15",

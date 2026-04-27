@@ -177,9 +177,27 @@ PlayerBoard:
 
 Each draw creates a new object (even repeat numbers) to ensure reactive re-fire.
 
-## Offline Capability
+## Offline Capability & PWA
 
-All state is localStorage. No API calls. Fully functional offline after initial load.
+**Static Storage**: All game state in localStorage. No API calls. Fully functional offline.
+
+**Service Worker**: @vite-pwa/sveltekit auto-generates `/sw.js` with:
+- App shell precache (~353 KB): HTML, CSS, JS bundles for instant load
+- Audio runtime caching: Voice clips cached on-demand (CacheFirst strategy)
+- Navigation: NetworkFirst (try network, fallback to cache)
+- Auto-update: Detects new versions, shows reload toast, skipWaiting on user action
+
+**Manifest**: `/manifest.webmanifest` enables install prompt on Android/iOS:
+- Display: `standalone` (fullscreen app-like mode, no browser chrome)
+- Theme colors: Indigo primary, white background
+- Icons: 192px + 512px PNG (auto-generated)
+- Start URL: `/` with basePath awareness
+
+**Installation Flow**:
+1. App loads, registers SW (production only, not dev)
+2. Browser detects manifest → shows install prompt (native, no custom banner)
+3. User installs → app appears on home screen, launches in standalone mode
+4. Updates: SW checks for new version; if found, toast appears; user can reload
 
 Last reviewed: 2026-04-27
-Last synced: 2026-04-27 (three-mode + auto-tick feature)
+Last synced: 2026-04-27 (UI polish v2 + PWA: font, mode picker, color picker, empty state, PWA stack)

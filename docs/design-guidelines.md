@@ -35,6 +35,7 @@ All colors have corresponding `dark:` variants. Tailwind's `prefers-color-scheme
 ## Typography
 
 - **Font**: Geist Sans (Google Fonts), fallback to Arial/Helvetica.
+- **Grid numbers**: Roboto Condensed (self-hosted via @fontsource/roboto-condensed, font-display: swap) in `tan-tan-num` stack, bold weight.
 - **Headings**: Extrabold (font-extrabold) for main title, bold (font-bold) for secondary.
 - **Body**: Regular weight, slate-600 (light) / slate-400 (dark).
 - **Emphasis**: `<strong>` for important copy (e.g., button labels in instructions).
@@ -65,12 +66,19 @@ All colors have corresponding `dark:` variants. Tailwind's `prefers-color-scheme
 ## Settings & UI Toggles
 
 ### Mode Picker (SettingsButton)
-Three-way toggle in settings modal:
-- **Player mode** (`mode: "player"`) — PlayerBoard only, default UX for players
-- **Master mode** (`mode: "master"`) — MasterPanel only, host-only view (e.g., projector)
-- **Both mode** (`mode: "both"`) — PlayerBoard + MasterPanel stacked inline, master auto-ticks player board on draw
+Three-way segmented picker in settings modal with inline SVG glyphs:
+- **Player mode** (rectangle icon) — PlayerBoard only, default UX for players
+- **Master mode** (rounded ellipse icon) — MasterPanel only, host-only view (e.g., projector)
+- **Both mode** (double-box icon) — PlayerBoard + MasterPanel stacked inline, master auto-ticks player board on draw
 
-Mode selection is persisted to localStorage and applied immediately.
+SVG icons hand-drawn from primitives (no icon library). Selection persisted to localStorage.
+
+### Color Picker (SettingsButton)
+Grouped card with two sub-sections:
+- **Mẫu** (Presets): 10 Excel color swatches in a flex row (purple, blue, cyan, green, yellow, orange, red, pink, gray, black)
+- **Tuỳ chỉnh** (Custom): Native `<input type="color">` for custom hex entry
+
+Card has rounded border, shadow, padding. Compact layout fits mobile.
 
 ## Component Patterns
 
@@ -159,5 +167,12 @@ Keep emojis rare; use for celebration only.
 - Focus states: Implicit via Tailwind (`focus:ring-2`), add if extending components.
 - Contrast: Tailwind slate/indigo/emerald combos meet WCAG AA.
 - Dark mode: Respects `prefers-color-scheme`, not forced.
+- SVG glyphs: Simple, high-contrast shapes (no fill patterns); keyboard-navigable via fieldset + label.
 
-Last reviewed: 2026-04-26
+## PWA Features
+
+- **Install Prompt**: Native browser-driven (no custom banner). Manifest enables Android/iOS install.
+- **Offline**: App shell precache enables instant load. Audio cached on first play.
+- **Auto-Update**: SW detects new version; user sees reload toast (non-intrusive).
+
+Last reviewed: 2026-04-27

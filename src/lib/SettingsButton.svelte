@@ -251,12 +251,29 @@
               type="button"
               aria-pressed={selected}
               onclick={() => pickMode(v)}
-              class="px-2 py-2 rounded-lg border-2 text-sm font-medium transition-all
+              class="flex flex-col items-center gap-1 px-2 py-2 rounded-lg border-2 text-sm font-medium transition-all
                      {selected
                        ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
                        : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
             >
-              {label}
+              {#if v === "player"}
+                <svg viewBox="0 0 24 16" class="w-7 h-5" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <rect x="1" y="1" width="22" height="14" rx="1.5" />
+                  <path d="M1 6h22M1 11h22M8 1v14M16 1v14" />
+                </svg>
+              {:else if v === "master"}
+                <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 11l14-6v14L3 13z" />
+                  <path d="M3 11v2" />
+                  <path d="M19 8a4 4 0 0 1 0 8" />
+                </svg>
+              {:else}
+                <svg viewBox="0 0 24 20" class="w-7 h-6" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <rect x="1" y="1" width="16" height="11" rx="1.2" />
+                  <rect x="7" y="7" width="16" height="11" rx="1.2" />
+                </svg>
+              {/if}
+              <span>{label}</span>
             </button>
           {/each}
         </div>
@@ -364,37 +381,49 @@
           Màu ô trống
         </legend>
 
-        <div class="flex items-center gap-3 mb-3">
-          <input
-            type="color"
-            aria-label="Chọn màu tuỳ ý"
-            value={settings.emptyCellColor}
-            oninput={onPickerInput}
-            class="w-12 h-10 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer bg-transparent"
-          />
-          <code
-            class="text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums"
-          >
-            {settings.emptyCellColor}
-          </code>
-        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 space-y-3">
+          <div>
+            <p class="text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+              Tuỳ chỉnh
+            </p>
+            <div class="flex items-center gap-3">
+              <input
+                type="color"
+                aria-label="Chọn màu tuỳ ý"
+                value={settings.emptyCellColor}
+                oninput={onPickerInput}
+                class="w-12 h-10 rounded-lg border border-slate-300 dark:border-slate-600 cursor-pointer bg-transparent"
+              />
+              <code
+                class="text-sm font-mono text-slate-600 dark:text-slate-300 tabular-nums"
+              >
+                {settings.emptyCellColor}
+              </code>
+            </div>
+          </div>
 
-        <div class="grid grid-cols-5 gap-2">
-          {#each PRESETS as hex (hex)}
-            {@const selected =
-              settings.emptyCellColor.toLowerCase() === hex.toLowerCase()}
-            <button
-              type="button"
-              aria-label="Đặt màu {hex}"
-              aria-pressed={selected}
-              onclick={() => pickColor(hex)}
-              style:background-color={hex}
-              class="aspect-square rounded-lg border-2 transition-all
-                     {selected
-                       ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-300 dark:ring-indigo-600 scale-110'
-                       : 'border-slate-200 dark:border-slate-600 hover:scale-105'}"
-            ></button>
-          {/each}
+          <div>
+            <p class="text-xs uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+              Mẫu sẵn
+            </p>
+            <div class="grid grid-cols-5 gap-2">
+              {#each PRESETS as hex (hex)}
+                {@const selected =
+                  settings.emptyCellColor.toLowerCase() === hex.toLowerCase()}
+                <button
+                  type="button"
+                  aria-label="Đặt màu {hex}"
+                  aria-pressed={selected}
+                  onclick={() => pickColor(hex)}
+                  style:background-color={hex}
+                  class="aspect-square rounded-lg border-2 transition-all
+                         {selected
+                           ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-300 dark:ring-indigo-600 scale-110'
+                           : 'border-slate-200 dark:border-slate-600 hover:scale-105'}"
+                ></button>
+              {/each}
+            </div>
+          </div>
         </div>
       </fieldset>
 
@@ -404,9 +433,10 @@
           onclick={() => resetSettings()}
           class="px-4 py-2 rounded-full text-sm font-medium
                  text-slate-600 dark:text-slate-300
+                 border border-slate-300 dark:border-slate-600
                  hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
         >
-          Mặc định
+          Đặt lại
         </button>
         <button
           type="button"
