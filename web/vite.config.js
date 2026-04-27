@@ -7,10 +7,12 @@ import { defineConfig, loadEnv } from "vite";
 // Precache the default voice's clips so the app is fully offline-capable
 // on first install (without bloating the install with every voice).
 // Alternate voices fall through to runtime CacheFirst on first play.
+// `audio-manifest.js` is the single source of truth for voice ids; we
+// duplicate the read here because vite.config can't import .svelte.js.
 const audioManifest = JSON.parse(
   readFileSync("./static/audio/manifest.json", "utf8"),
 );
-const defaultVoiceId = audioManifest.voices[0]?.id ?? "hoai-my";
+const defaultVoiceId = audioManifest.voices[0].id;
 const clipNames = [
   ...Array.from({ length: 90 }, (_, i) => String(i + 1)),
   "cho",
@@ -18,8 +20,8 @@ const clipNames = [
 ];
 const defaultVoicePrecacheEntries = clipNames.map((n) => ({
   url: `/audio/${defaultVoiceId}/${n}.mp3`,
-  // Static asset with a stable name; Workbox needs a revision string
-  // to track changes. Bump the prefix when audio is regenerated.
+  // Workbox needs a revision string to invalidate stale clips.
+  // Bump the prefix when audio is regenerated.
   revision: `audio-v1-${defaultVoiceId}-${n}`,
 }));
 
@@ -43,7 +45,6 @@ export default defineConfig(({ mode }) => {
         // confusing.
         strategies: "generateSW",
         manifest: false,
-        includeAssets: ["icons/*.png", "audio/**/*.mp3"],
         workbox: {
           globPatterns: ["**/*.{js,css,html,svg,png,woff2,webmanifest}"],
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
@@ -62,7 +63,8 @@ export default defineConfig(({ mode }) => {
                   maxEntries: 400,
                   maxAgeSeconds: 60 * 60 * 24 * 30,
                 },
-                cacheableResponse: { statuses: [0, 200] },
+                // Audio is same-origin → no need to allow opaque (0).
+                cacheableResponse: { statuses: [200] },
               },
             },
           ],

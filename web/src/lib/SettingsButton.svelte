@@ -333,9 +333,15 @@
         {#if settings.mode !== "player"}
           <div class="mb-2">
             {@render switchRow("Quản trò đọc số", settings.voiceEnabledMaster, toggleVoiceMaster)}
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
-              Đọc số đã xổ + báo Chờ/Kinh khi ở "Cả hai".
-            </p>
+            {#if settings.mode === "both"}
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
+                Đọc số đã xổ + báo Chờ/Kinh.
+              </p>
+            {:else}
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
+                Đọc số đã xổ.
+              </p>
+            {/if}
           </div>
         {/if}
 
