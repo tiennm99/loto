@@ -62,6 +62,16 @@ All colors have corresponding `dark:` variants. Tailwind's `prefers-color-scheme
 - **Max width**: `max-w-lg` (player), `max-w-2xl` (host) — centered with `mx-auto`.
 - **Flex wrap**: Use `flex flex-wrap gap-1.5` for number history chips.
 
+## Settings & UI Toggles
+
+### Mode Picker (SettingsButton)
+Three-way toggle in settings modal:
+- **Player mode** (`mode: "player"`) — PlayerBoard only, default UX for players
+- **Master mode** (`mode: "master"`) — MasterPanel only, host-only view (e.g., projector)
+- **Both mode** (`mode: "both"`) — PlayerBoard + MasterPanel stacked inline, master auto-ticks player board on draw
+
+Mode selection is persisted to localStorage and applied immediately.
+
 ## Component Patterns
 
 ### Button Styles

@@ -29,6 +29,12 @@
     ["dark", "Tối"],
   ]);
 
+  const MODES = /** @type {const} */ ([
+    ["player", "Người chơi"],
+    ["master", "Quản trò"],
+    ["both", "Cả hai"],
+  ]);
+
   /** @param {string} hex */
   function pickColor(hex) {
     settings.emptyCellColor = hex;
@@ -48,8 +54,9 @@
     saveSettings();
   }
 
-  function toggleMaster() {
-    settings.masterMode = !settings.masterMode;
+  /** @param {"player"|"master"|"both"} m */
+  function pickMode(m) {
+    settings.mode = m;
     saveSettings();
   }
 
@@ -75,6 +82,11 @@
 
   function toggleVoicePlayer() {
     settings.voiceEnabledPlayer = !settings.voiceEnabledPlayer;
+    saveSettings();
+  }
+
+  function toggleVoiceWaitingNumber() {
+    settings.voiceWaitingNumber = !settings.voiceWaitingNumber;
     saveSettings();
   }
 
@@ -150,11 +162,11 @@
     >
       <h2
         id="settings-title"
-        class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1"
+        class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1"
       >
         Cài đặt
       </h2>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-5">
         Tuỳ chỉnh giao diện bảng lô tô
       </p>
 
@@ -216,28 +228,43 @@
         </div>
       {/snippet}
 
-      <!-- Master mode -->
+      <!-- Display mode: player / master / both -->
       <fieldset class="mb-5">
         <legend
           class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
         >
-          Chế độ quản trò
+          Chế độ hiển thị
         </legend>
-        <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
-          Hiện bảng quản trò bên dưới bảng người chơi
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
+          Chọn vai trò để chỉ hiện phần liên quan
         </p>
-        {@render switchRow("Hiện bảng quản trò", settings.masterMode, toggleMaster)}
+        <div class="grid grid-cols-3 gap-2">
+          {#each MODES as [v, label] (v)}
+            {@const selected = settings.mode === v}
+            <button
+              type="button"
+              aria-pressed={selected}
+              onclick={() => pickMode(v)}
+              class="px-2 py-2 rounded-lg border-2 text-sm font-medium transition-all
+                     {selected
+                       ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
+                       : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
+            >
+              {label}
+            </button>
+          {/each}
+        </div>
       </fieldset>
 
-      <!-- Auto-call (only relevant when master mode is on) -->
-      {#if settings.masterMode}
+      <!-- Auto-call (only relevant when master panel is visible) -->
+      {#if settings.mode !== "player"}
       <fieldset class="mb-5">
         <legend
           class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
         >
           Tự động xổ
         </legend>
-        <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
           Tự xổ số liên tiếp khi đang ở chế độ quản trò
         </p>
         <div class="mb-3">
@@ -245,7 +272,7 @@
         </div>
         {#if settings.autoCallEnabled}
           <label class="block">
-            <span class="text-xs text-slate-600 dark:text-slate-300">
+            <span class="text-sm text-slate-700 dark:text-slate-200">
               Tốc độ: <strong class="tabular-nums"
                 >{settings.autoCallSpeed}</strong
               > giây/số
@@ -273,18 +300,32 @@
         >
           Âm thanh
         </legend>
-        <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
           Đọc số bằng tiếng Việt
         </p>
 
         <div class="mb-2">
           {@render switchRow("Quản trò đọc số", settings.voiceEnabledMaster, toggleVoiceMaster)}
+          {#if settings.mode !== "player"}
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
+              Đọc số đã xổ + báo Chờ/Kinh khi ở "Cả hai".
+            </p>
+          {/if}
         </div>
 
         {@render switchRow("Báo Chờ / Kinh", settings.voiceEnabledPlayer, toggleVoicePlayer)}
 
+        {#if settings.voiceEnabledPlayer}
+          <div class="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-600">
+            {@render switchRow("Đọc thêm số đang chờ", settings.voiceWaitingNumber, toggleVoiceWaitingNumber)}
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
+              Tắt: chỉ nói "Chờ". Bật: nói "Chờ {`{số}`}".
+            </p>
+          </div>
+        {/if}
+
         {#if VOICES.length > 1}
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 mb-1">
+          <p class="text-sm font-medium text-slate-600 dark:text-slate-300 mt-3 mb-1.5">
             Giọng đọc
           </p>
           <div class="grid grid-cols-2 gap-2">

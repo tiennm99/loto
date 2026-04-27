@@ -24,25 +24,29 @@
         Lô tô
       </h1>
       <p
-        class="text-[0.65rem] sm:text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 italic mt-1"
+        class="text-xs sm:text-sm uppercase tracking-[0.28em] text-slate-600 dark:text-slate-300 italic mt-1.5 font-medium"
       >
         Hội chợ TN1
       </p>
     </header>
 
-    <PlayerBoard />
+    {#if settings.mode !== "master"}
+      <PlayerBoard />
+    {/if}
 
-    {#if settings.masterMode}
+    {#if settings.mode !== "player"}
       <section
-        class="mt-10"
+        class={settings.mode === "both" ? "mt-10" : ""}
         aria-label="Bảng quản trò"
         transition:slide={{ duration: 250 }}
       >
-        <h2
-          class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-orange-500 dark:text-orange-400"
-        >
-          Quản trò
-        </h2>
+        {#if settings.mode === "both"}
+          <h2
+            class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-orange-500 dark:text-orange-400"
+          >
+            Quản trò
+          </h2>
+        {/if}
         <MasterPanel />
       </section>
     {/if}

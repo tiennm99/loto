@@ -1,4 +1,5 @@
 <script>
+  import { bus } from "$lib/call-bus.svelte.js";
   import {
     generateGrid,
     getWaitingNumber,
@@ -91,6 +92,12 @@
   $effect(() => {
     if (!grid || crossed.length === 0) return;
 
+    // The master takes over announcer duties in "both" mode, so its
+    // voice flag also drives Chờ/Kinh. Solo players keep their own flag.
+    const announce =
+      settings.voiceEnabledPlayer ||
+      (settings.voiceEnabledMaster && settings.mode === "both");
+
     // Pass 1: at most one bingo popup per render
     for (let i = 0; i < grid.length; i++) {
       if (!celebratedRows.has(i) && isRowComplete(grid, crossed, i)) {
@@ -99,7 +106,7 @@
         congratsRow = i + 1;
         showCongrats = true;
         celebrationTier = celebratedRows.size >= 3 ? 2 : 1;
-        if (settings.voiceEnabledPlayer) playBingo();
+        if (announce) playBingo();
         break;
       }
     }
@@ -111,7 +118,7 @@
       if (waitNum !== null && !notifiedWaitingRows.has(i)) {
         notifiedWaitingRows.add(i);
         showToast(`Chờ ${waitNum}`);
-        if (settings.voiceEnabledPlayer) playWaiting(waitNum);
+        if (announce) playWaiting(waitNum);
       } else if (waitNum === null && notifiedWaitingRows.has(i)) {
         notifiedWaitingRows.delete(i);
       }
@@ -120,6 +127,28 @@
 
   // Stop any in-flight clip on unmount so audio doesn't outlive the board.
   $effect(() => () => cancelPlayback());
+
+  // Auto-tick on master draw (only in "both" mode). Set-only — never
+  // un-marks an already-crossed cell, so manual taps and auto-tick
+  // can't fight each other. Forward-only: only marks the most recent
+  // draw, doesn't backfill prior calls when mode flips to "both"
+  // mid-game (use the master's "Ván mới" if you need a fresh state).
+  $effect(() => {
+    const drawn = bus.lastDrawn;
+    if (!drawn) return;
+    if (settings.mode !== "both") return;
+    if (!grid || crossed.length === 0) return;
+    for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < grid[r].length; c++) {
+        if (grid[r][c] === drawn.num && !crossed[r][c]) {
+          crossed = crossed.map((row, ri) =>
+            ri === r ? row.map((v, ci) => (ci === c ? true : v)) : row,
+          );
+          return;
+        }
+      }
+    }
+  });
 
   function handleGenerate() {
     if (grid && !confirm("Bạn có muốn tạo lại bảng không?")) return;
@@ -243,14 +272,14 @@
                     onclick={() => handleCellClick(row, col)}
                     class="tan-tan-num relative flex items-center justify-center
                            aspect-[3/4] sm:aspect-[3/5]
-                           text-lg sm:text-2xl md:text-3xl
+                           text-xl sm:text-2xl md:text-3xl
                            border border-slate-400/50 dark:border-slate-600/40
                            transition-all select-none cursor-pointer active:scale-90
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
                            {isCrossed
                              ? rowComplete
-                               ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
-                               : 'cell-crossed bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-500'
+                               ? 'cell-crossed bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                               : 'cell-crossed bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300'
                              : 'bg-white dark:bg-slate-800 text-black dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
                   >
                     {num}
@@ -326,12 +355,12 @@
         {/each}
       </div>
     </div>
-    <p class="text-sm text-slate-500 dark:text-slate-400 italic">
+    <p class="text-base text-slate-600 dark:text-slate-300 italic">
       Nhấn
       <span class="font-semibold text-rose-500 dark:text-rose-400 not-italic">"Tạo bảng mới"</span>
       để bắt đầu chơi
     </p>
-    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
+    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
       🎫 Chúc cả nhà một ván vui vẻ
     </p>
   </div>
@@ -390,10 +419,10 @@
       >
         Kinh!
       </h2>
-      <p class="mt-3 text-lg text-slate-600 dark:text-slate-300">
+      <p class="mt-3 text-lg text-slate-700 dark:text-slate-200">
         Hàng <span class="font-bold text-pink-500">{congratsRow}</span> đã đầy đủ!
       </p>
-      <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">
+      <p class="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
         Hãy hô to "Kinh!" 🎶
       </p>
       <button

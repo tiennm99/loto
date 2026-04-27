@@ -63,6 +63,7 @@
 </script>
 
 <script>
+  import { broadcastDraw, resetBus } from "$lib/call-bus.svelte.js";
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playNumber } from "$lib/voice.js";
 
@@ -135,6 +136,7 @@
     autoRunning = false;
     state = createFreshState();
     lastCalled = null;
+    resetBus();
   }
 
   function handleDrawNext() {
@@ -146,6 +148,7 @@
     };
     lastCalled = next;
     scrollOnNextDraw = true;
+    broadcastDraw(next);
     if (settings.voiceEnabledMaster) playNumber(next);
   }
 
@@ -194,7 +197,7 @@
 
 {#if settings.autoCallEnabled && state && state.remaining.length > 0}
   <div
-    class="text-center text-xs text-slate-500 dark:text-slate-400 mb-4 tabular-nums"
+    class="text-center text-sm text-slate-600 dark:text-slate-300 mb-4 tabular-nums"
   >
     Tự động: {settings.autoCallSpeed}s/số
   </div>
@@ -205,7 +208,7 @@
   {@const lastIsLow = lastCalled <= 49}
   <div class="flex flex-col items-center mb-6">
     <div
-      class="text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2"
+      class="text-sm uppercase tracking-[0.2em] font-semibold text-slate-500 dark:text-slate-400 mb-2"
     >
       Số vừa xổ
     </div>
@@ -233,9 +236,9 @@
       </span>
     </div>
     {#if state}
-      <div class="mt-2 text-xs text-slate-400 dark:text-slate-500">
-        Đã xổ: {state.called.length}/90 &middot; Còn lại: {state.remaining
-          .length}
+      <div class="mt-2.5 text-sm text-slate-600 dark:text-slate-300 tabular-nums">
+        Đã xổ: <strong class="font-semibold">{state.called.length}</strong>/90
+        &middot; Còn lại: <strong class="font-semibold">{state.remaining.length}</strong>
       </div>
     {/if}
   </div>
@@ -244,19 +247,19 @@
 <!-- Called history -->
 {#if state && state.called.length > 0}
   <div class="mb-6 px-1">
-    <div class="text-xs text-slate-400 dark:text-slate-500 mb-1">
+    <div class="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
       Thứ tự đã xổ:
     </div>
     <div class="flex flex-wrap gap-1.5">
       {#each state.called as num, i (i)}
         {@const isLow = num <= 49}
         <span
-          class="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9
-                 text-sm sm:text-base font-black tabular-nums rounded-full
+          class="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10
+                 text-base sm:text-lg font-black tabular-nums rounded-full
                  border-[3px] bg-amber-50 dark:bg-amber-100
                  {isLow
-                   ? 'border-pink-500 dark:border-pink-400 text-pink-500 dark:text-pink-400'
-                   : 'border-emerald-500 dark:border-emerald-400 text-emerald-500 dark:text-emerald-400'}"
+                   ? 'border-pink-500 dark:border-pink-400 text-pink-600 dark:text-pink-500'
+                   : 'border-emerald-500 dark:border-emerald-400 text-emerald-600 dark:text-emerald-500'}"
         >
           {num}
         </span>
@@ -292,13 +295,13 @@
             <div
               class="flex items-center justify-center
                      w-[82%] h-[82%] rounded-full
-                     text-lg sm:text-xl font-black tabular-nums
+                     text-xl sm:text-2xl font-black tabular-nums
                      border-[3px] transition-all
                      {!isCalled
                        ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
                        : isLow
-                         ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-pink-500 dark:text-pink-400'
-                         : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-500 dark:text-emerald-400'}
+                         ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-pink-600 dark:text-pink-500'
+                         : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-600 dark:text-emerald-500'}
                      {isLast
                        ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
                        : ''}"
@@ -307,7 +310,7 @@
             </div>
             {#if isCalled}
               <span
-                class="absolute top-0.5 right-0.5 text-[9px] sm:text-[10px] font-semibold leading-none text-slate-500 dark:text-slate-400 tabular-nums"
+                class="absolute top-0.5 right-0.5 text-[10px] sm:text-[11px] font-bold leading-none text-slate-600 dark:text-slate-300 tabular-nums"
               >
                 {order}
               </span>
@@ -318,7 +321,7 @@
     </div>
   </div>
 {:else}
-  <div class="text-center text-slate-400 dark:text-slate-500 py-10 text-sm">
+  <div class="text-center text-slate-500 dark:text-slate-400 py-10 text-base">
     Nhấn "Ván mới" để bắt đầu
   </div>
 {/if}
