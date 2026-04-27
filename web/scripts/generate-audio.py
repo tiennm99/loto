@@ -57,10 +57,37 @@ def display_label(short_name: str, gender: str) -> str:
     return f"{given} ({gender_vi})"
 
 
+# Microsoft's TTS endpoint rate-limits aggressive concurrency and
+# occasionally returns empty streams. Cap parallelism + retry transient
+# failures so one voice run doesn't bail halfway through.
+CONCURRENCY = 4
+MAX_RETRIES = 4
+RETRY_BACKOFF_SEC = 1.5
+
+_sem: asyncio.Semaphore | None = None
+
+
+def _semaphore() -> asyncio.Semaphore:
+    global _sem
+    if _sem is None:
+        _sem = asyncio.Semaphore(CONCURRENCY)
+    return _sem
+
+
 async def synth(text: str, voice: str, out: str) -> None:
     import edge_tts
-    await edge_tts.Communicate(text, voice).save(out)
-    print(f"  {out}  ←  \"{text}\"")
+    from edge_tts.exceptions import NoAudioReceived
+
+    async with _semaphore():
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                await edge_tts.Communicate(text, voice).save(out)
+                print(f"  {out}  ←  \"{text}\"")
+                return
+            except NoAudioReceived:
+                if attempt == MAX_RETRIES:
+                    raise
+                await asyncio.sleep(RETRY_BACKOFF_SEC * attempt)
 
 
 async def main() -> None:
