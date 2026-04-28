@@ -1,9 +1,10 @@
 ---
 name: Per-row "Chờ" indicator
 phase: 5
-status: todo
+status: completed
 priority: medium
 effort: 1h
+completed: 2026-04-28
 ---
 
 # Phase 5 — Per-row "Chờ" visual indicator

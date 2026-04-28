@@ -133,6 +133,24 @@ body {
   );
 }
 
+/* Persistent visual cue when any of the section's 3 rows is in "Chờ"
+   (one cell from bingo). Amber matches the toast — `bg-amber-500/95`
+   in PlayerBoard — so users associate the same colour with the same
+   meaning. Inset ring so the label band keeps its natural width. */
+.section-label-waiting {
+  box-shadow: inset 0 0 0 2px rgb(245 158 11 / 0.6);
+  animation: section-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes section-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 2px rgb(245 158 11 / 0.45); }
+  50%      { box-shadow: inset 0 0 0 2px rgb(245 158 11 / 0.85); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-label-waiting { animation: none; }
+}
+
 /* Tân Tân BAMBOORAFT-style number — tall, condensed, heavy black. Stack
    prefers a system condensed face; falls back to negative letter-spacing
    on platforms without one so the digits still read tall-and-tight. */
@@ -187,7 +205,7 @@ body {
   position: absolute;
   top: 0;
   left: var(--x);
-  font-size: 2rem;
+  font-size: var(--size, 2rem);
   animation: confetti-fall 1.6s ease-in var(--delay) forwards;
   will-change: transform, opacity;
 }
