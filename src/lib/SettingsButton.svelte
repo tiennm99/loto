@@ -164,17 +164,24 @@
       class="absolute inset-0"
     ></div>
     <div
-      class="relative mx-4 max-w-sm sm:max-w-md w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 p-6 shadow-2xl animate-pop-in"
+      class="relative mx-4 max-w-sm sm:max-w-md w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-800 shadow-2xl animate-pop-in"
     >
-      <h2
-        id="settings-title"
-        class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1"
-      >
-        Cài đặt
-      </h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-5">
-        Tuỳ chỉnh giao diện bảng lô tô
-      </p>
+      <!-- Sticky title — pinned so the modal stays anchored on small
+           viewports (iPhone SE: 375x667) where the body would otherwise
+           push the heading off-screen. -->
+      <div class="sticky top-0 z-10 bg-white dark:bg-slate-800 px-6 pt-6 pb-3 rounded-t-3xl">
+        <h2
+          id="settings-title"
+          class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1"
+        >
+          Cài đặt
+        </h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          Tuỳ chỉnh giao diện bảng lô tô
+        </p>
+      </div>
+
+      <div class="px-6 pt-2">
 
       <!-- Theme -->
       <fieldset class="mb-5">
@@ -268,9 +275,14 @@
                   <path d="M19 8a4 4 0 0 1 0 8" />
                 </svg>
               {:else}
-                <svg viewBox="0 0 24 20" class="w-7 h-6" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                  <rect x="1" y="1" width="16" height="11" rx="1.2" />
-                  <rect x="7" y="7" width="16" height="11" rx="1.2" />
+                <!-- "Both": mini grid (player) + mini megaphone (master)
+                     side-by-side, so the glyph reads as the two roles
+                     combined rather than two stacked windows. -->
+                <svg viewBox="0 0 28 16" class="w-7 h-5" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <rect x="1" y="2" width="11" height="12" rx="1" />
+                  <path d="M1 6h11M1 10h11M5 2v12M9 2v12" />
+                  <path d="M16 6l9-3v10l-9-3z" stroke-linejoin="round" />
+                  <path d="M16 6v4" />
                 </svg>
               {/if}
               <span>{label}</span>
@@ -433,7 +445,12 @@
         </div>
       </fieldset>
 
-      <div class="flex justify-between gap-2">
+      </div>
+
+      <!-- Sticky action row: keep "Xong" reachable without scrolling
+           back when the body overflows (iPhone SE). Border-t separates
+           visually from content slipping behind. -->
+      <div class="sticky bottom-0 z-10 bg-white dark:bg-slate-800 px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex justify-between gap-2 rounded-b-3xl">
         <button
           type="button"
           onclick={() => resetSettings()}

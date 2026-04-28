@@ -1,9 +1,10 @@
 ---
 name: Mode picker glyph redesign
 phase: 3
-status: todo
+status: completed
 priority: medium
 effort: 45m
+completed: 2026-04-28
 ---
 
 # Phase 3 — Mode picker glyph redesign
