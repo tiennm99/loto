@@ -32,7 +32,9 @@
   // 12 confetti emoji indices. Stable per-render — values don't matter,
   // only the count drives the {#each}.
   const CONFETTI = Array.from({ length: 12 }, (_, i) => i);
-  const CONFETTI_EMOJI = ["🎊", "✨", "🎉", "🥳"];
+  // Hội-chợ flavour added (lantern, bamboo, chopsticks) so the
+  // celebration set reads as Vietnamese fair, not generic party.
+  const CONFETTI_EMOJI = ["🎊", "✨", "🎉", "🥳", "🥢", "🎋", "🏮"];
 
   // Plain refs (not reactive)
   /** @type {ReturnType<typeof setTimeout> | null} */
@@ -48,6 +50,18 @@
   const rowCompleteness = $derived(
     grid && crossed.length
       ? grid.map((_, r) => isRowComplete(grid, crossed, r))
+      : []
+  );
+
+  // Per-row "Chờ" flag — one cell away AND not already complete. Reuses
+  // rowCompleteness so we don't re-walk the row twice.
+  const waitingRows = $derived(
+    grid && crossed.length
+      ? grid.map(
+          (_, r) =>
+            !rowCompleteness[r] &&
+            getWaitingNumber(grid, crossed, r) !== null,
+        )
       : []
   );
 
@@ -110,7 +124,19 @@
         notifiedWaitingRows.add(i);
         congratsRow = i + 1;
         showCongrats = true;
-        celebrationTier = celebratedRows.size >= 3 ? 2 : 1;
+        // Tier 2 confetti: 2nd bingo, OR 1st bingo while another row
+        // is one cell away. The previous "3+ bingos" threshold rarely
+        // fired on a 9-row card so most wins felt under-celebrated.
+        const hasActiveCho = grid.some(
+          (_, r) =>
+            !celebratedRows.has(r) &&
+            getWaitingNumber(grid, crossed, r) !== null,
+        );
+        celebrationTier =
+          celebratedRows.size >= 2 ||
+          (celebratedRows.size >= 1 && hasActiveCho)
+            ? 2
+            : 1;
         if (announce) playBingo();
         break;
       }
@@ -219,6 +245,14 @@
     "TN1 (2014-2017)",
     "Độc-Đỉnh-Điên",
   ];
+
+  // Persistent ring on the section band when any of its 3 rows is
+  // waiting on a single number. Reduces reliance on the 5s toast.
+  const sectionHasWaiting = $derived(
+    SECTIONS.map((startRow) =>
+      waitingRows.slice(startRow, startRow + 3).some(Boolean)
+    )
+  );
 </script>
 
 <div class="flex flex-wrap justify-center gap-3 mb-6">
@@ -257,7 +291,11 @@
         <div class="section-divider-vertical" aria-hidden="true"></div>
         <div class="flex-1">
           {#each SECTIONS as startRow, sectionIdx (sectionIdx)}
-            <div class="section-label">{SECTION_LABELS[sectionIdx]}</div>
+            <div
+              class="section-label {sectionHasWaiting[sectionIdx] ? 'section-label-waiting' : ''}"
+            >
+              {SECTION_LABELS[sectionIdx]}
+            </div>
             <div class="loto-grid">
               {#each grid.slice(startRow, startRow + 3).flat() as num, idx (idx)}
                 {@const row = startRow + Math.floor(idx / 9)}
@@ -378,6 +416,7 @@
         style:--x="{(i * 8.3 + (i % 3) * 11) % 100}%"
         style:--delay="{(i * 37) % 400}ms"
         style:--rot="{(i * 67) % 360}deg"
+        style:--size="{(1.5 + ((i * 13) % 11) / 10).toFixed(2)}rem"
       >
         {CONFETTI_EMOJI[i % CONFETTI_EMOJI.length]}
       </span>
