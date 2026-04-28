@@ -1,9 +1,10 @@
 ---
 name: Settings modal sticky on small screens
 phase: 4
-status: todo
+status: completed
 priority: medium
 effort: 30m
+completed: 2026-04-28
 ---
 
 # Phase 4 — Settings modal sticky header/footer
