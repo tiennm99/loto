@@ -1,7 +1,7 @@
 <script>
+  import { processAutoTick } from "$lib/auto-tick.js";
   import { bus, resetBus } from "$lib/call-bus.svelte.js";
   import {
-    findUncrossedCell,
     generateGrid,
     getWaitingNumber,
     isRowComplete,
@@ -149,25 +149,19 @@
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  // Auto-tick on master draw (only in "both" mode). The effect tracks
-  // `bus.lastDrawn` reactively, but `grid`/`crossed` are read inside a
-  // peek — we only want to fire when a NEW draw arrives, not when the
-  // user manually unticks, clears, or regenerates. Comparing
-  // `drawn.at` against the last-handled timestamp blocks re-marks.
+  // Auto-tick on master draw (only in "both" mode). Reads `bus.lastDrawn`
+  // reactively; the dedup-by-`at` invariant lives in `processAutoTick` —
+  // see `auto-tick.test.js` for the full case matrix.
   $effect(() => {
-    const drawn = bus.lastDrawn;
-    if (!drawn) return;
-    if (drawn.at === lastHandledDrawAt) return;
-    lastHandledDrawAt = drawn.at;
-    if (settings.mode !== "both") return;
-    if (!grid || crossed.length === 0) return;
-    const target = findUncrossedCell(grid, crossed, drawn.num);
-    if (!target) return;
-    crossed = crossed.map((row, ri) =>
-      ri === target.row
-        ? row.map((v, ci) => (ci === target.col ? true : v))
-        : row,
-    );
+    const result = processAutoTick({
+      grid,
+      crossed,
+      lastDraw: bus.lastDrawn,
+      lastHandledAt: lastHandledDrawAt,
+      mode: settings.mode,
+    });
+    lastHandledDrawAt = result.lastHandledAt;
+    if (result.changed) crossed = result.crossed;
   });
 
   function handleGenerate() {
