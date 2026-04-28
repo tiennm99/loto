@@ -1,9 +1,10 @@
 ---
 name: Strict CSP via hashed inline script
 phase: 7
-status: todo
+status: completed
 priority: medium
 effort: 1.5h
+completed: 2026-04-28
 ---
 
 # Phase 7 — Strict CSP via hashed inline script

@@ -47,7 +47,8 @@
 | `svelte.config.js` | adapter-static (HTML export), dual basePath via BUILD_PROFILE env, SvelteKit PWA plugin config. |
 | `vite.config.js` | Tailwind + SvelteKit + PWA plugins. codeserver HMR config (port, allowedHosts, hmr). |
 | `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite, @vite-pwa/sveltekit. Scripts: dev, dev:codeserver, build, build:gh, lint, test, test:watch, verify:build. |
-| `scripts/verify-build-inline-scripts.mjs` | Post-build CSP guard. Counts inline `<script>` tags in `build/index.html` and fails if > EXPECTED_INLINE (1). Catches future SvelteKit upgrades that add inline blocks the CSP `'unsafe-inline'` relaxation isn't calibrated for. |
+| `scripts/verify-build-inline-scripts.mjs` | Post-build CSP guard. Counts inline `<script>` tags in `build/index.html` (fails if > EXPECTED_INLINE) and asserts `build/_headers` `script-src` has no `'unsafe-inline'`. Catches future SvelteKit upgrades that ship a new inline block the CSP isn't calibrated for. |
+| `scripts/inject-csp-hashes.mjs` | Postbuild step chained into `npm run build` and `build:gh`. Reads inline `<script>` bodies from `build/index.html`, computes SHA-256, and rewrites `build/_headers` `script-src 'self' 'unsafe-inline'` → `script-src 'self' 'sha256-…'`. Hash regenerates per build; `_headers` is treated as a build artifact. |
 | `.github/workflows/verify-build.yml` | CI: on push/PR to main runs `npm test && npm run build && npm run verify:build` to enforce the inline-script guard above. |
 | `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). Declares Svelte 5 rune globals. |
 | `jsconfig.json` | Path alias `$lib`, no checkJs. |

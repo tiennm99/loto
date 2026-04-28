@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite dev",
     "dev:codeserver": "VITE_DEV_PROFILE=codeserver vite dev --host 0.0.0.0",
-    "build": "vite build",
-    "build:gh": "BUILD_PROFILE=gh vite build",
+    "build": "vite build && node scripts/inject-csp-hashes.mjs",
+    "build:gh": "BUILD_PROFILE=gh vite build && node scripts/inject-csp-hashes.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run",

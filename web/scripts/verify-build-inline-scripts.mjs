@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
 
 const EXPECTED_INLINE = 1;
 const HTML_PATH = "build/index.html";
+const HEADERS_PATH = "build/_headers";
 
 let html;
 try {
@@ -40,4 +41,26 @@ if (inline < EXPECTED_INLINE) {
   );
 }
 
-console.log(`verify-build: ${inline} inline <script> tag(s) — OK.`);
+// Post-Phase 7: script-src must NOT contain 'unsafe-inline' anymore —
+// `inject-csp-hashes` should have replaced it with sha256 hashes.
+let headers;
+try {
+  headers = readFileSync(HEADERS_PATH, "utf8");
+} catch {
+  console.warn(`verify-build: ${HEADERS_PATH} not found — skipping CSP check.`);
+  process.exit(0);
+}
+
+const scriptSrcLine = headers
+  .split("\n")
+  .find((l) => /script-src\b/.test(l) && /Content-Security-Policy/i.test(l));
+// Single-line policy: Content-Security-Policy: ... script-src 'self' …
+if (scriptSrcLine && /script-src[^;]*'unsafe-inline'/.test(scriptSrcLine)) {
+  console.error(
+    `verify-build: ${HEADERS_PATH} script-src still contains 'unsafe-inline'. ` +
+      `inject-csp-hashes.mjs should have replaced it with SHA-256 hash(es).`,
+  );
+  process.exit(1);
+}
+
+console.log(`verify-build: ${inline} inline <script> tag(s), CSP hashed — OK.`);
