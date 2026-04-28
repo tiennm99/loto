@@ -18,7 +18,7 @@ YAGNI — parking-lot features and upstream-blocked items skipped.
 | # | Phase | File |
 |---|-------|------|
 | 1 | Auto-tick integration test ✅ | `phase-01-auto-tick-test.md` |
-| 2 | CI inline-script guard | `phase-02-ci-inline-script-guard.md` |
+| 2 | CI inline-script guard ✅ | `phase-02-ci-inline-script-guard.md` |
 | 3 | Mode picker glyph redesign | `phase-03-mode-picker-glyphs.md` |
 | 4 | Settings modal sticky on small screens | `phase-04-settings-modal-sticky.md` |
 | 5 | Per-row "Chờ" indicator | `phase-05-cho-row-indicator.md` |
