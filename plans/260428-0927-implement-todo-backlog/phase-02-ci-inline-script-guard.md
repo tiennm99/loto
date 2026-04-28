@@ -1,9 +1,10 @@
 ---
 name: CI inline-script guard
 phase: 2
-status: todo
+status: completed
 priority: high
 effort: 30m
+completed: 2026-04-28
 ---
 
 # Phase 2 — CI inline-script guard
