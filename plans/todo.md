@@ -1,28 +1,60 @@
 # Next-session TODO
 
-Hand-off list as of 2026-04-28 (commit `9f24b6d`). The
-`260428-0927-implement-todo-backlog` plan shipped 8 of 9 phases — only
-the manual PWA verification checklist remains. Below are residual /
-new items deferred from that pass.
+Hand-off list as of 2026-04-28 (commit `9f24b6d`). All prior plan
+folders have been deleted; residual / new items live here directly.
 
 ## Highest leverage (start here)
 
-- **Run Phase 9 — PWA install verification.** Manual checklist in
-  `plans/260428-0927-implement-todo-backlog/phase-09-pwa-verify-install.md`.
-  Needs production deploy on Cloudflare Pages + physical Android
-  Chrome + iOS Safari. Lighthouse PWA = 100/100, install flow,
-  airplane-mode offline, `curl -I` header check (script-src now
-  hashed, no longer `'unsafe-inline'`).
+### PWA install verification (manual, post-deploy)
 
-## UX polish (carried over from pass-2)
+Needs production deploy on Cloudflare Pages + physical Android
+Chrome + iOS Safari. No code; verification only.
+
+**Lighthouse — Cloudflare Pages (root base)**
+- Open `https://loto.miti99.com/` in incognito Chrome.
+- DevTools → Lighthouse → PWA + Perf + Best Practices + a11y.
+- PWA score = 100. No CSP violations. No mixed-content warnings.
+
+**Lighthouse — GitHub Pages (`/loto/` base)**
+- Open `https://tiennm99.github.io/loto/` in incognito.
+- Confirm SW URL `/loto/sw.js`, manifest `/loto/manifest.webmanifest`,
+  icons `/loto/icons/...` resolve.
+
+**Android Chrome (physical or emulator)**
+- "Add to Home Screen" → install → launch.
+- Splash uses theme color (`#1565c0` light / `#0a0f1f` dark, see
+  `app.html:9-10`). Status bar matches.
+- Standalone display (no Chrome chrome).
+- Airplane mode → reload from home → app shell + default voice work.
+- Maskable icon: long-press app icon, ensure mask doesn't crop the
+  centered glyph. Verify in DevTools "Show maskable preview" too.
+  May need to drop safe-zone 70% → 65% if mask crops tight.
+
+**iOS Safari**
+- Share → Add to Home Screen.
+- Icon uses `apple-touch-icon` (`/icons/icon-192.png`) — round-ish
+  glyph, no white bars.
+- Launch standalone, fonts legible under translucent status bar.
+- Airplane mode → app shell + default voice play.
+
+**CSP + headers (production)**
+- `curl -I https://loto.miti99.com/` shows `Content-Security-Policy`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy`,
+  `Permissions-Policy`, `X-Frame-Options: DENY`.
+- CSP `script-src` no longer contains `'unsafe-inline'`.
+
+**Common gotchas**
+- Manifest paths break under `/loto/` base → check `vite.config.js`
+  PWA `manifest: false` + `app.html` uses `%sveltekit.assets%`.
+- iOS install shows wrong icon → ensure `icons/icon-192.png` is
+  192×192 actual size.
+
+## UX polish (carried over)
 
 - **`MasterEmptyState` ↔ PlayerBoard ghost-grid duplication.** Two
   near-identical decorative components — extract a shared
   `<GhostBoardPreview rows={N} />` only if a third use appears.
   (Rule-of-three not met yet.)
-- **Maskable icon at 70% safe-zone.** Verify in Chrome DevTools "Show
-  maskable preview" before announcing PWA. May need to drop to 65% if
-  Android shape masks crop too tight. Roll into Phase 9 verification.
 
 ## Tech debt
 
@@ -50,27 +82,3 @@ new items deferred from that pass.
 - "New version available" reload toast for SW autoUpdate. Today the
   swap is silent; if users complain about content jumping mid-game,
   add a non-blocking notice.
-
-## Reports archive
-
-- Pass 1 (260427-1151): `code-reviewer-`, `ui-ux-designer-`, `security-`
-- Pass 2 (260427-2047): `code-reviewer-pass2-full`,
-  `ui-ux-designer-pass2-full`, `security-pass2-full`
-- Phase-specific: `code-reviewer-260427-1036-three-mode`,
-  `code-reviewer-260427-2030-polish-pwa`
-
-All under `plans/reports/`. Pass-1 unresolved items were verified
-addressed in pass-2; pass-2 items were addressed across the
-`260428-0927-implement-todo-backlog` phases.
-
-## Recently shipped (260428-0927-implement-todo-backlog)
-
-- ✅ Phase 1 — auto-tick integration test (8 cases, helper extracted)
-- ✅ Phase 2 — CI inline-script guard (`npm run verify:build`)
-- ✅ Phase 3 — mode picker "Both" glyph: grid + megaphone composite
-- ✅ Phase 4 — settings modal sticky title/footer on small screens
-- ✅ Phase 5 — per-section Chờ ring (amber, reduced-motion aware)
-- ✅ Phase 6 — confetti tier-2 threshold + 🥢🎋🏮 + size jitter
-- ✅ Phase 7 — strict CSP: SHA-256 hash of inline bootstrap, no
-  `'unsafe-inline'` in `script-src`
-- ✅ Phase 8 — audio cache 30d → 7d + purgeOnQuotaError
