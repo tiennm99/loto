@@ -1,9 +1,10 @@
 ---
 name: Audio cache LRU rule
 phase: 8
-status: todo
+status: completed
 priority: low
 effort: 30m
+completed: 2026-04-28
 ---
 
 # Phase 8 — Audio cache LRU rule

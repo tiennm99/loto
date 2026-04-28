@@ -24,7 +24,7 @@ YAGNI — parking-lot features and upstream-blocked items skipped.
 | 5 | Per-row "Chờ" indicator ✅ | `phase-05-cho-row-indicator.md` |
 | 6 | Confetti polish (threshold + variety) ✅ | `phase-06-confetti-polish.md` |
 | 7 | Strict CSP via hashed inline script ✅ | `phase-07-strict-csp-hashed.md` |
-| 8 | Audio cache LRU rule | `phase-08-audio-cache-lru.md` |
+| 8 | Audio cache LRU rule ✅ | `phase-08-audio-cache-lru.md` |
 | 9 | PWA install verification checklist | `phase-09-pwa-verify-install.md` |
 
 ## Cuts (YAGNI)

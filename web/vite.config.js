@@ -61,7 +61,15 @@ export default defineConfig(({ mode }) => {
                 expiration: {
                   // Headroom for future voice growth: 4× current 184 clips.
                   maxEntries: 400,
-                  maxAgeSeconds: 60 * 60 * 24 * 30,
+                  // 7d (was 30d). A clip stays cached as long as it gets
+                  // played at least once a week. Voices that go unused
+                  // for 7d fall out and re-fetch on next play —
+                  // approximates LRU without a custom workbox plugin.
+                  // Each clip <200KB so re-fetch cost is negligible.
+                  maxAgeSeconds: 60 * 60 * 24 * 7,
+                  // Belt-and-suspenders for the rare quota-pressure case
+                  // (lots of voices precached + other origins competing).
+                  purgeOnQuotaError: true,
                 },
                 // Audio is same-origin → no need to allow opaque (0).
                 cacheableResponse: { statuses: [200] },
