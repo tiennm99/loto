@@ -18,4 +18,10 @@ data class PlayerBoardUiState(
     val celebratedRows: Set<Int> = emptySet(),
     val notifiedWaitingRows: Set<Int> = emptySet(),
     val lastConsumedEventId: Long = 0L,
+    /**
+     * Per-section flag (size 3): rows 0-2, 3-5, 6-8. True iff any row in
+     * that section is one cell from bingo and not yet complete. Drives
+     * the persistent amber ring on the section label band.
+     */
+    val sectionHasWaiting: List<Boolean> = listOf(false, false, false),
 )

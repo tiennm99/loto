@@ -18,9 +18,9 @@ val BrandAmberDark = Color(0xFFFBBF24)   // amber-400
 val BrandEmeraldLight = Color(0xFF10B981)  // emerald-500
 val BrandEmeraldDark = Color(0xFF34D399)   // emerald-400
 
-// Pink — called numbers ≤ 49, modal subtitle.
-val BrandPinkLight = Color(0xFFEC4899)   // pink-500
-val BrandPinkDark = Color(0xFFF472B6)    // pink-400
+// Sky — called numbers ≤ 49 (single-accent palette, replaces former pink).
+val BrandSky600 = Color(0xFF0284C7)      // sky-600 (light theme)
+val BrandSky400 = Color(0xFF38BDF8)      // sky-400 (dark theme)
 
 // Purple — secondary brand (legacy Excel purple — also default empty cell).
 val BrandPurpleLight = Color(0xFF8B5CF6) // violet-500
@@ -30,9 +30,14 @@ val BrandPurpleDark = Color(0xFFA78BFA)  // violet-400
 val BrandRedLight = Color(0xFFEF4444)    // red-500
 val BrandRedDark = Color(0xFFF87171)     // red-400
 
-// Indigo — player accent (settings highlight, "Tạo bảng mới" gradient).
-val BrandIndigoLight = Color(0xFF6366F1) // indigo-500
-val BrandIndigoDark = Color(0xFF818CF8)  // indigo-400
+// Deeper -600 shades for the solid-color (no-gradient) palette.
+val BrandRose600 = Color(0xFFE11D48)     // rose-600
+val BrandAmber600 = Color(0xFFD97706)    // amber-600
+val BrandEmerald600 = Color(0xFF059669)  // emerald-600
+
+// Warm cream light background, replacing pure white. Matches upstream
+// `--background: #fffbeb` so the page feels festive without a radial glow.
+val BackgroundCream = Color(0xFFFFFBEB)
 
 // Empty cell legacy default (Excel "Standard Color: Purple"). User-overridable
 // via settings; mirrors web app's `--empty-cell-bg` CSS variable.
