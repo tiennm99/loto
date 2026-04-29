@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
@@ -30,14 +29,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.miti99.loto.R
 import com.miti99.loto.state.BingoEvent
-import com.miti99.loto.ui.theme.BrandAmberLight
-import com.miti99.loto.ui.theme.BrandRoseLight
+import com.miti99.loto.ui.theme.BrandAmber600
+import com.miti99.loto.ui.theme.BrandRose600
 
 /**
  * "Kinh!" bingo celebration dialog.
  *
- * Shown when [bingoEvent] is non-null. Tier 2 (≥ 3 rows complete) also renders
- * [Confetti] behind the dialog via a sibling Box in [PlayerBoardScreen].
+ * Shown when [bingoEvent] is non-null. Tier 2 fires confetti through the
+ * sibling Box in [PlayerBoardScreen] (see [PlayerBoardViewModel] for the
+ * tier rule).
  */
 @Composable
 fun KinhModal(
@@ -57,14 +57,11 @@ fun KinhModal(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // Gradient title "Kinh!"
-            val gradientBrush = Brush.horizontalGradient(
-                colors = listOf(BrandRoseLight, BrandAmberLight, BrandRoseLight),
-            )
+            // Solid amber title "Kinh!" — single-accent palette.
             Text(
                 text = stringResource(R.string.kinh_title),
+                color = BrandAmber600,
                 style = TextStyle(
-                    brush = gradientBrush,
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Black,
                     fontStyle = FontStyle.Italic,
@@ -98,7 +95,7 @@ fun KinhModal(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BrandRoseLight,
+                    containerColor = BrandRose600,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             ) {
