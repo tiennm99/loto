@@ -25,14 +25,14 @@
   <span
     class="inline-block px-3 py-1 rounded-full text-xs font-semibold
            tracking-wider uppercase
-           bg-orange-100 dark:bg-orange-950/40
-           text-orange-700 dark:text-orange-300"
+           bg-amber-100 dark:bg-amber-950/40
+           text-amber-700 dark:text-amber-300"
   >
     Chế độ Quản trò
   </span>
   <p class="mt-3 text-base text-slate-600 dark:text-slate-300 italic">
     Nhấn
-    <span class="font-semibold text-orange-500 dark:text-orange-400 not-italic">
+    <span class="font-semibold text-amber-700 dark:text-amber-400 not-italic">
       "Ván mới"
     </span>
     để bắt đầu xổ số

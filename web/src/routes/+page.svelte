@@ -12,14 +12,11 @@
 >
   <div class="w-full max-w-2xl">
     <header class="relative text-center mb-6">
-      <!-- z-10: H1 has a CSS `drop-shadow` filter which creates a stacking
-           context. Without z-index here, that filtered H1 (later in tree
-           order) paints over the gear button and swallows clicks. -->
-      <div class="absolute right-0 top-0 z-10">
+      <div class="absolute right-0 top-0">
         <SettingsButton />
       </div>
       <h1
-        class="text-5xl sm:text-7xl font-black italic tracking-tight bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 bg-clip-text text-transparent drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]"
+        class="text-5xl sm:text-7xl font-black italic tracking-tight text-rose-600 dark:text-rose-400"
       >
         Lô tô
       </h1>
@@ -44,7 +41,7 @@
         transition:slide={{ duration: 250 }}
       >
         <h2
-          class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-orange-500 dark:text-orange-400"
+          class="text-center text-lg sm:text-xl font-bold tracking-wider uppercase mb-4 text-amber-700 dark:text-amber-400"
         >
           Quản trò
         </h2>

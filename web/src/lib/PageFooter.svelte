@@ -10,7 +10,7 @@
       href="https://miti99.com"
       target="_blank"
       rel="noopener noreferrer"
-      class="text-indigo-500 dark:text-indigo-400 hover:underline"
+      class="text-rose-600 dark:text-rose-400 hover:underline"
     >
       miti99
     </a>
