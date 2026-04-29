@@ -15,7 +15,8 @@ Outstanding work, grouped by priority. The 11 implementation phases from
 ## P1 — Tests not written by the agent
 
 - [ ] `CallBusTest` — Turbine: broadcast/reset/monotonic id (specced in phase-06)
-- [ ] `PlayerBoardViewModelTest` — bingo idempotency, forward-only auto-tick, mode gating, voice announce rule (specced in phase-06)
+- [ ] `PlayerBoardViewModelTest` — bingo idempotency, forward-only auto-tick, mode gating, voice announce rule (specced in phase-06).
+      Tier rule (post-260429-1511 sync): `tier == 2` when `celebrated.size >= 2` OR `(celebrated.size >= 1 AND any other row in Chờ)`. Also assert `sectionHasWaiting[s]` flips amber when any row in section `s` has 1 uncrossed number, drops once that row completes.
 - [ ] `MasterPanelViewModelTest` — `runTest` with `advanceTimeBy` for auto-call cadence, settings-mid-run cancel, remaining-empty stop (specced in phase-06)
 - [ ] `VoicePlayerInstrumentationTest` — assets resolve, clip plays end-to-end (specced in phase-04)
 - [ ] `MasterBoardLayoutTest` — verify the 11×9 ones-digit layout (90 in row10/col8, edge cells correct)

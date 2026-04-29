@@ -2,6 +2,7 @@ package com.miti99.loto.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,14 +24,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.miti99.loto.R
 import com.miti99.loto.ui.theme.BrandEmeraldLight
-import com.miti99.loto.ui.theme.BrandPinkLight
+import com.miti99.loto.ui.theme.BrandSky400
+import com.miti99.loto.ui.theme.BrandSky600
 import com.miti99.loto.ui.theme.CalledCellCream
 
 /**
  * Large circle hero showing the most-recently drawn number.
  *
- * Pink ring for numbers ≤ 49; emerald ring for ≥ 50 (port MasterPanel.svelte:283).
- * TalkBack announces each new draw via [LiveRegionMode.Assertive].
+ * Sky ring for numbers ≤ 49; emerald ring for ≥ 50 (matches upstream
+ * single-accent palette). TalkBack announces each new draw via
+ * [LiveRegionMode.Assertive].
  */
 @Composable
 fun CurrentNumberHero(
@@ -40,7 +43,8 @@ fun CurrentNumberHero(
     modifier: Modifier = Modifier,
 ) {
     val isLow = last <= 49
-    val ring = if (isLow) BrandPinkLight else BrandEmeraldLight
+    val skyAccent = if (isSystemInDarkTheme()) BrandSky400 else BrandSky600
+    val ring = if (isLow) skyAccent else BrandEmeraldLight
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -2,6 +2,7 @@ package com.miti99.loto.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.miti99.loto.ui.common.LocalEmptyCellColor
 import com.miti99.loto.ui.theme.BrandEmeraldLight
-import com.miti99.loto.ui.theme.BrandPinkLight
 import com.miti99.loto.ui.theme.BrandRedLight
+import com.miti99.loto.ui.theme.BrandSky400
+import com.miti99.loto.ui.theme.BrandSky600
 import com.miti99.loto.ui.theme.CalledCellCream
 
 private val UncalledRing = Color(0xFFCBD5E1)    // slate-300
@@ -52,15 +54,16 @@ fun MasterCell(
 
     val isLow    = num <= 49
     val isCalled = callOrder != null
+    val skyAccent = if (isSystemInDarkTheme()) BrandSky400 else BrandSky600
 
     val ringColor = when {
         isLast   -> BrandRedLight
-        isCalled -> if (isLow) BrandPinkLight else BrandEmeraldLight
+        isCalled -> if (isLow) skyAccent else BrandEmeraldLight
         else     -> UncalledRing
     }
     val bgColor   = if (isCalled) CalledCellCream else UncalledBg
     val textColor = when {
-        isCalled -> if (isLow) BrandPinkLight else BrandEmeraldLight
+        isCalled -> if (isLow) skyAccent else BrandEmeraldLight
         else     -> UncalledText
     }
 

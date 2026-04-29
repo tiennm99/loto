@@ -28,8 +28,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.miti99.loto.R
 import com.miti99.loto.state.PlayerBoardUiState
-import com.miti99.loto.ui.theme.BrandIndigoLight
-import com.miti99.loto.ui.theme.BrandRoseLight
+import com.miti99.loto.ui.theme.BrandRose600
 
 /**
  * Top-level stateless PlayerBoard composable.
@@ -109,7 +108,7 @@ fun PlayerBoardScreen(
                         if (state.grid == null) onGenerate()
                         else showGenerateDialog = true
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandRoseLight),
+                    colors = ButtonDefaults.buttonColors(containerColor = BrandRose600),
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(R.string.btn_generate_new))
@@ -124,7 +123,7 @@ fun PlayerBoardScreen(
                             if (hasCrossed) showClearDialog = true else onClear()
                         },
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = BrandIndigoLight,
+                            contentColor = BrandRose600,
                         ),
                         modifier = Modifier.weight(1f),
                     ) {
@@ -141,6 +140,7 @@ fun PlayerBoardScreen(
                     grid = state.grid,
                     crossed = state.crossed,
                     rowComplete = state.rowComplete,
+                    sectionHasWaiting = state.sectionHasWaiting,
                     emptyCellColor = emptyCellColor,
                     onCellClick = onCellClick,
                     modifier = Modifier.padding(horizontal = 4.dp),
@@ -157,7 +157,7 @@ fun PlayerBoardScreen(
                 .padding(top = 56.dp), // clear the button row
         )
 
-        // Confetti for tier-2 bingo (≥ 3 rows complete)
+        // Confetti for tier-2 bingo. Tier rule lives in PlayerBoardViewModel.
         if (state.bingoEvent?.tier == 2) {
             Confetti(
                 visible = true,

@@ -2,6 +2,7 @@ package com.miti99.loto.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.miti99.loto.R
 import com.miti99.loto.ui.theme.BrandEmeraldLight
-import com.miti99.loto.ui.theme.BrandPinkLight
+import com.miti99.loto.ui.theme.BrandSky400
+import com.miti99.loto.ui.theme.BrandSky600
 import com.miti99.loto.ui.theme.CalledCellCream
 
 /**
@@ -69,7 +71,8 @@ fun CalledHistory(
 @Composable
 private fun CalledChip(num: Int) {
     val isLow = num <= 49
-    val ring = if (isLow) BrandPinkLight else BrandEmeraldLight
+    val skyAccent = if (isSystemInDarkTheme()) BrandSky400 else BrandSky600
+    val ring = if (isLow) skyAccent else BrandEmeraldLight
 
     Box(
         contentAlignment = Alignment.Center,
