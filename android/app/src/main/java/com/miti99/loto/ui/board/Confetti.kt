@@ -18,7 +18,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val CONFETTI_EMOJI = listOf("🎊", "✨", "🎉", "🥳")
+// Hội-chợ flavour added (lantern, bamboo, chopsticks) so the celebration
+// set reads as Vietnamese fair, not generic party.
+private val CONFETTI_EMOJI = listOf("🎊", "✨", "🎉", "🥳", "🥢", "🎋", "🏮")
 private const val PARTICLE_COUNT = 12
 private const val DURATION_NS = 3_000_000_000L  // 3 seconds
 
@@ -28,6 +30,7 @@ private data class Particle(
     val speed: Float,             // px per second (screen height fraction)
     val rotationSpeed: Float,     // degrees per second
     val delayNs: Long,            // stagger start
+    val fontSizeSp: Float,        // per-piece size jitter
 )
 
 /**
@@ -49,12 +52,16 @@ fun Confetti(
 
     val particles = remember {
         List(PARTICLE_COUNT) { i ->
+            // Match upstream jitter range 1.5..2.4rem; render as sp.
+            // 1rem ≈ 16sp on default density.
+            val sizeRem = 1.5f + ((i * 13) % 11) / 10f
             Particle(
                 emoji = CONFETTI_EMOJI[i % CONFETTI_EMOJI.size],
                 startXFraction = (i.toFloat() / PARTICLE_COUNT) + (((i * 17) % 10) / 100f),
                 speed = screenHeightPx * (0.25f + (i % 5) * 0.05f),
                 rotationSpeed = 60f + (i % 7) * 30f,
                 delayNs = (i * 150_000_000L),  // 150 ms stagger
+                fontSizeSp = (sizeRem * 16f).coerceIn(24f, 38f),
             )
         }
     }
@@ -86,7 +93,7 @@ fun Confetti(
 
             Text(
                 text = p.emoji,
-                fontSize = 20.sp,
+                fontSize = p.fontSizeSp.sp,
                 modifier = Modifier
                     .offset(x = xDp.dp, y = yDp.dp)
                     .graphicsLayer { rotationZ = rotation % 360f },

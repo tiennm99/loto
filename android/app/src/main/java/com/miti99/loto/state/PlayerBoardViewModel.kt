@@ -55,6 +55,7 @@ class PlayerBoardViewModel(
             grid = grid,
             crossed = crossed,
             rowComplete = List(grid.size) { false },
+            sectionHasWaiting = listOf(false, false, false),
         )
         persistDebounced()
     }
@@ -72,6 +73,7 @@ class PlayerBoardViewModel(
                 notifiedWaitingRows = emptySet(),
                 bingoEvent = null,
                 waitingToast = null,
+                sectionHasWaiting = listOf(false, false, false),
             )
         }
         persistDebounced()
@@ -108,6 +110,7 @@ class PlayerBoardViewModel(
             rowComplete = rowComplete,
             celebratedRows = celebrated,
             notifiedWaitingRows = notifiedWaiting,
+            sectionHasWaiting = computeSectionHasWaiting(gridArr, crossedArr, rowComplete),
         )
     }
 
@@ -163,7 +166,18 @@ class PlayerBoardViewModel(
                 if (i !in celebrated && rowComplete[i]) {
                     celebrated = celebrated + i
                     notifiedWaiting = notifiedWaiting + i
-                    val tier = if (celebrated.size >= 3) 2 else 1
+                    // Tier 2 confetti: 2nd bingo, OR 1st bingo while another row
+                    // is one cell from completion. Old "≥3 bingos" rule rarely
+                    // fired on a 9-row card so most wins felt under-celebrated.
+                    val hasActiveCho = grid.indices.any { otherRow ->
+                        otherRow !in celebrated &&
+                            GameLogic.getWaitingNumber(gridArr, crossedArr, otherRow) != null
+                    }
+                    val tier = when {
+                        celebrated.size >= 2 -> 2
+                        celebrated.size >= 1 && hasActiveCho -> 2
+                        else -> 1
+                    }
                     bingoEvent = BingoEvent(row1Based = i + 1, tier = tier)
                     if (announce) voicePlayer.playBingo()
                     return@run
@@ -193,6 +207,7 @@ class PlayerBoardViewModel(
                 bingoEvent = bingoEvent,
                 waitingToast = waitingToast,
                 lastConsumedEventId = lastConsumedEventId ?: it.lastConsumedEventId,
+                sectionHasWaiting = computeSectionHasWaiting(gridArr, crossedArr, rowComplete),
             )
         }
         persistDebounced()
@@ -241,4 +256,22 @@ class PlayerBoardViewModel(
 
     private fun toBoolArray(crossed: List<List<Boolean>>): Array<BooleanArray> =
         Array(crossed.size) { r -> BooleanArray(crossed[r].size) { c -> crossed[r][c] } }
+
+    /**
+     * Per-section waiting flag (rows 0-2, 3-5, 6-8). True when any row in
+     * the section has exactly 1 uncrossed number AND is not yet complete.
+     */
+    private fun computeSectionHasWaiting(
+        gridArr: Array<IntArray>,
+        crossedArr: Array<BooleanArray>,
+        rowComplete: List<Boolean>,
+    ): List<Boolean> {
+        val waitingRows = gridArr.indices.map { r ->
+            !rowComplete.getOrElse(r) { false } &&
+                GameLogic.getWaitingNumber(gridArr, crossedArr, r) != null
+        }
+        return listOf(0, 3, 6).map { start ->
+            (start until start + 3).any { r -> waitingRows.getOrElse(r) { false } }
+        }
+    }
 }
