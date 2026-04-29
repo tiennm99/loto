@@ -129,7 +129,7 @@
   class="inline-flex items-center justify-center w-9 h-9 rounded-full
          text-slate-500 dark:text-slate-400
          hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors
-         focus:outline-none focus:ring-2 focus:ring-indigo-400"
+         focus:outline-none focus:ring-2 focus:ring-rose-400"
 >
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +199,7 @@
               onclick={() => pickTheme(v)}
               class="px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all
                      {selected
-                       ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
+                       ? 'border-rose-600 dark:border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
                        : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
             >
               {label}
@@ -225,7 +225,7 @@
           class="flex items-center justify-between gap-3 px-3 py-2 rounded-lg
                  border-2 border-slate-200 dark:border-slate-600 cursor-pointer
                  hover:border-slate-300 dark:hover:border-slate-500 transition-colors
-                 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                 focus:outline-none focus:ring-2 focus:ring-rose-400"
         >
           <span class="text-sm text-slate-700 dark:text-slate-200">{label}</span>
           <span
@@ -260,7 +260,7 @@
               onclick={() => pickMode(v)}
               class="flex flex-col items-center gap-1 px-2 py-2 rounded-lg border-2 text-sm font-medium transition-all
                      {selected
-                       ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
+                       ? 'border-rose-600 dark:border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
                        : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
             >
               {#if v === "player"}
@@ -324,7 +324,7 @@
               oninput={onSpeedInput}
               aria-label="Tốc độ tự động xổ"
               aria-valuetext="{settings.autoCallSpeed} giây mỗi số"
-              class="w-full mt-1 accent-indigo-500"
+              class="w-full mt-1 accent-rose-600"
             />
           </label>
         {/if}
@@ -381,7 +381,7 @@
                 onclick={() => pickVoice(v.id)}
                 class="px-3 py-2 rounded-lg border-2 text-sm transition-all
                        {selected
-                         ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
+                         ? 'border-rose-600 dark:border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
               >
                 {v.label}
@@ -436,7 +436,7 @@
                   style:background-color={hex}
                   class="aspect-square rounded-lg border-2 transition-all
                          {selected
-                           ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-300 dark:ring-indigo-600 scale-110'
+                           ? 'border-rose-600 dark:border-rose-400 ring-2 ring-rose-300 dark:ring-rose-600 scale-110'
                            : 'border-slate-200 dark:border-slate-600 hover:scale-105'}"
                 ></button>
               {/each}
@@ -465,9 +465,8 @@
           type="button"
           onclick={close}
           class="px-6 py-2 rounded-full text-sm font-semibold text-white
-                 bg-gradient-to-r from-indigo-500 to-purple-500
-                 hover:from-indigo-600 hover:to-purple-600
-                 active:scale-95 transition-all shadow-lg"
+                 bg-rose-600 hover:bg-rose-700
+                 active:scale-95 transition-all shadow-md"
         >
           Xong
         </button>

@@ -12,23 +12,15 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f8fafc;
+  /* Warm cream — keeps festive warmth without a radial gradient. */
+  --background: #fffbeb;
   --foreground: #1e293b;
-  /* Soft warm-amber glow at the top, fading out — echoes the festive
-     rose/amber gradient in the header and gives the page some warmth. */
-  --bg-glow: radial-gradient(
-    ellipse 70% 40% at 50% -10%,
-    rgba(251, 191, 36, 0.18) 0%,
-    transparent 75%
-  );
   /* Default empty-cell color: Excel "Standard Color: Purple". Overridden
      at runtime by the settings store via documentElement.style. */
   --empty-cell-bg: #7030A0;
-  /* Section accent — used by both the label text and the cross-hatch in
+  /* Section accent — used by both the label text and the solid bars in
      dividers/label flanks, so they always read as one unified band. */
   --section-accent: #1565c0;
-  /* Pale blue band with a hint of warmth so it doesn't fight the
-     amber top-glow at the topmost section label. */
   --section-band-bg: rgb(232 240 250 / 0.78);
 }
 
@@ -37,35 +29,16 @@
      theme switch reads instantly. */
   --background: #050813;
   --foreground: #e2e8f0;
-  /* Indigo top-glow + faint rose lower-glow — adds depth and matches the
-     header gradient against the deep-navy base. */
-  --bg-glow:
-    radial-gradient(
-      ellipse 70% 40% at 50% -10%,
-      rgba(99, 102, 241, 0.22) 0%,
-      transparent 75%
-    ),
-    radial-gradient(
-      ellipse 60% 50% at 50% 110%,
-      rgba(244, 63, 94, 0.10) 0%,
-      transparent 70%
-    );
   --section-accent: #64b5f6;
   --section-band-bg: rgb(13 71 161 / 0.4);
 }
 
-/* Apply to html so the base color always paints the full viewport, even
-   when body content is shorter than the screen. Body adds the glow on
-   top — `transparent` falls back to html's color. */
 html {
   background-color: var(--background);
   color: var(--foreground);
 }
 body {
   background-color: transparent;
-  background-image: var(--bg-glow);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 /* Equal-width grid cells */
@@ -81,33 +54,20 @@ body {
   gap: 0;
 }
 
-/* Decorative cross-hatch borders that frame and segment the player
-   sheet, echoing the ✚✚✚ blue borders on a Tân Tân BAMBOORAFT card. */
+/* Solid bars that frame and segment the player sheet. */
 .section-divider {
-  height: 8px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent 0 6px,
-    var(--section-accent) 6px 8px,
-    transparent 8px 14px
-  );
-  background-color: var(--section-band-bg);
+  height: 4px;
+  background-color: var(--section-accent);
 }
 .section-divider-vertical {
-  width: 8px;
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent 0 6px,
-    var(--section-accent) 6px 8px,
-    transparent 8px 14px
-  );
-  background-color: var(--section-band-bg);
+  width: 4px;
+  background-color: var(--section-accent);
 }
 
 .section-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.8125rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -118,19 +78,15 @@ body {
   font-style: italic;
   white-space: nowrap;
 }
-/* Cross-hatch ✚✚✚ flanks on both sides of the label text — flex:1 fills
-   the remaining width so the text stays centered with comfy padding. */
+/* Solid editorial rules on both sides of the label — flex:1 fills
+   the remaining width so the text stays centered. */
 .section-label::before,
 .section-label::after {
   content: "";
   flex: 1;
-  height: 8px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent 0 6px,
-    var(--section-accent) 6px 8px,
-    transparent 8px 14px
-  );
+  height: 2px;
+  background-color: var(--section-accent);
+  opacity: 0.7;
 }
 
 /* Persistent visual cue when any of the section's 3 rows is in "Chờ"
@@ -190,8 +146,8 @@ body {
 .animate-toast { animation: toast 5s ease-in-out forwards; }
 
 @keyframes cross-draw {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0 0 0); }
+  from { stroke-dashoffset: 200; }
+  to   { stroke-dashoffset: 0; }
 }
 
 /* Falling-confetti burst for the 3rd-and-up bingo of a single card. */
@@ -210,28 +166,24 @@ body {
   will-change: transform, opacity;
 }
 
-.cell-crossed::after {
-  content: "";
+/* Diagonal slash drawn as a true solid stroke via SVG. preserveAspectRatio
+   on the <svg> stretches the line to corner-to-corner regardless of cell
+   aspect ratio; vector-effect keeps the visual stroke width constant. */
+.cross-slash {
   position: absolute;
   inset: 6px;
-  background-image: linear-gradient(
-    to bottom right,
-    transparent calc(50% - 1.5px),
-    #ef4444,
-    transparent calc(50% + 1.5px)
-  );
   pointer-events: none;
+}
+.cross-slash-line {
+  stroke: #ef4444;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 0;
   animation: cross-draw 200ms ease-out;
 }
-/* Winning-row slash uses emerald instead of red so a completed row
-   reads as "win" rather than "marked off". */
-.cell-crossed-win::after {
-  background-image: linear-gradient(
-    to bottom right,
-    transparent calc(50% - 1.5px),
-    #10b981,
-    transparent calc(50% + 1.5px)
-  );
+.cross-slash-win .cross-slash-line {
+  stroke: #10b981;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -242,9 +194,7 @@ body {
   .animate-spin-slow-reverse,
   .animate-toast,
   .confetti,
-  .cell-crossed::after {
+  .cross-slash-line {
     animation: none !important;
   }
-  /* Keep the crossed slash visible (no draw animation, but still drawn). */
-  .cell-crossed::after { clip-path: none; }
 }

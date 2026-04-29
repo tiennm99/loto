@@ -187,9 +187,8 @@
   <button
     onclick={handleNewGame}
     class="px-8 py-4 rounded-full font-semibold text-white text-lg
-           bg-gradient-to-r from-orange-500 to-red-500
-           hover:from-orange-600 hover:to-red-600
-           active:scale-95 transition-all shadow-lg shadow-orange-500/25"
+           bg-amber-600 hover:bg-amber-700
+           active:scale-95 transition-all shadow-md"
   >
     Ván mới
   </button>
@@ -198,10 +197,10 @@
       <button
         onclick={toggleAuto}
         class="px-10 py-4 rounded-full font-semibold text-white text-lg
-               bg-gradient-to-r {autoRunning
-                 ? 'from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 shadow-red-500/25'
-                 : 'from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/25'}
-               active:scale-95 transition-all shadow-lg"
+               {autoRunning
+                 ? 'bg-rose-600 hover:bg-rose-700'
+                 : 'bg-emerald-600 hover:bg-emerald-700'}
+               active:scale-95 transition-all shadow-md"
       >
         {autoRunning ? "Dừng" : "Bắt đầu"}
       </button>
@@ -209,9 +208,8 @@
       <button
         onclick={handleDrawNext}
         class="px-10 py-4 rounded-full font-semibold text-white text-lg
-               bg-gradient-to-r from-emerald-500 to-teal-500
-               hover:from-emerald-600 hover:to-teal-600
-               active:scale-95 transition-all shadow-lg shadow-emerald-500/25"
+               bg-emerald-600 hover:bg-emerald-700
+               active:scale-95 transition-all shadow-md"
       >
         Xổ số
       </button>
@@ -247,13 +245,13 @@
              flex items-center justify-center
              shadow-xl scroll-mt-4
              {lastIsLow
-               ? 'border-pink-500 dark:border-pink-400 shadow-pink-500/30'
+               ? 'border-sky-600 dark:border-sky-400 shadow-sky-500/30'
                : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
     >
       <span
         class="text-6xl sm:text-8xl font-black tabular-nums
                {lastIsLow
-                 ? 'text-pink-500 dark:text-pink-400'
+                 ? 'text-sky-700 dark:text-sky-400'
                  : 'text-emerald-500 dark:text-emerald-400'}"
       >
         {lastCalled}
@@ -282,7 +280,7 @@
                  text-base sm:text-lg font-black tabular-nums rounded-full
                  border-2 bg-amber-50 dark:bg-amber-100
                  {isLow
-                   ? 'border-pink-500 dark:border-pink-400 text-pink-600 dark:text-pink-500'
+                   ? 'border-sky-600 dark:border-sky-400 text-sky-700 dark:text-sky-400'
                    : 'border-emerald-500 dark:border-emerald-400 text-emerald-600 dark:text-emerald-500'}"
         >
           {num}
@@ -314,7 +312,7 @@
                  {isLast ? 'z-10' : ''}"
         >
           {#if hasNumber}
-            <!-- Token: cream inner when called (pink ≤49 / green ≥50 ring),
+            <!-- Token: cream inner when called (sky ≤49 / emerald ≥50 ring),
                  gray-ringed and dim when uncalled. -->
             <div
               class="flex items-center justify-center
@@ -324,8 +322,8 @@
                      {!isCalled
                        ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
                        : isLow
-                         ? 'border-pink-500 dark:border-pink-400 bg-amber-50 dark:bg-amber-100 text-pink-600 dark:text-pink-500'
-                         : 'border-emerald-500 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-600 dark:text-emerald-500'}
+                         ? 'border-sky-600 dark:border-sky-400 bg-amber-50 dark:bg-amber-100 text-sky-700 dark:text-sky-700'
+                         : 'border-emerald-600 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-700 dark:text-emerald-700'}
                      {isLast
                        ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
                        : ''}"

@@ -259,9 +259,8 @@
   <button
     onclick={handleGenerate}
     class="px-8 py-3 rounded-full font-semibold text-white
-           bg-gradient-to-r from-indigo-500 to-purple-500
-           hover:from-indigo-600 hover:to-purple-600
-           active:scale-95 transition-all shadow-lg shadow-indigo-500/25"
+           bg-rose-600 hover:bg-rose-700
+           active:scale-95 transition-all shadow-md"
   >
     Tạo bảng mới
   </button>
@@ -329,14 +328,28 @@
                            text-xl sm:text-2xl md:text-3xl
                            border border-slate-400/50 dark:border-slate-600/40
                            transition-all select-none cursor-pointer active:scale-90
-                           focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-400
+                           focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400
                            {isCrossed
                              ? rowComplete
-                               ? 'cell-crossed cell-crossed-win bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-200'
-                               : 'cell-crossed bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300'
-                             : 'bg-white dark:bg-slate-800 text-black dark:text-slate-100 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400'}"
+                               ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-200'
+                               : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300'
+                             : 'bg-white dark:bg-slate-800 text-black dark:text-slate-100 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 dark:hover:text-rose-400'}"
                   >
                     {num}
+                    {#if isCrossed}
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        class="cross-slash {rowComplete ? 'cross-slash-win' : ''}"
+                      >
+                        <line
+                          class="cross-slash-line"
+                          x1="0" y1="0" x2="100" y2="100"
+                          vector-effect="non-scaling-stroke"
+                        />
+                      </svg>
+                    {/if}
                   </button>
                 {/if}
               {/each}
@@ -394,7 +407,7 @@
     </div>
     <p class="text-base text-slate-600 dark:text-slate-300 italic">
       Nhấn
-      <span class="font-semibold text-rose-500 dark:text-rose-400 not-italic">"Tạo bảng mới"</span>
+      <span class="font-semibold text-rose-600 dark:text-rose-400 not-italic">"Tạo bảng mới"</span>
       để bắt đầu chơi
     </p>
     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
@@ -452,13 +465,13 @@
 
       <h2
         id="congrats-title"
-        class="mt-6 text-4xl font-black bg-gradient-to-r from-amber-500 via-pink-500 to-purple-500 bg-clip-text text-transparent"
+        class="mt-6 text-4xl font-black text-amber-600 dark:text-amber-400"
       >
         Kinh!
       </h2>
       <p class="mt-3 text-base text-slate-700 dark:text-slate-200">
         Hàng
-        <span class="block text-5xl sm:text-6xl font-black text-pink-500 dark:text-pink-400 my-1 tabular-nums">
+        <span class="block text-5xl sm:text-6xl font-black text-rose-600 dark:text-rose-400 my-1 tabular-nums">
           {congratsRow}
         </span>
         đã đầy đủ!
@@ -469,9 +482,8 @@
       <button
         onclick={() => (showCongrats = false)}
         class="mt-6 px-8 py-2.5 rounded-full font-semibold text-white
-               bg-gradient-to-r from-pink-500 to-purple-500
-               hover:from-pink-600 hover:to-purple-600
-               active:scale-95 transition-all shadow-lg"
+               bg-rose-600 hover:bg-rose-700
+               active:scale-95 transition-all shadow-md"
       >
         Tuyệt vời! 🥳
       </button>
