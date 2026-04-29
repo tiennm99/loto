@@ -62,6 +62,8 @@
     <string name="voice_enabled_master">Quản trò: đọc số</string>
     <string name="voice_enabled_player">Người chơi: đọc Chờ / Kinh</string>
     <string name="voice_waiting_number">Đọc số khi Chờ</string>
+    <string name="voice_master_hint_both">Đọc số đã xổ + báo Chờ/Kinh.</string>
+    <string name="voice_master_hint_master_only">Đọc số đã xổ.</string>
     <string name="voice_picker_label">Chọn giọng</string>
     <string name="settings_empty_cell_color">Màu ô trống</string>
     <string name="empty_cell_custom">Tùy chỉnh</string>
