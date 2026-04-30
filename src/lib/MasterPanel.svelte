@@ -123,12 +123,10 @@
       autoRunning = false;
       return;
     }
-    // Re-baseline countdown on every (re-)arm: rising edge of autoRunning,
-    // speed change, autoCallEnabled toggle. handleDrawNext bumps it again
-    // per tick so the ring re-fills before the next interval elapses.
-    // Safe self-write: this effect doesn't read tickCount, so the bump
-    // can't re-trigger it.
-    tickCount++;
+    // No tickCount bump here on purpose: `tickCount++` would read tickCount
+    // and turn this effect into its own dependency (effect_update_depth_exceeded).
+    // AutoCountdown's reset effect already re-baselines on `running` rising
+    // edge and on `duration` change, so re-arms are covered without our help.
     const ms = settings.autoCallSpeed * 1000;
     const id = setInterval(() => {
       if (!state || state.remaining.length === 0) {
