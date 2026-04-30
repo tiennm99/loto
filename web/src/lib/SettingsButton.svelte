@@ -357,15 +357,17 @@
           </div>
         {/if}
 
-        {@render switchRow("Báo Chờ / Kinh", settings.voiceEnabledPlayer, toggleVoicePlayer)}
+        {#if settings.mode !== "master"}
+          {@render switchRow("Báo Chờ / Kinh", settings.voiceEnabledPlayer, toggleVoicePlayer)}
 
-        {#if settings.voiceEnabledPlayer && settings.mode !== "both"}
-          <div class="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-600">
-            {@render switchRow("Đọc thêm số đang chờ", settings.voiceWaitingNumber, toggleVoiceWaitingNumber)}
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
-              Tắt: chỉ nói "Chờ". Bật: nói "Chờ {`{số}`}".
-            </p>
-          </div>
+          {#if settings.voiceEnabledPlayer && settings.mode !== "both"}
+            <div class="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-600">
+              {@render switchRow("Đọc thêm số đang chờ", settings.voiceWaitingNumber, toggleVoiceWaitingNumber)}
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 px-1">
+                Tắt: chỉ nói "Chờ". Bật: nói "Chờ {`{số}`}".
+              </p>
+            </div>
+          {/if}
         {/if}
 
         {#if VOICES.length > 1}
