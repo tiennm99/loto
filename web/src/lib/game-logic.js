@@ -264,6 +264,45 @@ export function loadCrossedState(prefix = "loto") {
   }
 }
 
+/** @param {any} v */
+function isUnticksArray(v) {
+  return (
+    Array.isArray(v) &&
+    v.every((n) => Number.isInteger(n) && n >= 1 && n <= 90)
+  );
+}
+
+/**
+ * @param {Set<number>} unticks
+ * @param {string} [prefix]
+ */
+export function saveManualUnticks(unticks, prefix = "loto") {
+  try {
+    localStorage.setItem(
+      `${prefix}_manualUnticks`,
+      JSON.stringify([...unticks].sort((a, b) => a - b)),
+    );
+  } catch {
+    // see saveGrid
+  }
+}
+
+/**
+ * @param {string} [prefix]
+ * @returns {Set<number>}
+ */
+export function loadManualUnticks(prefix = "loto") {
+  try {
+    const arr = safeParse(
+      localStorage.getItem(`${prefix}_manualUnticks`),
+      isUnticksArray,
+    );
+    return new Set(arr ?? []);
+  } catch {
+    return new Set();
+  }
+}
+
 /**
  * Locate the first non-crossed cell holding `num` on the grid.
  * Returns `null` when the number is absent or already crossed everywhere.

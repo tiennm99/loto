@@ -1,15 +1,17 @@
 <script>
-  import { processAutoTick } from "$lib/auto-tick.js";
-  import { bus, resetBus } from "$lib/call-bus.svelte.js";
   import {
     generateGrid,
     getWaitingNumber,
     isRowComplete,
     loadCrossedState,
     loadGrid,
+    loadManualUnticks,
     saveCrossedState,
     saveGrid,
+    saveManualUnticks,
   } from "$lib/game-logic.js";
+  import { masterState } from "$lib/master-store.svelte.js";
+  import { applyMasterCalls } from "$lib/player-auto-cross.js";
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playBingo, playWaiting } from "$lib/voice.js";
 
@@ -24,6 +26,10 @@
 
   let grid = $state(/** @type {number[][] | null} */ (null));
   let crossed = $state(/** @type {boolean[][]} */ ([]));
+  // Numbers the user explicitly unticked AFTER an auto-cross; suppresses
+  // re-cross on subsequent passes (e.g. regen replay). Manual re-ticks
+  // remove from the set.
+  let manualUnticks = $state(/** @type {Set<number>} */ (new Set()));
   let showCongrats = $state(false);
   let congratsRow = $state(-1);
   let celebrationTier = $state(/** @type {1 | 2} */ (1));
@@ -41,10 +47,15 @@
   let toastTimer = null;
   const celebratedRows = new Set();
   const notifiedWaitingRows = new Set();
-  // Last bus draw we acted on. Compared against bus.lastDrawn.at so the
-  // auto-tick effect only fires on a NEW draw — re-runs caused by
-  // crossed/grid changes (manual untick, clear, regen) skip cleanly.
-  let lastHandledDrawAt = 0;
+  // How many entries of masterState.called we've already replayed.
+  // Advances strictly even on no-op passes so a single draw never
+  // re-fires (auto-cross effect dedup). Resets to 0 when the host
+  // starts a new game (called → []).
+  let lastHandledIndex = $state(0);
+  // Tracks called.length across reactivity ticks so we can detect a
+  // master "Ván mới" (length transitions from >0 → 0) and clear
+  // player crossed in both mode per locked product decision.
+  let prevCalledLen = $state(0);
 
   // Memoized per-row completeness — avoid 81×/render isRowComplete calls
   const rowCompleteness = $derived(
@@ -92,6 +103,7 @@
       loadCrossedState(STORAGE_PREFIX) ??
       savedGrid.map((row) => row.map(() => false));
     crossed = savedCrossed;
+    manualUnticks = loadManualUnticks(STORAGE_PREFIX);
 
     celebratedRows.clear();
     notifiedWaitingRows.clear();
@@ -100,6 +112,16 @@
       if (getWaitingNumber(savedGrid, savedCrossed, i) !== null)
         notifiedWaitingRows.add(i);
     }
+    // No cursor baseline here on purpose. We let `lastHandledIndex` stay
+    // at its $state init (0) so the auto-cross effect re-applies the full
+    // master history. Already-crossed cells are skipped by
+    // `findUncrossedCell`, so reload is idempotent. This avoids racing
+    // mount order between PlayerBoard and MasterPanel mode toggles.
+  });
+
+  // Persist manualUnticks whenever it changes.
+  $effect(() => {
+    if (grid) saveManualUnticks(manualUnticks, STORAGE_PREFIX);
   });
 
   // Persist crossed state on change
@@ -175,35 +197,81 @@
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  // Auto-tick on master draw (only in "both" mode). Reads `bus.lastDrawn`
-  // reactively; the dedup-by-`at` invariant lives in `processAutoTick` —
-  // see `auto-tick.test.js` for the full case matrix.
+  // Auto-cross on master draws (only in "both" mode). Reads
+  // `masterState.called` directly — full history, no bus, no 1ms
+  // collision risk.
+  //
+  // Self-write safety: this effect reads `crossed` and `lastHandledIndex`
+  // and may write both. Convergence is guaranteed because (a) writes are
+  // gated on `result.changed` / cursor-mismatch and (b) on re-run after
+  // a write, `applyMasterCalls`'s cursor-at-length short-circuit returns
+  // a no-op result. Don't unguard the writes without re-testing.
   $effect(() => {
-    const result = processAutoTick({
+    const result = applyMasterCalls({
       grid,
       crossed,
-      lastDraw: bus.lastDrawn,
-      lastHandledAt: lastHandledDrawAt,
+      called: masterState.called,
+      lastHandledIndex,
+      manualUnticks,
       mode: settings.mode,
     });
-    lastHandledDrawAt = result.lastHandledAt;
+    if (result.lastHandledIndex !== lastHandledIndex) {
+      lastHandledIndex = result.lastHandledIndex;
+    }
     if (result.changed) crossed = result.crossed;
+  });
+
+  // Detect master "Ván mới" — `called` length transitions from >0 → 0.
+  // Per locked product decision, force-clear player crossed (and
+  // manualUnticks) in both mode so a fresh round starts truly fresh.
+  //
+  // Self-write safety: explicit early-return when `len === prev` avoids
+  // a same-value write to `prevCalledLen` that could spuriously re-run.
+  $effect(() => {
+    const len = masterState.called.length;
+    const prev = prevCalledLen;
+    if (len === prev) return;
+    prevCalledLen = len;
+    if (prev > 0 && len === 0 && settings.mode === "both" && grid) {
+      crossed = grid.map((row) => row.map(() => false));
+      manualUnticks = new Set();
+      lastHandledIndex = 0;
+      celebratedRows.clear();
+      notifiedWaitingRows.clear();
+    }
   });
 
   function handleGenerate() {
     if (grid && !confirm("Bạn có muốn tạo lại bảng không?")) return;
     cancelPlayback();
     const newGrid = generateGrid();
-    const newCrossed = newGrid.map((row) => row.map(() => false));
+    let newCrossed = newGrid.map((row) => row.map(() => false));
+    // Replay master's called[] onto the fresh grid so the host doesn't
+    // restart from zero when they regenerate mid-game (locked decision).
+    if (settings.mode === "both") {
+      const result = applyMasterCalls({
+        grid: newGrid,
+        crossed: newCrossed,
+        called: masterState.called,
+        lastHandledIndex: 0,
+        manualUnticks: new Set(),
+        mode: "both",
+      });
+      newCrossed = result.crossed;
+      lastHandledIndex = result.lastHandledIndex;
+    } else {
+      lastHandledIndex = masterState.called.length;
+    }
     grid = newGrid;
     crossed = newCrossed;
+    manualUnticks = new Set();
     saveGrid(newGrid, STORAGE_PREFIX);
     saveCrossedState(newCrossed, STORAGE_PREFIX);
+    saveManualUnticks(manualUnticks, STORAGE_PREFIX);
     celebratedRows.clear();
     notifiedWaitingRows.clear();
     dismissToast();
     showCongrats = false;
-    resetBus();
   }
 
   function handleClear() {
@@ -211,12 +279,29 @@
     const hasMarks = crossed.some((row) => row.some(Boolean));
     if (hasMarks && !confirm("Bạn có muốn xoá tất cả đánh dấu không?")) return;
     cancelPlayback();
-    crossed = grid.map((row) => row.map(() => false));
+    let cleared = grid.map((row) => row.map(() => false));
+    manualUnticks = new Set();
+    // In both mode, immediately replay master's called[] (locked
+    // decision: clear → re-cross all currently-called numbers).
+    if (settings.mode === "both") {
+      const result = applyMasterCalls({
+        grid,
+        crossed: cleared,
+        called: masterState.called,
+        lastHandledIndex: 0,
+        manualUnticks: new Set(),
+        mode: "both",
+      });
+      cleared = result.crossed;
+      lastHandledIndex = result.lastHandledIndex;
+    } else {
+      lastHandledIndex = masterState.called.length;
+    }
+    crossed = cleared;
     celebratedRows.clear();
     notifiedWaitingRows.clear();
     dismissToast();
     showCongrats = false;
-    resetBus();
   }
 
   /**
@@ -230,6 +315,19 @@
       !prefersReducedMotion()
     ) {
       navigator.vibrate(10);
+    }
+    if (!grid) return;
+    const num = grid[row][col];
+    const wasCrossed = crossed[row]?.[col] === true;
+    const willBeCrossed = !wasCrossed;
+    // Track manual unticks of called numbers so future regen/clear
+    // replays skip them. Untracking uncalled numbers would pollute the
+    // set with no visible effect — auto-cross only acts on called nums.
+    if (num > 0 && masterState.called.includes(num)) {
+      const next = new Set(manualUnticks);
+      if (wasCrossed && !willBeCrossed) next.add(num);
+      else if (!wasCrossed && willBeCrossed) next.delete(num);
+      if (next.size !== manualUnticks.size) manualUnticks = next;
     }
     crossed = crossed.map((r, ri) =>
       ri === row ? r.map((v, ci) => (ci === col ? !v : v)) : r

@@ -1,6 +1,4 @@
 <script module>
-  const STORAGE_KEY = "loto_master";
-
   /**
    * 11x9 board, aligned by ones-digit. Row = ones digit, col = tens digit.
    * Col 0 holds 1..9, col 8 holds 80..90 (90 sits alone in row 10 col 8).
@@ -29,87 +27,54 @@
     return board;
   }
 
-  /** @returns {{ called: number[], remaining: number[] }} */
-  function createFreshState() {
-    const all = Array.from({ length: 90 }, (_, i) => i + 1);
-    for (let i = all.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [all[i], all[j]] = [all[j], all[i]];
-    }
-    return { called: [], remaining: all };
-  }
-
-  /** @param {{ called: number[], remaining: number[] }} state */
-  function saveState(state) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* ignore */
-    }
-  }
-
-  /** Hard cap so a poisoned origin can't stall the UI on mount.
-   *  90-number called list serializes to ~500 bytes; 16 KB has 30× headroom. */
-  const MAX_STORAGE_BYTES = 16_384;
-
-  function loadState() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      if (!data || data.length > MAX_STORAGE_BYTES) return null;
-      const parsed = JSON.parse(data, (k, v) =>
-        k === "__proto__" || k === "constructor" ? undefined : v,
-      );
-      // Minimal shape check — Array.isArray on both halves is enough
-      // for all callers; deeper validation isn't worth the complexity.
-      if (
-        !parsed ||
-        !Array.isArray(parsed.called) ||
-        !Array.isArray(parsed.remaining)
-      ) {
-        return null;
-      }
-      return parsed;
-    } catch {
-      return null;
-    }
-  }
-
   const BOARD = Object.freeze(buildBoard().map((row) => Object.freeze(row)));
   const BOARD_FLAT = Object.freeze(BOARD.flatMap((r) => r));
 </script>
 
 <script>
   import AutoCountdown from "$lib/AutoCountdown.svelte";
-  import { broadcastDraw, resetBus } from "$lib/call-bus.svelte.js";
+  import {
+    drawNext,
+    masterState,
+    saveMaster,
+    startNewGame,
+  } from "$lib/master-store.svelte.js";
   import MasterEmptyState from "$lib/MasterEmptyState.svelte";
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playNumber } from "$lib/voice.js";
 
-  let state = $state(
-    /** @type {{called: number[], remaining: number[]} | null} */ (null),
-  );
-  let lastCalled = $state(/** @type {number | null} */ (null));
   let heroEl = $state(/** @type {HTMLDivElement | null} */ (null));
   let autoRunning = $state(false);
   // Bumped on each draw and on every (re-)arm of the auto-call interval —
   // signals AutoCountdown to reset its ring.
   let tickCount = $state(0);
 
-  $effect(() => {
-    const saved = loadState();
-    if (saved && saved.called.length > 0) {
-      state = saved;
-      lastCalled = saved.called[saved.called.length - 1];
-    }
-  });
+  // Round is "active" once a game has been started (remaining filled or
+  // called populated). `called.length === 0 && remaining.length === 0`
+  // means no game in progress → show empty state.
+  const hasGame = $derived(
+    masterState.called.length > 0 || masterState.remaining.length > 0,
+  );
+  const lastCalled = $derived(
+    masterState.called.length > 0
+      ? masterState.called[masterState.called.length - 1]
+      : null,
+  );
 
+  // Master state hydration lives in `+layout.svelte` so it runs before
+  // any panel mounts — otherwise PlayerBoard would baseline its cursor
+  // against an empty `masterState.called` and replay the back-history
+  // when MasterPanel later loads.
   $effect(() => {
-    if (state) saveState(state);
+    // Subscribe to both arrays so any mutation re-saves.
+    masterState.called;
+    masterState.remaining;
+    saveMaster();
   });
 
   // Map number -> 1-based draw order for fast Kinh! verification.
   const callOrder = $derived(
-    new Map((state?.called ?? []).map((n, i) => [n, i + 1])),
+    new Map(masterState.called.map((n, i) => [n, i + 1])),
   );
 
   // Auto-call interval. Single $effect that depends on autoRunning,
@@ -129,7 +94,7 @@
     // edge and on `duration` change, so re-arms are covered without our help.
     const ms = settings.autoCallSpeed * 1000;
     const id = setInterval(() => {
-      if (!state || state.remaining.length === 0) {
+      if (masterState.remaining.length === 0) {
         autoRunning = false;
         return;
       }
@@ -163,30 +128,22 @@
   });
 
   function handleNewGame() {
-    if (state && !confirm("Bạn có muốn tạo ván mới không?")) return;
+    if (hasGame && !confirm("Bạn có muốn tạo ván mới không?")) return;
     cancelPlayback();
     autoRunning = false;
-    state = createFreshState();
-    lastCalled = null;
-    resetBus();
+    startNewGame();
   }
 
   function handleDrawNext() {
-    if (!state || state.remaining.length === 0) return;
-    const next = state.remaining[0];
-    state = {
-      called: [...state.called, next],
-      remaining: state.remaining.slice(1),
-    };
-    lastCalled = next;
+    const next = drawNext();
+    if (next === null) return;
     scrollOnNextDraw = true;
-    broadcastDraw(next);
     tickCount++;
     if (settings.voiceEnabledMaster) playNumber(next);
   }
 
   function toggleAuto() {
-    if (!state || state.remaining.length === 0) return;
+    if (masterState.remaining.length === 0) return;
     autoRunning = !autoRunning;
   }
 </script>
@@ -201,7 +158,7 @@
   >
     Ván mới
   </button>
-  {#if state && state.remaining.length > 0}
+  {#if hasGame && masterState.remaining.length > 0}
     {#if settings.autoCallEnabled}
       <button
         onclick={toggleAuto}
@@ -226,7 +183,7 @@
   {/if}
 </div>
 
-{#if settings.autoCallEnabled && state && state.remaining.length > 0}
+{#if settings.autoCallEnabled && hasGame && masterState.remaining.length > 0}
   <div
     class="text-center text-sm text-slate-600 dark:text-slate-300 mb-4 tabular-nums"
   >
@@ -234,7 +191,7 @@
   </div>
 {/if}
 
-{#if autoRunning && state && state.remaining.length > 0}
+{#if autoRunning && masterState.remaining.length > 0}
   <div class="flex justify-center mb-4">
     <AutoCountdown
       running={autoRunning}
@@ -276,23 +233,23 @@
         {lastCalled}
       </span>
     </div>
-    {#if state}
+    {#if hasGame}
       <div class="mt-2.5 text-sm text-slate-600 dark:text-slate-300 tabular-nums">
-        Đã xổ: <strong class="font-semibold">{state.called.length}</strong>/90
-        &middot; Còn lại: <strong class="font-semibold">{state.remaining.length}</strong>
+        Đã xổ: <strong class="font-semibold">{masterState.called.length}</strong>/90
+        &middot; Còn lại: <strong class="font-semibold">{masterState.remaining.length}</strong>
       </div>
     {/if}
   </div>
 {/if}
 
 <!-- Called history -->
-{#if state && state.called.length > 0}
+{#if masterState.called.length > 0}
   <div class="mb-6 px-1">
     <div class="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
       Thứ tự đã xổ:
     </div>
     <div class="flex flex-wrap gap-1.5">
-      {#each state.called as num, i (i)}
+      {#each masterState.called as num, i (i)}
         {@const isLow = num <= 49}
         <span
           class="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10
@@ -310,7 +267,7 @@
 {/if}
 
 <!-- 11x9 master tracking board -->
-{#if state}
+{#if hasGame}
   <div
     aria-label="Bảng theo dõi số đã xổ"
     class="rounded-2xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-700"
