@@ -109,7 +109,11 @@ export function playWaiting(n) {
   cancelPlayback();
   const token = Symbol("playWaiting");
   activeToken = token;
-  const speakNumber = settings.voiceWaitingNumber;
+  // Suppress the trailing number in both mode — master is already
+  // calling numbers aloud, so "Chờ 42" right after a "33" call confuses
+  // listeners who can't tell which number is the active draw.
+  const speakNumber =
+    settings.voiceWaitingNumber && settings.mode !== "both";
   (async () => {
     await playClip(clipUrl("cho"), token);
     if (speakNumber) await playClip(clipUrl(String(n)), token);
