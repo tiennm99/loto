@@ -24,12 +24,15 @@
 
   // Re-baseline whenever the parent bumps tickKey, running flips on, or
   // duration changes mid-run (e.g. host moves the speed slider).
+  // Use a local snapshot so we don't read `tickStart` after writing it —
+  // that would make this effect depend on its own write and infinite-loop.
   $effect(() => {
     tickKey; // subscribe
     duration; // subscribe — keeps the contract explicit, not parent-coupled
     if (running) {
-      tickStart = performance.now();
-      now = tickStart;
+      const t = performance.now();
+      tickStart = t;
+      now = t;
     }
   });
 
