@@ -7,8 +7,10 @@ import {
   isRowComplete,
   loadCrossedState,
   loadGrid,
+  loadManualUnticks,
   saveCrossedState,
   saveGrid,
+  saveManualUnticks,
 } from "./game-logic.js";
 
 const NUM_ROWS = 9;
@@ -292,5 +294,47 @@ describe("findUncrossedCell", () => {
     // Both row 0 col 1 and row 2 col 1 hold 11/12 — first match wins.
     expect(findUncrossedCell(grid, grid.map((row) => row.map(() => false)), 11))
       .toEqual({ row: 0, col: 1 });
+  });
+});
+
+describe("saveManualUnticks / loadManualUnticks roundtrip", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("round-trips a Set of numbers", () => {
+    const set = new Set([7, 42, 88]);
+    saveManualUnticks(set, "loto");
+    expect(loadManualUnticks("loto")).toEqual(set);
+  });
+
+  it("returns empty Set when nothing stored", () => {
+    expect(loadManualUnticks("loto")).toEqual(new Set());
+  });
+
+  it("returns empty Set on corrupt JSON", () => {
+    localStorage.setItem("loto_manualUnticks", "{not valid");
+    expect(loadManualUnticks("loto")).toEqual(new Set());
+  });
+
+  it("rejects entries outside [1,90]", () => {
+    localStorage.setItem(
+      "loto_manualUnticks",
+      JSON.stringify([0, 1, 91, 5]),
+    );
+    // Whole payload is rejected when any entry fails validation,
+    // mirroring the safeParse semantics for grids and crossed state.
+    expect(loadManualUnticks("loto")).toEqual(new Set());
+  });
+
+  it("storage value is sorted ascending for deterministic diffs", () => {
+    saveManualUnticks(new Set([88, 7, 42]), "loto");
+    expect(localStorage.getItem("loto_manualUnticks")).toBe("[7,42,88]");
+  });
+
+  it("respects the prefix arg", () => {
+    saveManualUnticks(new Set([5]), "alt");
+    expect(loadManualUnticks("alt")).toEqual(new Set([5]));
+    expect(loadManualUnticks("loto")).toEqual(new Set());
   });
 });
