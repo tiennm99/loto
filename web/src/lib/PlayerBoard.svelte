@@ -455,18 +455,10 @@
                   >
                     {num}
                     {#if isCrossed}
-                      <svg
+                      <span
                         aria-hidden="true"
-                        viewBox="0 0 100 100"
-                        preserveAspectRatio="none"
-                        class="cross-slash {rowComplete ? 'cross-slash-win' : ''}"
-                      >
-                        <line
-                          class="cross-slash-line"
-                          x1="0" y1="0" x2="100" y2="100"
-                          vector-effect="non-scaling-stroke"
-                        />
-                      </svg>
+                        class="cell-crossed {rowComplete ? 'cell-crossed-win' : ''}"
+                      ></span>
                     {/if}
                   </button>
                 {/if}
