@@ -4,29 +4,29 @@
   import { loadMaster } from "$lib/master-store.svelte.js";
   import { loadSettings } from "$lib/settings-store.svelte.js";
   import {
-    reclaimTab,
-    startTabLock,
-    tabLock,
-  } from "$lib/tab-lock.svelte.js";
+    activeTab,
+    claimActiveTab,
+    watchActiveTab,
+  } from "$lib/active-tab.svelte.js";
 
   let { children } = $props();
 
   // Hydrate global stores once so children mount with consistent state.
   // Master state must hydrate before PlayerBoard reads `masterState.called`
   // length — see the mode-mount race fix in the consistency refactor.
-  // The tab-lock cleanup is returned so HMR / route changes close the
+  // The active-tab cleanup is returned so HMR / route changes close the
   // BroadcastChannel cleanly.
   onMount(() => {
     loadSettings();
     loadMaster();
-    return startTabLock();
+    return watchActiveTab();
   });
 </script>
 
-{#if tabLock.frozen}
+{#if activeTab.inactive}
   <button
     type="button"
-    onclick={reclaimTab}
+    onclick={claimActiveTab}
     class="fixed inset-0 z-50 flex flex-col items-center justify-center
            bg-slate-900/95 text-white text-center px-6
            cursor-pointer focus:outline-none"
