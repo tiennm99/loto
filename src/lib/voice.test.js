@@ -35,6 +35,7 @@ beforeEach(() => {
   clearAudioCache();
   settings.voice = "test-voice";
   settings.voiceWaitingNumber = false;
+  settings.mode = "player";
 });
 
 afterEach(() => {
@@ -89,5 +90,19 @@ describe("voice — playback cancellation", () => {
     await Promise.resolve();
     expect(audios.length).toBe(2);
     expect(audios[1].src).toMatch(/\/42\.mp3$/);
+  });
+
+  it("playWaiting suppresses trailing number in both mode even when flag is on", async () => {
+    settings.voiceWaitingNumber = true;
+    settings.mode = "both";
+    playWaiting(42);
+    await Promise.resolve();
+    expect(audios[0].src).toMatch(/\/cho\.mp3$/);
+    audios[0].onended?.();
+    await Promise.resolve();
+    await Promise.resolve();
+    // Master is the announcer in both mode — overlapping "Chờ N" right
+    // after a master call confuses listeners, so we drop it.
+    expect(audios.length).toBe(1);
   });
 });
