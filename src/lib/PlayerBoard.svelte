@@ -76,6 +76,24 @@
       : []
   );
 
+  // "row,col" keys of cells holding the awaited number for any waiting
+  // row. Drives the per-cell pulse animation so the user can spot which
+  // number to find without reading text. Multiple rows may be waiting
+  // simultaneously — each gets its own pulsing cell.
+  const waitingCells = $derived.by(() => {
+    /** @type {Set<string>} */
+    const set = new Set();
+    if (!grid || crossed.length === 0) return set;
+    for (let r = 0; r < grid.length; r++) {
+      if (rowCompleteness[r]) continue;
+      const num = getWaitingNumber(grid, crossed, r);
+      if (num === null) continue;
+      const c = grid[r].indexOf(num);
+      if (c >= 0) set.add(`${r},${c}`);
+    }
+    return set;
+  });
+
   function dismissToast() {
     toast = null;
     if (toastTimer) {
@@ -400,6 +418,7 @@
                 {@const hasNumber = num > 0}
                 {@const isCrossed = hasNumber && !!crossed[row]?.[col]}
                 {@const rowComplete = hasNumber && rowCompleteness[row]}
+                {@const isWaitingCell = hasNumber && waitingCells.has(`${row},${col}`)}
 
                 {#if !hasNumber}
                   <!-- Empty cell. Dark-mode dim is an overlay div, not a CSS
@@ -418,7 +437,7 @@
                 {:else}
                   <button
                     type="button"
-                    aria-label="Số {num}{isCrossed ? ', đã đánh dấu' : ''}"
+                    aria-label="Số {num}{isCrossed ? ', đã đánh dấu' : ''}{isWaitingCell ? ', đang chờ' : ''}"
                     aria-pressed={isCrossed}
                     onclick={() => handleCellClick(row, col)}
                     class="tan-tan-num relative flex items-center justify-center
@@ -427,6 +446,7 @@
                            border border-slate-400/50 dark:border-slate-600/40
                            transition-all select-none cursor-pointer active:scale-90
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400
+                           {isWaitingCell ? 'cell-waiting' : ''}
                            {isCrossed
                              ? rowComplete
                                ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-200'
@@ -464,19 +484,20 @@
     </div>
 
     {#if toast}
-      <!-- Anchor toast ABOVE the grid (not centered over playable cells)
-           so it announces without blocking row taps. Pointer-events
-           still routed to the dismiss button only. -->
+      <!-- Centered overlay over the card. Lower opacity + pointer-events
+           routing keeps cell taps unblocked while the chip is visible.
+           Cell-pulse on the awaited number is the persistent visual
+           anchor; this chip is the textual fresh-event cue. -->
       <div
         role="status"
         aria-live="polite"
-        class="absolute left-1/2 -translate-x-1/2 -top-3 sm:-top-4 z-10 pointer-events-none"
+        class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
       >
         <button
           type="button"
           onclick={dismissToast}
           aria-label="Đóng thông báo"
-          class="pointer-events-auto px-5 py-2.5 rounded-2xl bg-amber-500/95 dark:bg-amber-600/95 text-white text-lg sm:text-xl font-black shadow-xl animate-toast"
+          class="pointer-events-auto px-6 py-3 rounded-2xl bg-amber-500/75 dark:bg-amber-600/75 text-white text-2xl sm:text-3xl font-black shadow-2xl animate-toast backdrop-blur-sm"
         >
           {toast}
         </button>
