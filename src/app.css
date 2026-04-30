@@ -171,8 +171,8 @@ body {
 .animate-toast { animation: toast 5s ease-in-out forwards; }
 
 @keyframes cross-draw {
-  from { stroke-dashoffset: 200; }
-  to   { stroke-dashoffset: 0; }
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
 }
 
 /* Falling-confetti burst for the 3rd-and-up bingo of a single card. */
@@ -191,24 +191,32 @@ body {
   will-change: transform, opacity;
 }
 
-/* Diagonal slash drawn as a true solid stroke via SVG. preserveAspectRatio
-   on the <svg> stretches the line to corner-to-corner regardless of cell
-   aspect ratio; vector-effect keeps the visual stroke width constant. */
-.cross-slash {
+/* Diagonal slash drawn via a CSS gradient stripe centered on the
+   anti-diagonal of the cell. Per-cell aspect ratio means the visible
+   line tracks naturally with the cell's diagonal regardless of mobile
+   vs sm+ aspect, and the inset keeps the slash off the cell edges so
+   adjacent cells don't blur into one continuous stripe. */
+.cell-crossed {
   position: absolute;
   inset: 6px;
   pointer-events: none;
-}
-.cross-slash-line {
-  stroke: #ef4444;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 200;
-  stroke-dashoffset: 0;
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1.5px),
+    #ef4444,
+    transparent calc(50% + 1.5px)
+  );
   animation: cross-draw 200ms ease-out;
 }
-.cross-slash-win .cross-slash-line {
-  stroke: #10b981;
+/* Winning-row slash uses emerald instead of red so a completed row
+   reads as "win" rather than "marked off". */
+.cell-crossed-win {
+  background-image: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1.5px),
+    #10b981,
+    transparent calc(50% + 1.5px)
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -219,7 +227,9 @@ body {
   .animate-spin-slow-reverse,
   .animate-toast,
   .confetti,
-  .cross-slash-line {
+  .cell-crossed {
     animation: none !important;
   }
+  /* Keep the slash visible (no draw animation, but still drawn). */
+  .cell-crossed { clip-path: none; }
 }
