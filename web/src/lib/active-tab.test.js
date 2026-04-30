@@ -44,41 +44,41 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("tab-lock", () => {
-  it("startTabLock returns no-op cleanup when BroadcastChannel is missing", async () => {
+describe("active-tab", () => {
+  it("watchActiveTab returns no-op cleanup when BroadcastChannel is missing", async () => {
     vi.stubGlobal("BroadcastChannel", undefined);
-    const mod = await import("./tab-lock.svelte.js?nobc");
-    const cleanup = mod.startTabLock();
+    const mod = await import("./active-tab.svelte.js?nobc");
+    const cleanup = mod.watchActiveTab();
     expect(typeof cleanup).toBe("function");
-    expect(mod.tabLock.frozen).toBe(false);
+    expect(mod.activeTab.inactive).toBe(false);
     cleanup();
   });
 
-  it("second tab's claim freezes the first tab", async () => {
-    const tabA = await import("./tab-lock.svelte.js?a");
-    const tabB = await import("./tab-lock.svelte.js?b");
-    tabA.startTabLock();
-    expect(tabA.tabLock.frozen).toBe(false);
-    tabB.startTabLock();
-    expect(tabA.tabLock.frozen).toBe(true);
-    expect(tabB.tabLock.frozen).toBe(false);
+  it("second tab's claim marks the first tab inactive", async () => {
+    const tabA = await import("./active-tab.svelte.js?a");
+    const tabB = await import("./active-tab.svelte.js?b");
+    tabA.watchActiveTab();
+    expect(tabA.activeTab.inactive).toBe(false);
+    tabB.watchActiveTab();
+    expect(tabA.activeTab.inactive).toBe(true);
+    expect(tabB.activeTab.inactive).toBe(false);
   });
 
-  it("reclaimTab unfreezes self and freezes the other", async () => {
-    const tabA = await import("./tab-lock.svelte.js?ra-a");
-    const tabB = await import("./tab-lock.svelte.js?ra-b");
-    tabA.startTabLock();
-    tabB.startTabLock();
-    expect(tabA.tabLock.frozen).toBe(true);
-    tabA.reclaimTab();
-    expect(tabA.tabLock.frozen).toBe(false);
-    expect(tabB.tabLock.frozen).toBe(true);
+  it("claimActiveTab reactivates self and inactivates the other", async () => {
+    const tabA = await import("./active-tab.svelte.js?ra-a");
+    const tabB = await import("./active-tab.svelte.js?ra-b");
+    tabA.watchActiveTab();
+    tabB.watchActiveTab();
+    expect(tabA.activeTab.inactive).toBe(true);
+    tabA.claimActiveTab();
+    expect(tabA.activeTab.inactive).toBe(false);
+    expect(tabB.activeTab.inactive).toBe(true);
   });
 
-  it("startTabLock is idempotent within a single module", async () => {
-    const tab = await import("./tab-lock.svelte.js?idem");
-    const c1 = tab.startTabLock();
-    const c2 = tab.startTabLock();
+  it("watchActiveTab is idempotent within a single module", async () => {
+    const tab = await import("./active-tab.svelte.js?idem");
+    const c1 = tab.watchActiveTab();
+    const c2 = tab.watchActiveTab();
     expect(typeof c1).toBe("function");
     expect(typeof c2).toBe("function");
     c1();
