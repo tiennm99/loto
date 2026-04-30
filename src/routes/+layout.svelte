@@ -30,13 +30,13 @@
     class="fixed inset-0 z-50 flex flex-col items-center justify-center
            bg-slate-900/95 text-white text-center px-6
            cursor-pointer focus:outline-none"
-    aria-label="Loto đã mở ở tab khác. Nhấn để chuyển về tab này."
+    aria-label="Phiên Lô tô đang chạy ở tab khác. Nhấn để tiếp tục tại đây."
   >
     <p class="text-2xl sm:text-3xl font-bold mb-3">
-      🏮 Loto đã mở ở tab khác
+      Phiên Lô tô đang chạy ở tab khác
     </p>
     <p class="text-base text-slate-300 max-w-sm">
-      Tap để chuyển về tab này. Tab kia sẽ tự dừng.
+      Nhấn để tiếp tục tại đây. Tab kia sẽ tự động dừng.
     </p>
   </button>
 {:else}
