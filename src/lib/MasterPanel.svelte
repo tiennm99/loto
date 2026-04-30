@@ -79,6 +79,7 @@
 </script>
 
 <script>
+  import AutoCountdown from "$lib/AutoCountdown.svelte";
   import { broadcastDraw, resetBus } from "$lib/call-bus.svelte.js";
   import MasterEmptyState from "$lib/MasterEmptyState.svelte";
   import { settings } from "$lib/settings-store.svelte.js";
@@ -90,6 +91,9 @@
   let lastCalled = $state(/** @type {number | null} */ (null));
   let heroEl = $state(/** @type {HTMLDivElement | null} */ (null));
   let autoRunning = $state(false);
+  // Bumped on each draw and on every (re-)arm of the auto-call interval —
+  // signals AutoCountdown to reset its ring.
+  let tickCount = $state(0);
 
   $effect(() => {
     const saved = loadState();
@@ -119,6 +123,12 @@
       autoRunning = false;
       return;
     }
+    // Re-baseline countdown on every (re-)arm: rising edge of autoRunning,
+    // speed change, autoCallEnabled toggle. handleDrawNext bumps it again
+    // per tick so the ring re-fills before the next interval elapses.
+    // Safe self-write: this effect doesn't read tickCount, so the bump
+    // can't re-trigger it.
+    tickCount++;
     const ms = settings.autoCallSpeed * 1000;
     const id = setInterval(() => {
       if (!state || state.remaining.length === 0) {
@@ -173,6 +183,7 @@
     lastCalled = next;
     scrollOnNextDraw = true;
     broadcastDraw(next);
+    tickCount++;
     if (settings.voiceEnabledMaster) playNumber(next);
   }
 
@@ -222,6 +233,16 @@
     class="text-center text-sm text-slate-600 dark:text-slate-300 mb-4 tabular-nums"
   >
     Tự động: {settings.autoCallSpeed}s/số
+  </div>
+{/if}
+
+{#if autoRunning && state && state.remaining.length > 0}
+  <div class="flex justify-center mb-4">
+    <AutoCountdown
+      running={autoRunning}
+      duration={settings.autoCallSpeed}
+      tickKey={tickCount}
+    />
   </div>
 {/if}
 
