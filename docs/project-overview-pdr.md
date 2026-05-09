@@ -73,7 +73,7 @@ That format is intentionally out of scope.
 - **Styling**: Tailwind CSS 4 (utility-first, animations)
 - **Persistence**: localStorage (no backend)
 - **Audio**: pre-generated MP3 clips bundled under `static/audio/{voiceId}/`. Built once by `scripts/generate-audio.py` using free `edge-tts` (Microsoft Neural). Runtime plays via plain HTML5 Audio — no TTS API at runtime.
-- **Deploy**: Cloudflare Pages (root domain), GitHub Pages fallback (`/loto`)
+- **Deploy**: GitHub Pages at `/loto` (canonical, via GitHub Actions)
 - **Dev Profile**: code-server compatible via `/absproxy/{port}` basePath + HMR proxy config
 
 ## Architecture Overview
@@ -86,9 +86,9 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 
 ## Deployment
 
-- **Production**: Cloudflare Pages at `loto.miti99.com` (canonical, CF dashboard, root basePath). GitHub Pages serves only a redirect to the canonical URL via `.github/workflows/deploy-github-pages.yml`.
+- **Production**: GitHub Pages at `https://tiennm99.github.io/loto/` (canonical, basePath `/loto`). Deployed by `.github/workflows/deploy-github-pages.yml` on push to `main`.
 - **Development**: `npm run dev` (local), `npm run dev:codeserver` (code-server via proxy).
-- **Build**: `npm run build` generates static export to `build/` directory.
+- **Build**: `npm run build:gh` generates static export to `build/` directory with the `/loto` basePath.
 
 ## Key Acceptance Criteria
 
@@ -143,5 +143,5 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 - Multiplayer sync (real-time via WebSocket)
 - i18n beyond Vietnamese
 
-Last reviewed: 2026-04-27 (scope locked: Lô tô hội chợ Tân Tân + theme/master/auto-call)
-Last synced: 2026-04-27 (6-phase refactor)
+Last reviewed: 2026-05-09 (scope locked: Lô tô hội chợ Tân Tân + theme/master/auto-call)
+Last synced: 2026-05-09 (deploy target switched to GitHub Pages)

@@ -4,8 +4,8 @@
 
 | Script | basePath | Target |
 |---|---|---|
-| `npm run build` | `""` (root) | Cloudflare Pages → `https://loto.miti99.com` |
-| `npm run build:gh` | `/loto` | GitHub Pages → `https://tiennm99.github.io/loto` (manual fallback) |
+| `npm run build` | `""` (root) | Local preview / generic static host |
+| `npm run build:gh` | `/loto` | GitHub Pages → `https://tiennm99.github.io/loto` (canonical) |
 
 Implementation: `svelte.config.js` reads `BUILD_PROFILE` env. Default is empty
 basePath; `BUILD_PROFILE=gh npm run build` switches to `/loto`.
@@ -13,61 +13,21 @@ basePath; `BUILD_PROFILE=gh npm run build` switches to `/loto`.
 Internal links use `import { base } from '$app/paths'` so they survive
 either profile without code changes.
 
-## Production Deployment — Cloudflare Pages
+## Production Deployment — GitHub Pages
 
-Primary deploy. Set up via the Cloudflare dashboard once; subsequent
-pushes to `main` trigger automatic builds + deploys.
+Canonical deploy. Wired via `.github/workflows/deploy-github-pages.yml`:
+on push to `main`, runs `npm run build:gh`, uploads `build/` as the
+GitHub Pages artifact, and deploys.
 
-1. dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git
-   → pick the repo
-2. Build settings:
-   - Framework preset: SvelteKit
-   - Build command: `npm run build`
-   - Build output directory: `build`
-   - Production branch: `main`
-3. After first deploy, add the custom domain:
-   Project → Custom domains → `loto.miti99.com`. Cloudflare gives DNS
-   records to add at your registrar (or auto-configures if `miti99.com` is
-   on Cloudflare DNS).
+One-time setup (already done; documented for restoration):
+1. Repo → Settings → Pages → Source: **GitHub Actions**.
+2. Push to `main` triggers the workflow; the deploy job posts the
+   live URL on completion.
 
-No GitHub Actions involved; no repo secrets needed.
+URL: `https://tiennm99.github.io/loto/`
 
-## GitHub Pages (redirect-only)
-
-`.github/workflows/deploy-github-pages.yml` no longer builds the app.
-It generates a tiny HTML page at `/loto/index.html` that immediately
-redirects to the canonical URL on Cloudflare Pages, plus a copy at
-`/loto/master/index.html` to catch legacy `/master` bookmarks (the app
-itself is single-page now; Cloudflare's `_redirects` collapses unknown
-paths back to `/`).
-
-The redirect uses both `<meta http-equiv="refresh">` (no-JS fallback)
-and a tiny inline script that preserves path / query / hash:
-
-```js
-location.replace("https://loto.miti99.com" + path + search + hash);
-```
-
-So `tiennm99.github.io/loto/` → `loto.miti99.com/` and any legacy
-`tiennm99.github.io/loto/master` link → `loto.miti99.com/` (after the
-intermediate `/master` redirect is collapsed by `_redirects`).
-
-The redirect runs on every push to `main`. If you want full GH Pages
-serving back (instead of the redirect), restore the prior version of
-`.github/workflows/deploy-github-pages.yml` from git history — it ran
-`npm run build:gh` and uploaded the `build/` artifact.
-
-### Manual GH Pages Build (still available)
-
-If you ever want to build a real GH Pages export by hand:
-
-```bash
-npm run build:gh
-# upload build/ to the GH Pages target manually
-```
-
-`build:gh` script kept as an escape hatch — not used by the automated
-redirect workflow.
+No external secrets; the workflow uses GitHub's built-in `pages` and
+`id-token` permissions (declared in the workflow YAML).
 
 ## Development Environment
 
@@ -129,11 +89,11 @@ This is normal in proxy environments.
 
 ### Build Command
 ```bash
-npm run build
+npm run build:gh
 ```
 
 Generates:
-- `build/` — Complete static HTML + JS export
+- `build/` — Complete static HTML + JS export with `/loto` basePath
 - `.svelte-kit/` — Build cache (not needed for deployment)
 
 ### Export Settings
@@ -142,9 +102,9 @@ Generates:
 - All pages pre-rendered to HTML + JS bundles
 
 ### Asset Hosting
-- `base` path matches deployment target (prod: `""`, GH: `/loto`, codeserver: `/absproxy/{port}`)
+- `base` path matches deployment target (GH: `/loto`, root for local preview, codeserver: `/absproxy/{port}`)
 - CSS, JS, fonts all prefixed correctly
-- GitHub Pages serves from repository root, so `/loto` paths resolve correctly
+- GitHub Pages serves the project at `/loto`, so `/loto/_app/*` paths resolve correctly
 
 ## Environment Variables
 
@@ -154,7 +114,9 @@ Generates:
 - `CODESERVER_PORT` — port (default 3000)
 
 ### Build-Time
-- `BUILD_PROFILE` — set to "gh" for GitHub Pages build (basePath `/loto`). Default empty (Cloudflare).
+- `BUILD_PROFILE` — set to `gh` for GitHub Pages build (basePath `/loto`). The
+  deploy workflow sets this via `npm run build:gh`. Default empty (root
+  basePath) is for local preview / non-GH static hosts.
 
 ### Not Used at Runtime
 - No database URL, API keys, or secrets (all client-side, localStorage)
@@ -164,7 +126,7 @@ Generates:
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
-| 404 on subpages after deploy | basePath mismatch | Verify `BUILD_PROFILE=gh` for GitHub Pages; default for Cloudflare |
+| 404 on assets after deploy | basePath mismatch | Workflow runs `npm run build:gh` — check the deploy job log emits `/loto/_app/...` URLs |
 | HMR not connecting (code-server) | CODESERVER_HOST not set | Add `CODESERVER_HOST=...` to `.env.local` |
 | Assets 404 (code-server) | Wrong proxy URL | Use `/absproxy/{port}`, not `/proxy/{port}` |
 | Page blank after refresh | State not persisted | Check browser localStorage is enabled |
@@ -172,12 +134,12 @@ Generates:
 
 ## CI/CD Pipeline
 
-Two pipelines run on push to `main`:
-- **Cloudflare Pages** (canonical) — wired via the CF dashboard, builds with
-  `npm run build`, publishes to `loto.miti99.com`.
-- **GitHub Pages** (redirect-only) — wired via
-  `.github/workflows/deploy-github-pages.yml`, deploys static redirect HTML
-  that forwards `tiennm99.github.io/loto/*` to `loto.miti99.com/*`.
+Two workflows on `main`:
+- **`.github/workflows/deploy-github-pages.yml`** — canonical deploy. Builds
+  with `npm run build:gh` and publishes `build/` to GitHub Pages.
+- **`.github/workflows/verify-build.yml`** — PR + push gate. Runs
+  `npm test && npm run build` to catch regressions before they reach the
+  deploy job.
 
 ## Performance Checklist
 
@@ -185,7 +147,7 @@ Two pipelines run on push to `main`:
 - [x] Tailwind 4 purged for production size
 - [x] localStorage reduces bundle—no API calls
 - [x] Images minimal (mostly CSS gradients + emojis)
-- [x] Fonts: Geist via Google Fonts CDN
+- [x] Fonts: Roboto Condensed self-hosted via @fontsource
 
 Bundle analysis: Run `npm run build && ls -lh build/` to inspect file sizes.
 
@@ -195,6 +157,6 @@ Bundle analysis: Run `npm run build && ls -lh build/` to inspect file sizes.
 - `.env.local` is local-only, not committed
 - localStorage scoped to origin
 - No external API calls (offline-capable)
-- GitHub Pages HTTPS by default
+- GitHub Pages serves HTTPS by default
 
-Last reviewed: 2026-04-26
+Last reviewed: 2026-05-09

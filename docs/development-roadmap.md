@@ -80,7 +80,7 @@ European Bingo 90 patterns. **Out of scope** — Tân Tân uses single-line "Kin
 ## Decision Rationale
 
 All decisions follow **YAGNI** (You Aren't Gonna Need It), **KISS** (Keep It Simple), **DRY** (Don't Repeat Yourself):
-- No multiplayer sync → adds server dependency, breaks static export (Cloudflare Pages)
+- No multiplayer sync → adds server dependency, breaks static export (GitHub Pages)
 - No i18n → Vietnamese-only community, localizing adds complexity
 - Unit tests implemented → critical paths (constraints, persistence, settings) now have automated coverage
 - Component/E2E tests deferred → small codebase, manual testing sufficient for UI flows

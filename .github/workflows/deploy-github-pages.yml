@@ -1,4 +1,4 @@
-name: Deploy redirect to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -19,43 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Generate redirect pages
-        run: |
-          set -euo pipefail
-          DEST="https://loto.miti99.com"
-          mkdir -p out/master
-          cat > out/index.html <<HTML
-          <!doctype html>
-          <html lang="vi">
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-              <title>Lô tô — đã chuyển sang ${DEST}</title>
-              <link rel="canonical" href="${DEST}/">
-              <meta http-equiv="refresh" content="0; url=${DEST}/">
-              <meta name="robots" content="noindex">
-              <script>
-                (function () {
-                  var path = location.pathname.replace(/^\/loto/, "");
-                  location.replace("${DEST}" + path + location.search + location.hash);
-                })();
-              </script>
-              <style>
-                body { font-family: system-ui, sans-serif; padding: 3rem 1.5rem; text-align: center; color: #475569; }
-                a { color: #6366f1; }
-              </style>
-            </head>
-            <body>
-              <p>Trang đã chuyển sang <a href="${DEST}/">${DEST}</a></p>
-            </body>
-          </html>
-          HTML
-          # Mirror to /master so deep links also redirect cleanly
-          cp out/index.html out/master/index.html
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build:gh
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: out
+          path: build
 
   deploy:
     needs: build

@@ -31,12 +31,13 @@ path prefix and breaks the SvelteKit base path.
 ## Build
 
 ```bash
-npm run build         # default — root basePath, for Cloudflare Pages
-npm run build:gh      # /loto basePath, for tiennm99.github.io/loto manual export
+npm run build         # root basePath (local preview / generic static host)
+npm run build:gh      # /loto basePath, for tiennm99.github.io/loto
 ```
 
-Static export to `build/`. Deployed to Cloudflare Pages from `main`
-(set up via the CF dashboard — see `docs/deployment-guide.md`).
+Static export to `build/`. Deployed to GitHub Pages from `main` via
+`.github/workflows/deploy-github-pages.yml` — see
+`docs/deployment-guide.md`.
 
 ## Regenerating audio
 
