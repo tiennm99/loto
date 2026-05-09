@@ -23,7 +23,7 @@ ONES = [
 
 
 def number_to_vietnamese(n: int) -> str:
-    """Mirror of src/lib/vietnamese-number.js for build-time use."""
+    """Canonical Vietnamese number speller for build-time audio generation."""
     if n < 10:
         return ONES[n]
     if n == 10:

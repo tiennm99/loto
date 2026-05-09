@@ -5,14 +5,14 @@ import {
   drawNext,
   loadMaster,
   masterState,
-  resetMaster,
   saveMaster,
   startNewGame,
 } from "./master-store.svelte.js";
 
 beforeEach(() => {
   localStorage.clear();
-  resetMaster();
+  masterState.called = [];
+  masterState.remaining = [];
 });
 
 describe("master-store", () => {
@@ -48,14 +48,6 @@ describe("master-store", () => {
     expect(masterState.remaining).toEqual([]);
   });
 
-  it("resetMaster clears both arrays", () => {
-    startNewGame();
-    drawNext();
-    resetMaster();
-    expect(masterState.called).toEqual([]);
-    expect(masterState.remaining).toEqual([]);
-  });
-
   it("save + load round-trip preserves state", () => {
     startNewGame();
     drawNext();
@@ -63,7 +55,8 @@ describe("master-store", () => {
     const calledBefore = [...masterState.called];
     const remainingBefore = [...masterState.remaining];
     saveMaster();
-    resetMaster();
+    masterState.called = [];
+    masterState.remaining = [];
     expect(masterState.called).toEqual([]);
     loadMaster();
     expect(masterState.called).toEqual(calledBefore);

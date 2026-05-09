@@ -91,8 +91,3 @@ export function drawNext() {
   return next;
 }
 
-/** Wipe everything — used by tests and when leaving a game permanently. */
-export function resetMaster() {
-  masterState.called = [];
-  masterState.remaining = [];
-}

@@ -13,7 +13,7 @@ const env = loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), "");
 //   1. NEXT_BASE_PATH — explicit override (escape hatch)
 //   2. codeserver dev → /absproxy/{port}
 //   3. BUILD_PROFILE=gh → /loto
-//   4. default (CF Pages root, local dev) → ""
+//   4. default (local dev / generic static host) → ""
 function resolveBase() {
   if (process.env.NEXT_BASE_PATH != null) return process.env.NEXT_BASE_PATH;
   if (isCodeserver) {
