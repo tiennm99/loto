@@ -1,7 +1,9 @@
 {
+  "id": "/loto/",
   "name": "Lô tô — Hội chợ TN1",
   "short_name": "Lô tô",
-  "description": "Bàn số của trò chơi Lô tô",
+  "description": "Ứng dụng Lô tô (Bingo 90) cho hội chợ TN1 — bàn số người chơi, bộ quay người dẫn, gọi số tiếng Việt, chơi offline.",
+  "categories": ["games", "entertainment"],
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
