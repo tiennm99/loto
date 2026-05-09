@@ -37,4 +37,12 @@
 
     <!-- No INTERNET permission: app is fully offline. All assets bundled in
          APK; WebView serves from https://localhost which uses loopback. -->
+
+    <!-- Mark hardware as optional so emulators (BlueStacks, NoxPlayer, AVDs)
+         don't get filtered out. BlueStacks reports `faketouch` instead of
+         `touchscreen` and lacks real telephony/GPS hardware. -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.faketouch" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
 </manifest>

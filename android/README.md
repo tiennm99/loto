@@ -102,6 +102,27 @@ If you ever add a remote feature (analytics, sync, etc.), add this back to
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
+## Running on BlueStacks / NoxPlayer / Android emulators
+
+The APK has no native libraries (`lib/` is empty), so it's architecture-
+independent — same APK installs on x86_64 emulators and ARM phones.
+
+1. Download the APK from the [Actions artifact](https://github.com/tiennm99/loto-android/actions) (debug)
+   or [Releases](https://github.com/tiennm99/loto-android/releases) (signed).
+2. Drag-drop the APK onto the BlueStacks window, or use **Install APK**
+   from the sidebar.
+3. Launch "Lo To" from the BlueStacks home screen.
+
+If the app shows a blank white screen on first launch, open chrome://inspect
+on the host machine while BlueStacks is running, click **Inspect** on the
+WebView, and check the console — the WebView debugging is enabled in debug
+builds (Capacitor default behavior, no INTERNET permission needed because
+chrome://inspect uses ADB).
+
+Manifest declares `touchscreen`, `faketouch`, `screen.portrait`, and
+`screen.landscape` as **optional** so the Play Store and emulators don't
+filter the app out.
+
 ## CI / CD
 
 | Workflow | Trigger | Result |

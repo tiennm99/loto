@@ -4,8 +4,5 @@
   "webDir": "loto/build",
   "server": {
     "androidScheme": "https"
-  },
-  "android": {
-    "webContentsDebuggingEnabled": false
   }
 }
