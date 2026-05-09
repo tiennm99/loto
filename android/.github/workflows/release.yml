@@ -51,3 +51,30 @@ jobs:
           files: |
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/bundle/release/*.aab
+
+      # Auto-publish to Google Play (gated on the service-account secret).
+      # Skips silently if PLAY_SERVICE_ACCOUNT_JSON is not configured, so
+      # tagging a release before Play setup still produces a GH Release.
+      # Default track is "internal" — change to alpha/beta/production
+      # once you trust the pipeline.
+      - name: Check Play Store config
+        id: play
+        run: |
+          if [ -n "${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON not set; skipping Play Store upload."
+          fi
+
+      - name: Upload to Google Play (internal track)
+        if: steps.play.outputs.configured == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.miti99.loto
+          releaseFiles: android/app/build/outputs/bundle/release/*.aab
+          track: internal
+          status: completed
+          # Bumps versionCode automatically? No — must be incremented
+          # manually in android/app/build.gradle before tagging.

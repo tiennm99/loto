@@ -135,14 +135,40 @@ Both workflows checkout the loto submodule, install npm deps, build loto,
 
 ### GitHub Secrets (release only)
 
-| Secret | Description |
-|--------|-------------|
-| `KEYSTORE_BASE64` | `base64 -w0 loto-release.jks` |
-| `KEYSTORE_PASSWORD` | Keystore password |
-| `KEY_ALIAS` | Key alias |
-| `KEY_PASSWORD` | Key password |
+| Secret | Required for | Description |
+|--------|--------------|-------------|
+| `KEYSTORE_BASE64` | signed build | `base64 -w0 loto-release.jks` |
+| `KEYSTORE_PASSWORD` | signed build | Keystore password |
+| `KEY_ALIAS` | signed build | Key alias |
+| `KEY_PASSWORD` | signed build | Key password |
+| `PLAY_SERVICE_ACCOUNT_JSON` | Play Store auto-publish (optional) | Full JSON content of Google Cloud service account key |
 
-**Never commit `*.jks`, `*.keystore`, or `.env`.**
+**Never commit `*.jks`, `*.keystore`, `*.json` (service-account), or `.env`.**
+
+## Google Play Store
+
+### One-time manual setup (cannot be automated)
+
+1. Sign up at [play.google.com/console](https://play.google.com/console/signup) ($25 one-time)
+2. Create the app entry with package name `com.miti99.loto`
+3. Build a signed AAB (`npm run assemble:release` locally, or push a `v*.*.*` tag to use `release.yml`) and **upload manually** to the Internal Testing track via the Play Console UI — Google requires the first upload to be manual
+4. Fill out store listing: icon (512×512), feature graphic (1024×500), 2–8 screenshots, short + full description, category, content rating, target audience, **privacy policy URL** (host on GH Pages), data safety form (declare "No data collected" since the app is offline)
+5. Submit for review (1–7 days first time)
+
+### Auto-publish setup (after first manual upload)
+
+1. Play Console → **Setup → API access** → link/create a Google Cloud project
+2. In Google Cloud Console: create a **Service Account** with role *Service Account User*
+3. **Keys → Add Key → JSON** — download the JSON file
+4. Back in Play Console API access: grant the service account **Admin (all permissions)** for the Lo To app, or the minimum: *Release manager* + *View app information*
+5. Copy the entire JSON contents into a GitHub repo secret named `PLAY_SERVICE_ACCOUNT_JSON`
+6. Tag a release (`git tag v1.0.1 && git push origin v1.0.1`) — `release.yml` will:
+   - Build signed AAB + APK
+   - Upload to GitHub Release
+   - **If the secret is set**: upload AAB to Play Console **Internal track**
+7. Promote internal → closed → open → production via the Play Console UI (or change `track: internal` in `release.yml` to automate further)
+
+**Important:** every release must increment `versionCode` in `android/app/build.gradle` before tagging — Play Console rejects duplicate versionCodes.
 
 Tag a release:
 
