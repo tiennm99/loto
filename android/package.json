@@ -1,0 +1,21 @@
+{
+  "name": "loto-android",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Capacitor wrapper that bundles tiennm99/loto into a fully-offline Android APK.",
+  "scripts": {
+    "build:loto": "npm --prefix loto ci && npm --prefix loto run build",
+    "sync": "cap sync android",
+    "build": "npm run build:loto && npm run sync",
+    "open": "cap open android",
+    "assemble:debug": "cd android && ./gradlew :app:assembleDebug",
+    "assemble:release": "cd android && ./gradlew :app:bundleRelease :app:assembleRelease"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.3",
+    "@capacitor/core": "^8.3.3"
+  }
+}

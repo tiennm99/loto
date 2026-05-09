@@ -1,0 +1,11 @@
+{
+  "appId": "com.miti99.loto",
+  "appName": "Lo To",
+  "webDir": "loto/build",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "webContentsDebuggingEnabled": false
+  }
+}
