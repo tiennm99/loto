@@ -1,7 +1,8 @@
 # Next-session TODO
 
-Hand-off list as of 2026-04-28 (commit `9f24b6d`). All prior plan
-folders have been deleted; residual / new items live here directly.
+Hand-off list as of 2026-05-10. Deploy target is GitHub Pages
+(`/loto/` base). All prior plan folders + their reports have been
+swept after shipping; residual / new items live here directly.
 
 ## Highest leverage (start here)
 
