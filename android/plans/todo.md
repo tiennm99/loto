@@ -10,10 +10,17 @@ ship target.
 Reason: maintenance parity. Loto evolves; the wrapper rebuilds and ships
 without re-porting features.
 
-## P0 — Verify CI build (cannot do locally, no JDK/SDK in dev sandbox)
+## Done in 2026-05-10 session
 
-- [ ] Push to a PR branch → confirm `build-debug` workflow assembles APK
-- [ ] Sideload the artifact onto a real device (API 24, API 31, API 36)
+- [x] Migrate to Capacitor wrapper, push to main (commit `dab4f7e`)
+- [x] CI green: Node 22 + JDK 21 (commits `95358f2`, `4fde3f1`) — debug APK 4.9 MB
+- [x] BlueStacks/emulator compat: `<uses-feature required=false>`, WebView debug auto-enabled in debug builds (commit `1ec4863`)
+- [x] Optional Play Store auto-publish wired into `release.yml`, gated on `PLAY_SERVICE_ACCOUNT_JSON` (commit `793f009`)
+
+## P0 — Smoke test on real device
+
+- [x] CI build-debug workflow assembles APK (validated by run `25610204367`)
+- [ ] Sideload the latest artifact onto a real device (API 24, API 31, API 36) and BlueStacks
 - [ ] Smoke test cold start: app loads `https://localhost/`, no white flash > 1s
 - [ ] Smoke test offline: enable airplane mode, kill app, relaunch — must work
 - [ ] Smoke test audio: tap any number → Vietnamese voice plays
@@ -42,13 +49,50 @@ without re-porting features.
 - [ ] App-store screenshots (3–5 phone shots): cold start, mid-game, master panel,
       settings, bingo modal
 
-## P1 — Distribution
+## P1 — Distribution: signing + first GitHub Release
 
 - [ ] Generate release keystore: `keytool -genkey -v -keystore ~/.android/loto-release.jks -keyalg RSA -keysize 4096 -validity 36500 -alias loto`
-- [ ] Add GitHub secrets: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`
-- [ ] Tag `v1.0.0` and push → exercises `release.yml`
-- [ ] (Optional) Play Console listing in Vietnamese — privacy policy, content
-      rating, target audience
+- [ ] Add GitHub secrets: `KEYSTORE_BASE64` (= `base64 -w0 loto-release.jks`), `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`
+- [ ] Tag `v1.0.0` and push → `release.yml` builds signed AAB+APK, attaches to GH Release
+      (Play Store step skips silently because `PLAY_SERVICE_ACCOUNT_JSON` not yet set)
+
+## P1 — Google Play Store (ordered, do in sequence)
+
+**Phase A — one-time Play Console setup (cannot be automated, ~$25 + 1–7 day review):**
+
+- [ ] Sign up: https://play.google.com/console/signup ($25 one-time fee)
+- [ ] Create app entry with package name `com.miti99.loto` (must match `applicationId`)
+- [ ] Prepare store assets:
+  - [ ] Icon 512×512 PNG
+  - [ ] Feature graphic 1024×500 PNG/JPG
+  - [ ] 2–8 phone screenshots (master panel, player board, settings, bingo modal, cold start)
+  - [ ] Short description ≤ 80 chars
+  - [ ] Full description ≤ 4000 chars (Vietnamese + optional English)
+  - [ ] Privacy policy URL — host on GH Pages even though app is offline (required by Play)
+- [ ] Fill content rating questionnaire (Casino/Card → likely Everyone or Teen)
+- [ ] Fill target audience + data safety form (declare "No data collected" — fully offline)
+- [ ] **Manually upload** the signed AAB from the v1.0.0 GH Release to **Internal Testing track**
+      (Google policy: first upload must be manual; CI auto-publish only works for v1.0.1+)
+- [ ] Submit for review (1–7 days for first app)
+
+**Phase B — enable CI auto-publish (after Phase A approved):**
+
+- [ ] Play Console → Setup → API access → link/create Google Cloud project
+- [ ] In GCP Console: create Service Account → Keys → Add Key → JSON → download
+- [ ] Back in Play Console API access: grant the service account *Release manager* + *View app information*
+      (or *Admin* for simplicity)
+- [ ] Add full JSON content as GH secret `PLAY_SERVICE_ACCOUNT_JSON`
+- [ ] **Bump `versionCode` to 2** in `android/app/build.gradle` before next tag
+      (Play rejects duplicate versionCodes — every release must increment)
+- [ ] Tag `v1.0.1` and push → CI builds + uploads to **Internal track** automatically
+- [ ] Promote internal → closed → open → production via Play Console UI when ready
+      (or change `track: internal` in `release.yml` to `production` to fully automate)
+
+**Open question: versionCode footgun** — every release must increment `versionCode` in
+`android/app/build.gradle` before tagging. Options to consider:
+- Manual discipline (current state)
+- Pre-tag check workflow that fails if `versionCode` wasn't bumped
+- Auto-bump from the git tag (e.g., `v1.0.5` → `versionCode = 5`) as a Gradle plugin or sed step in CI
 
 ## P2 — Supply-chain hygiene
 
