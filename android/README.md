@@ -31,7 +31,7 @@ and the `<audio>` element all work offline.
 
 - Capacitor 8 (Android wrapper)
 - Loto upstream: SvelteKit 2 + Vite 7 + `@sveltejs/adapter-static` + `@vite-pwa/sveltekit`
-- minSdk 24 · targetSdk 36 · JDK 17 · Node 20
+- minSdk 24 · targetSdk 36 · JDK 17 · Node 22 (Capacitor 8 requires ≥22)
 
 ## Setup
 
