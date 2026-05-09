@@ -189,7 +189,7 @@ Set in `.env.local` (not committed).
 
 ### Build Targets
 - **adapter-static**: Generates static HTML + JS in `build/`.
-- **basePath**: Dual-mode: `""` (Cloudflare, dev) or `/loto` (GitHub Pages via `BUILD_PROFILE=gh`).
+- **basePath**: `/loto` for production GitHub Pages (`BUILD_PROFILE=gh`); `""` for local dev / generic static preview.
 
-Last reviewed: 2026-04-27
-Last synced: 2026-04-27 (6-phase refactor)
+Last reviewed: 2026-05-09
+Last synced: 2026-05-09 (deploy target switched to GitHub Pages)

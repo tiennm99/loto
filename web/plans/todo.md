@@ -7,16 +7,13 @@ folders have been deleted; residual / new items live here directly.
 
 ### PWA install verification (manual, post-deploy)
 
-Needs production deploy on Cloudflare Pages + physical Android
-Chrome + iOS Safari. No code; verification only.
-
-**Lighthouse — Cloudflare Pages (root base)**
-- Open `https://loto.miti99.com/` in incognito Chrome.
-- DevTools → Lighthouse → PWA + Perf + Best Practices + a11y.
-- PWA score = 100. No CSP violations. No mixed-content warnings.
+Needs production deploy on GitHub Pages + physical Android Chrome +
+iOS Safari. No code; verification only.
 
 **Lighthouse — GitHub Pages (`/loto/` base)**
-- Open `https://tiennm99.github.io/loto/` in incognito.
+- Open `https://tiennm99.github.io/loto/` in incognito Chrome.
+- DevTools → Lighthouse → PWA + Perf + Best Practices + a11y.
+- PWA score = 100. No mixed-content warnings.
 - Confirm SW URL `/loto/sw.js`, manifest `/loto/manifest.webmanifest`,
   icons `/loto/icons/...` resolve.
 
@@ -37,12 +34,6 @@ Chrome + iOS Safari. No code; verification only.
 - Launch standalone, fonts legible under translucent status bar.
 - Airplane mode → app shell + default voice play.
 
-**CSP + headers (production)**
-- `curl -I https://loto.miti99.com/` shows `Content-Security-Policy`,
-  `X-Content-Type-Options: nosniff`, `Referrer-Policy`,
-  `Permissions-Policy`, `X-Frame-Options: DENY`.
-- CSP `script-src` no longer contains `'unsafe-inline'`.
-
 **Common gotchas**
 - Manifest paths break under `/loto/` base → check `vite.config.js`
   PWA `manifest: false` + `app.html` uses `%sveltekit.assets%`.
@@ -62,11 +53,6 @@ Chrome + iOS Safari. No code; verification only.
   Remove the `overrides` block in `package.json` once
   `@sveltejs/kit` and `workbox-build` ship releases that pull
   `cookie >= 0.7.0` and `serialize-javascript >= 7.0.5` upstream.
-- **CSP hash brittleness.** `inject-csp-hashes.mjs` regenerates the
-  SvelteKit-bootstrap hash per build. If the bootstrap changes
-  format (e.g. SvelteKit moves to script-src-elem with nonce), the
-  marker `script-src 'self' 'unsafe-inline'` won't be present and
-  the script will exit 1. Watch for that on SvelteKit major bumps.
 - **Voice list growth.** If we add voices > 2 (esp. > 10), revisit
   the precache strategy — currently we precache only the default
   voice. The 7d runtime cache covers the rest, but cold-start cost

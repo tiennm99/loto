@@ -68,20 +68,13 @@ All keys are JSON stringified. Corruption is silent (returns null).
 
 ## basePath & Asset Resolution
 
-### Production (Cloudflare Pages, default)
-```
-npm run build
-basePath="" (root)
-Output: build/index.html
-Deploy: loto.miti99.com (root domain)
-```
-
-### Production (GitHub Pages, manual)
+### Production (GitHub Pages, canonical)
 ```
 npm run build:gh
 basePath="/loto"
 Output: build/index.html with /loto prefix
-Deploy: https://tiennm99.github.io/loto
+Deploy: https://tiennm99.github.io/loto/
+Workflow: .github/workflows/deploy-github-pages.yml
 ```
 
 ### Development (Local)
@@ -199,5 +192,5 @@ Each draw creates a new object (even repeat numbers) to ensure reactive re-fire.
 3. User installs → app appears on home screen, launches in standalone mode
 4. Updates: SW checks for new version; if found, toast appears; user can reload
 
-Last reviewed: 2026-04-27
-Last synced: 2026-04-27 (UI polish v2 + PWA: font, mode picker, color picker, empty state, PWA stack)
+Last reviewed: 2026-05-09
+Last synced: 2026-05-09 (Cloudflare Pages removed; GitHub Pages is the sole production target)
