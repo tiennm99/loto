@@ -1,55 +1,128 @@
-# Lô tô
+# Lô Tô
 
-Bàn số của trò chơi "Lô tô" — SvelteKit app.
+Web version of *Lô tô hội chợ* — Vietnamese fairground bingo. Built with SvelteKit
+(static export). The caller draws numbers one at a time; a host panel manages the
+game and called numbers are announced aloud in Vietnamese using bundled audio clips.
+No runtime TTS or server required.
 
-Single page (`/`). The host enables "Chế độ quản trò" in settings to
-reveal the master panel inline below their player card; called numbers
-get spoken aloud in Vietnamese using bundled MP3 clips (no runtime TTS).
+Live: [tiennm99.github.io/loto](https://tiennm99.github.io/loto)
 
-See `docs/` for architecture, code standards, and deployment.
+Android port: [tiennm99/loto-android](https://github.com/tiennm99/loto-android)
 
-## Development
+---
 
-```bash
+## Features
+
+- **Number board** — 1–90 grid; called numbers highlight as they are drawn
+- **Host panel** — enable "Chế độ quản trò" (host mode) in settings to reveal the
+  master draw panel inline below your player card
+- **Vietnamese voice callouts** — pre-generated MP3 clips for every number using
+  Microsoft Edge TTS (`edge-tts`); multiple voices selectable in settings; no API
+  key or internet connection needed at runtime
+- **Auto-cross player card** — optional automatic crossing of numbers on the player's
+  bingo card as they are called
+- **Auto-countdown** — configurable delay between number draws for unattended calling
+- **PWA** — installable as a progressive web app; works offline after first load
+- **Static export** — no server; deploys to any static host or GitHub Pages
+
+---
+
+## Requirements
+
+[Node.js](https://nodejs.org) 18+ and npm.
+
+---
+
+## Quick Start
+
+```sh
+git clone https://github.com/tiennm99/loto
+cd loto
 npm install
-npm run dev
+npm run dev        # dev server at http://localhost:5173
 ```
 
-### Inside code-server (reverse proxy)
+---
 
-```bash
-cp .env.example .env.local
-# edit .env.local: set CODESERVER_HOST and CODESERVER_PORT
-npm run dev:codeserver
+## Commands
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build (root base path) |
+| `npm run build:gh` | Production build for GitHub Pages (`/loto` base path) |
+| `npm run preview` | Preview production build locally |
+| `npm test` | Run unit tests |
+| `npm run lint` | ESLint check |
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env.local` and set:
+
+| Variable | Description |
+|---|---|
+| `CODESERVER_HOST` | Hostname for code-server reverse-proxy dev (optional) |
+| `CODESERVER_PORT` | Port for code-server proxy (optional) |
+
+When running inside code-server use `npm run dev:codeserver` and open
+`https://<CODESERVER_HOST>/absproxy/<CODESERVER_PORT>/` (use `/absproxy/`, not
+`/proxy/` — the latter strips the path prefix and breaks SvelteKit routing).
+
+---
+
+## Architecture
+
+Single-page SvelteKit app, statically exported. No backend.
+
+```
+src/
+├── routes/          # Single route: /
+├── lib/
+│   ├── game-logic.js          # Draw state, number pool, called-number tracking
+│   ├── master-store.svelte.js # Host panel state (Svelte 5 runes store)
+│   ├── settings-store.svelte.js
+│   ├── voice.js               # Audio manifest loader + clip player
+│   ├── player-auto-cross.js   # Auto-cross logic
+│   ├── MasterPanel.svelte     # Host draw UI
+│   ├── PlayerBoard.svelte     # Bingo card + number grid
+│   └── AutoCountdown.svelte   # Countdown timer between draws
+static/
+└── audio/{voiceId}/   # Pre-generated MP3 clips (one per number per voice)
+scripts/
+└── generate-audio.py  # Regenerates audio clips via edge-tts
 ```
 
-Open `https://<CODESERVER_HOST>/absproxy/<CODESERVER_PORT>/`.
+Game state lives entirely in Svelte 5 rune stores; no server round-trips.
+Audio manifest is generated once at build prep time — the app reads a JSON manifest
+on load and plays the appropriate clip for each drawn number.
 
-Use `/absproxy/{port}/`, **not** `/proxy/{port}/` — the latter strips the
-path prefix and breaks the SvelteKit base path.
+---
 
-## Build
+## Regenerating Audio
 
-```bash
-npm run build         # root basePath (local preview / generic static host)
-npm run build:gh      # /loto basePath, for tiennm99.github.io/loto
-```
+Voice clips in `static/audio/` were generated with
+[edge-tts](https://github.com/rany2/edge-tts) (free, no API key). To regenerate
+(e.g. to add a new Microsoft `vi-*` voice):
 
-Static export to `build/`. Deployed to GitHub Pages from `main` via
-`.github/workflows/deploy-github-pages.yml` — see
-`docs/deployment-guide.md`.
-
-## Regenerating audio
-
-Vietnamese voice clips live in `static/audio/{voiceId}/`. Generated
-once with [edge-tts](https://github.com/rany2/edge-tts) (free, no API
-key) — runtime never calls TTS. To regenerate (e.g., to add a new voice
-that Microsoft ships, or to change wording):
-
-```bash
+```sh
 pip install edge-tts
 python3 scripts/generate-audio.py
 ```
 
-The script auto-discovers every `vi-*` voice and writes a manifest the
-app reads on next reload.
+The script auto-discovers all available `vi-*` voices and writes an updated manifest.
+
+---
+
+## Deployment
+
+Deployed to GitHub Pages via `.github/workflows/deploy-github-pages.yml` on push to
+`main`. Build command: `npm run build:gh` (sets `/loto` base path). Static output in
+`build/`.
+
+---
+
+## License
+
+Apache 2.0
