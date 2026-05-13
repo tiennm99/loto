@@ -29,7 +29,7 @@ Android port: [tiennm99/loto-android](https://github.com/tiennm99/loto-android)
 
 ## Requirements
 
-[Node.js](https://nodejs.org) 18+ and npm.
+[Node.js](https://nodejs.org) 18+ and [pnpm](https://pnpm.io).
 
 ---
 
@@ -38,8 +38,8 @@ Android port: [tiennm99/loto-android](https://github.com/tiennm99/loto-android)
 ```sh
 git clone https://github.com/tiennm99/loto
 cd loto
-npm install
-npm run dev        # dev server at http://localhost:5173
+pnpm install
+pnpm dev        # dev server at http://localhost:5173
 ```
 
 ---
@@ -48,12 +48,12 @@ npm run dev        # dev server at http://localhost:5173
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build (root base path) |
-| `npm run build:gh` | Production build for GitHub Pages (`/loto` base path) |
-| `npm run preview` | Preview production build locally |
-| `npm test` | Run unit tests |
-| `npm run lint` | ESLint check |
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build (root base path) |
+| `pnpm build:gh` | Production build for GitHub Pages (`/loto` base path) |
+| `pnpm preview` | Preview production build locally |
+| `pnpm test` | Run unit tests |
+| `pnpm lint` | ESLint check |
 
 ---
 
@@ -66,7 +66,7 @@ Copy `.env.example` to `.env.local` and set:
 | `CODESERVER_HOST` | Hostname for code-server reverse-proxy dev (optional) |
 | `CODESERVER_PORT` | Port for code-server proxy (optional) |
 
-When running inside code-server use `npm run dev:codeserver` and open
+When running inside code-server use `pnpm dev:codeserver` and open
 `https://<CODESERVER_HOST>/absproxy/<CODESERVER_PORT>/` (use `/absproxy/`, not
 `/proxy/` — the latter strips the path prefix and breaks SvelteKit routing).
 
@@ -118,7 +118,7 @@ The script auto-discovers all available `vi-*` voices and writes an updated mani
 ## Deployment
 
 Deployed to GitHub Pages via `.github/workflows/deploy-github-pages.yml` on push to
-`main`. Build command: `npm run build:gh` (sets `/loto` base path). Static output in
+`main`. Build command: `pnpm build:gh` (sets `/loto` base path). Static output in
 `build/`.
 
 ---
