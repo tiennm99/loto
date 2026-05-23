@@ -29,7 +29,7 @@
     "@sveltejs/vite-plugin-svelte": "^7",
     "@tailwindcss/vite": "^4",
     "@vite-pwa/sveltekit": "^1.1.0",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-plugin-svelte": "^3",
     "globals": "^15",
     "happy-dom": "20.9.0",
