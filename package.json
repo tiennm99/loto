@@ -22,7 +22,7 @@
     "cookie": "^0.7.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9",
+    "@eslint/js": "^10",
     "@fontsource/roboto-condensed": "^5.2.8",
     "@sveltejs/adapter-static": "^3",
     "@sveltejs/kit": "^2",
