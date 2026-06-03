@@ -19,7 +19,8 @@
   },
   "overrides": {
     "serialize-javascript": "^7.0.5",
-    "cookie": "^0.7.2"
+    "cookie": "^0.7.2",
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "@eslint/js": "^10",
