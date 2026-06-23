@@ -1,3 +1,7 @@
+<script>
+  const PREVIEW_CELLS = [...Array(99).keys()];
+</script>
+
 <!-- Empty-state hero for master mode. Replaces the bare line of text
      when no game has been started; uses a decorative ghost mock of
      the 11×9 master tracking grid so the page silhouette stays
@@ -10,7 +14,7 @@
            rounded-md overflow-hidden border border-slate-300 dark:border-slate-600"
   >
     <div class="grid grid-cols-9 gap-px bg-slate-300 dark:bg-slate-700">
-      {#each Array(99) as _, i (i)}
+      {#each PREVIEW_CELLS as i (i)}
         {@const filled = i % 11 < 9 && i % 7 === 0}
         <div
           class="aspect-square text-[0.5rem] flex items-center justify-center

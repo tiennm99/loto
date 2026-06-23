@@ -1,4 +1,6 @@
 <script>
+  import { SvelteSet } from "svelte/reactivity";
+
   import {
     generateGrid,
     getWaitingNumber,
@@ -16,6 +18,7 @@
   import { cancelPlayback, playBingo, playWaiting } from "$lib/voice.js";
 
   const STORAGE_PREFIX = "loto";
+  const PREVIEW_CELLS = [...Array(27).keys()];
 
   function prefersReducedMotion() {
     return (
@@ -29,7 +32,8 @@
   // Numbers the user explicitly unticked AFTER an auto-cross; suppresses
   // re-cross on subsequent passes (e.g. regen replay). Manual re-ticks
   // remove from the set.
-  let manualUnticks = $state(/** @type {Set<number>} */ (new Set()));
+  /** @type {SvelteSet<number>} */
+  const manualUnticks = new SvelteSet();
   let showCongrats = $state(false);
   let congratsRow = $state(-1);
   let celebrationTier = $state(/** @type {1 | 2} */ (1));
@@ -42,11 +46,17 @@
   // celebration set reads as Vietnamese fair, not generic party.
   const CONFETTI_EMOJI = ["🎊", "✨", "🎉", "🥳", "🥢", "🎋", "🏮"];
 
-  // Plain refs (not reactive)
+  /** @param {Iterable<number>} values */
+  function replaceManualUnticks(values) {
+    manualUnticks.clear();
+    for (const value of values) manualUnticks.add(value);
+  }
+
+  // Timer handle stays plain; row trackers are reactive so Svelte can observe Set reads.
   /** @type {ReturnType<typeof setTimeout> | null} */
   let toastTimer = null;
-  const celebratedRows = new Set();
-  const notifiedWaitingRows = new Set();
+  const celebratedRows = new SvelteSet();
+  const notifiedWaitingRows = new SvelteSet();
   // How many entries of masterState.called we've already replayed.
   // Advances strictly even on no-op passes so a single draw never
   // re-fires (auto-cross effect dedup). Resets to 0 when the host
@@ -82,7 +92,7 @@
   // simultaneously — each gets its own pulsing cell.
   const waitingCells = $derived.by(() => {
     /** @type {Set<string>} */
-    const set = new Set();
+    const set = new SvelteSet();
     if (!grid || crossed.length === 0) return set;
     for (let r = 0; r < grid.length; r++) {
       if (rowCompleteness[r]) continue;
@@ -121,7 +131,7 @@
       loadCrossedState(STORAGE_PREFIX) ??
       savedGrid.map((row) => row.map(() => false));
     crossed = savedCrossed;
-    manualUnticks = loadManualUnticks(STORAGE_PREFIX);
+    replaceManualUnticks(loadManualUnticks(STORAGE_PREFIX));
 
     celebratedRows.clear();
     notifiedWaitingRows.clear();
@@ -252,7 +262,7 @@
     prevCalledLen = len;
     if (prev > 0 && len === 0 && settings.mode === "both" && grid) {
       crossed = grid.map((row) => row.map(() => false));
-      manualUnticks = new Set();
+      manualUnticks.clear();
       lastHandledIndex = 0;
       celebratedRows.clear();
       notifiedWaitingRows.clear();
@@ -264,6 +274,7 @@
     cancelPlayback();
     const newGrid = generateGrid();
     let newCrossed = newGrid.map((row) => row.map(() => false));
+    manualUnticks.clear();
     // Replay master's called[] onto the fresh grid so the host doesn't
     // restart from zero when they regenerate mid-game (locked decision).
     if (settings.mode === "both") {
@@ -272,7 +283,7 @@
         crossed: newCrossed,
         called: masterState.called,
         lastHandledIndex: 0,
-        manualUnticks: new Set(),
+        manualUnticks,
         mode: "both",
       });
       newCrossed = result.crossed;
@@ -282,7 +293,6 @@
     }
     grid = newGrid;
     crossed = newCrossed;
-    manualUnticks = new Set();
     saveGrid(newGrid, STORAGE_PREFIX);
     saveCrossedState(newCrossed, STORAGE_PREFIX);
     saveManualUnticks(manualUnticks, STORAGE_PREFIX);
@@ -298,7 +308,7 @@
     if (hasMarks && !confirm("Bạn có muốn xoá tất cả đánh dấu không?")) return;
     cancelPlayback();
     let cleared = grid.map((row) => row.map(() => false));
-    manualUnticks = new Set();
+    manualUnticks.clear();
     // In both mode, immediately replay master's called[] (locked
     // decision: clear → re-cross all currently-called numbers).
     if (settings.mode === "both") {
@@ -307,7 +317,7 @@
         crossed: cleared,
         called: masterState.called,
         lastHandledIndex: 0,
-        manualUnticks: new Set(),
+        manualUnticks,
         mode: "both",
       });
       cleared = result.crossed;
@@ -342,10 +352,8 @@
     // replays skip them. Untracking uncalled numbers would pollute the
     // set with no visible effect — auto-cross only acts on called nums.
     if (num > 0 && masterState.called.includes(num)) {
-      const next = new Set(manualUnticks);
-      if (wasCrossed && !willBeCrossed) next.add(num);
-      else if (!wasCrossed && willBeCrossed) next.delete(num);
-      if (next.size !== manualUnticks.size) manualUnticks = next;
+      if (wasCrossed && !willBeCrossed) manualUnticks.add(num);
+      else if (!wasCrossed && willBeCrossed) manualUnticks.delete(num);
     }
     crossed = crossed.map((r, ri) =>
       ri === row ? r.map((v, ci) => (ci === col ? !v : v)) : r
@@ -504,7 +512,7 @@
              rounded-md overflow-hidden border border-slate-300 dark:border-slate-600"
     >
       <div class="grid grid-cols-9 gap-px bg-slate-300 dark:bg-slate-700">
-        {#each Array(27) as _, i (i)}
+        {#each PREVIEW_CELLS as i (i)}
           {@const filled = i % 3 === 0}
           <div
             class="aspect-square text-[0.55rem] flex items-center justify-center
