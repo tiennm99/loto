@@ -14,7 +14,7 @@ into the APK at build time. No network is required at runtime.
 
 ```
 loto/ (git submodule, pinned SHA)
-  └── npm run build  →  loto/build/  (SvelteKit static output)
+  └── pnpm run build →  loto/build/  (SvelteKit static output)
                                 ↓
                          npx cap sync
                                 ↓
@@ -30,7 +30,7 @@ and the `<audio>` element all work offline.
 ## Stack
 
 - Capacitor 8 (Android wrapper)
-- Loto upstream: SvelteKit 2 + Vite 7 + `@sveltejs/adapter-static` + `@vite-pwa/sveltekit`
+- Loto upstream: SvelteKit 2 + Vite 8 + `@sveltejs/adapter-static` + `@vite-pwa/sveltekit`
 - minSdk 24 · targetSdk 36 · JDK 21 · Node 22 (Capacitor 8 requires both)
 
 ## Setup
