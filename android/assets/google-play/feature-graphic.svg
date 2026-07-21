@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="background" x1="28" y1="18" x2="986" y2="492" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9F1239"/>
+      <stop offset="0.48" stop-color="#E11D48"/>
+      <stop offset="1" stop-color="#FB7185"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="560" y1="90" x2="895" y2="425" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCD34D"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="0" cy="0" r="1" gradientTransform="translate(731 183) rotate(51) scale(168)">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.68" stop-color="#FFF8E7"/>
+      <stop offset="1" stop-color="#FDE7B2"/>
+    </radialGradient>
+    <filter id="shadow" x="500" y="38" width="462" height="430" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="17" flood-color="#4C0519" flood-opacity="0.36"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="500" fill="url(#background)"/>
+  <circle cx="44" cy="-18" r="220" fill="#FDA4AF" opacity="0.13"/>
+  <circle cx="987" cy="520" r="255" fill="#881337" opacity="0.16"/>
+
+  <g opacity="0.12" fill="none" stroke="#FFF8E7" stroke-width="2">
+    <path d="M508 54H968M508 109H968M508 164H968M508 219H968M508 274H968M508 329H968M508 384H968M508 439H968"/>
+    <path d="M563 31V469M618 31V469M673 31V469M728 31V469M783 31V469M838 31V469M893 31V469M948 31V469"/>
+  </g>
+
+  <g fill="#FFF8E7">
+    <path d="M74 72l7 18 18 7-18 7-7 18-7-18-18-7 18-7z" opacity="0.9"/>
+    <path d="M455 82l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" opacity="0.72"/>
+    <path d="M448 404l6 15 15 6-15 6-6 15-6-15-15-6 15-6z" opacity="0.72"/>
+  </g>
+
+  <g transform="translate(72 117)">
+    <text x="0" y="116" font-family="Arial, Helvetica, sans-serif" font-size="112" font-weight="900" font-style="italic" letter-spacing="-5" fill="#FFF8E7">LÔ TÔ</text>
+    <rect x="3" y="145" width="356" height="4" rx="2" fill="#FCD34D"/>
+    <text x="3" y="196" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#FFFFFF">Vui hội • Gọi số • Ngoại tuyến</text>
+    <text x="3" y="241" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="500" fill="#FFE4E6">Người chơi và quản trò trong một ứng dụng</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <g transform="translate(770 274) rotate(8)">
+      <rect x="-156" y="-113" width="274" height="207" rx="25" fill="#0F172A" opacity="0.28"/>
+      <rect x="-143" y="-126" width="274" height="207" rx="25" fill="#FFF8E7"/>
+      <rect x="-121" y="-102" width="230" height="158" rx="12" fill="#FFFFFF"/>
+      <g fill="#0284C7" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="800" text-anchor="middle">
+        <text x="-93" y="-65">6</text><text x="-47" y="-65">18</text><text x="0" y="-65">27</text><text x="47" y="-65">42</text><text x="93" y="-65">59</text>
+        <text x="-93" y="-18">11</text><text x="-47" y="-18">23</text><text x="0" y="-18">35</text><text x="47" y="-18">64</text><text x="93" y="-18">72</text>
+        <text x="-93" y="30">15</text><text x="-47" y="30">31</text><text x="0" y="30">48</text><text x="47" y="30">76</text><text x="93" y="30">88</text>
+      </g>
+      <g fill="none" stroke="#CBD5E1" stroke-width="2">
+        <path d="M-70-102V56M-23-102V56M23-102V56M70-102V56"/>
+        <path d="M-121-50H109M-121-2H109"/>
+      </g>
+    </g>
+
+    <circle cx="762" cy="183" r="126" fill="url(#gold)"/>
+    <circle cx="762" cy="183" r="110" fill="url(#ball)"/>
+    <ellipse cx="735" cy="154" rx="41" ry="22" fill="#FFFFFF" opacity="0.75" transform="rotate(-24 735 154)"/>
+    <circle cx="762" cy="183" r="71" fill="#0284C7"/>
+    <circle cx="762" cy="183" r="61" fill="#0369A1"/>
+    <text x="762" y="210" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="77" font-weight="900" letter-spacing="-5" fill="#FFFFFF">90</text>
+  </g>
+
+  <g fill="#FCD34D">
+    <circle cx="553" cy="111" r="12"/><circle cx="925" cy="119" r="9"/><circle cx="936" cy="354" r="14"/>
+  </g>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="background" x1="42" y1="28" x2="468" y2="488" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FB7185"/>
+      <stop offset="0.48" stop-color="#F43F5E"/>
+      <stop offset="1" stop-color="#BE123C"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="0" cy="0" r="1" gradientTransform="translate(216 185) rotate(52) scale(190)">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.66" stop-color="#FFF8E7"/>
+      <stop offset="1" stop-color="#FDE7B2"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="167" y1="142" x2="356" y2="374" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#D97706"/>
+    </linearGradient>
+    <filter id="shadow" x="90" y="96" width="348" height="358" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#881337" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#background)"/>
+  <circle cx="65" cy="82" r="118" fill="#FDA4AF" opacity="0.23"/>
+  <circle cx="477" cy="442" r="164" fill="#881337" opacity="0.16"/>
+
+  <g opacity="0.16" fill="none" stroke="#FFF8E7" stroke-width="3">
+    <path d="M44 165H468M44 226H468M44 287H468M44 348H468"/>
+    <path d="M104 105V409M165 105V409M226 105V409M287 105V409M348 105V409M409 105V409"/>
+  </g>
+
+  <g fill="#FFF8E7">
+    <path d="M93 87l6 15 15 6-15 6-6 15-6-15-15-6 15-6z"/>
+    <path d="M427 105l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" opacity="0.9"/>
+    <path d="M424 377l7 18 18 7-18 7-7 18-7-18-18-7 18-7z" opacity="0.82"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="256" r="155" fill="url(#rim)"/>
+    <circle cx="256" cy="256" r="137" fill="url(#ball)"/>
+    <ellipse cx="224" cy="197" rx="55" ry="31" fill="#FFFFFF" opacity="0.7" transform="rotate(-24 224 197)"/>
+  </g>
+
+  <circle cx="256" cy="256" r="93" fill="#0284C7"/>
+  <circle cx="256" cy="256" r="81" fill="#0369A1"/>
+  <text x="256" y="292" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="105" font-weight="900" letter-spacing="-7" fill="#FFFFFF">90</text>
+</svg>
