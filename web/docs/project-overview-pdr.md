@@ -32,8 +32,8 @@ That format is intentionally out of scope.
   may keep playing further rows (game does not end).
 - **Waiting state**: when a row needs only 1 number, app announces **"Chờ N"**.
 - **Host (quản trò)** draws numbers from a shuffled 1–90 deck, tracks them on
-  a master board with circular tokens (pink ring for 1–49, green for 50–90,
-  cream fill on called, dim on uncalled, red ring + scale on the most
+  a master board with circular tokens (light-blue ring and cream fill when
+  called, dim when uncalled, red ring + scale on the most
   recent draw), and may also play their own card.
 - **Settings**: gear icon in headers opens a modal with 5 fieldsets:
   - Giao diện: theme switcher (auto / light / dark; auto mirrors OS pref)
@@ -129,7 +129,7 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 - **Wordmark gradient**: rose → amber → rose, italic + drop-shadow — vintage carnival marquee feel.
 - **Player accent**: indigo → purple (primary brand, positive action).
 - **Host accent**: orange (subordinate to wordmark; not gradient).
-- **Completed rows**: emerald (success indicator).
+- **Completed rows**: sky blue (success indicator).
 - **Waiting toast**: amber (attention, ephemeral).
 - **Emojis**: 🎉 ✨ 🎊 🥳 ❤️ (celebration, joy). Confetti rain on 3rd+ bingo per card.
 - **Haptic**: 10 ms vibration on cell tap (mobile only, where supported).
