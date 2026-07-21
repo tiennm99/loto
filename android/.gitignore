@@ -27,6 +27,8 @@ android/app/src/main/assets/capacitor.plugins.json
 *.aab
 *.keystore
 *.jks
+*.p12
+service-account*.json
 google-services.json
 
 # Editor / OS
