@@ -52,7 +52,7 @@ Use the `.svelte.js` extension for modules that export rune-based reactive state
 ### Gradients
 - Player page: `from-indigo-500 to-purple-500`.
 - Host page: `from-orange-500 to-red-500`.
-- Completed rows: `bg-emerald-100` + `text-emerald-500`.
+- Completed rows: `bg-sky-100` + `text-sky-700`.
 - Shadows: `shadow-lg shadow-indigo-500/25`.
 
 ## localStorage Patterns
