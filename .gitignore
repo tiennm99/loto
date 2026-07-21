@@ -1,4 +1,6 @@
 .vscode/
+.agents/
+.claude/
 node_modules/
 .svelte-kit/
 build/
