@@ -457,7 +457,7 @@
                            {isWaitingCell ? 'cell-waiting' : ''}
                            {isCrossed
                              ? rowComplete
-                               ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-200'
+                               ? 'bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-200'
                                : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300'
                              : 'bg-white dark:bg-slate-800 text-black dark:text-slate-100 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 dark:hover:text-rose-400'}"
                   >
