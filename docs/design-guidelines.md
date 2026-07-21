@@ -19,24 +19,26 @@ hierarchy via solid weights; emphasis via type weight + scale.
 - Semantic: festive, energetic
 
 **Draw / Go**
-- Solid: emerald-600 `#059669` (light) / emerald-400 `#34D399` (dark)
-- Use for: "Xổ số", "Bắt đầu", master grid token ring (≥50)
+- Solid: sky-700 `#0369A1`, with white text at WCAG AA contrast
+- Use for: "Xổ số" and "Bắt đầu"
+
+**Active controls and called numbers**
+- Rings: sky-600 `#0284C7` (light) / sky-400 `#38BDF8` (dark)
+- Token text: sky-700 `#0369A1` on the light amber token fill
+- Use for: enabled switches and called-number rings
 
 **Stop / Active-running**
 - Solid: rose-600 (same as primary). Distinguished by context (only
   appears as the running auto-call toggle).
 
-**Master low-half marker (≤49)**
+**Master called-number marker**
 - Solid: sky-600 `#0284C7` (light) / sky-400 `#38BDF8` (dark)
-- Paired with emerald-600 (≥50) for an elegant cool/warm binary
-- Replaces the previous pink — kept clearly distinct from the rose
-  primary so the eye doesn't read "low-number" and "primary action" as
-  the same brand color.
+- All called numbers use one light-blue treatment for a simpler board.
 
 **Success (Completed Rows)**
-- Background: emerald-100 (light) / emerald-900/60 (dark)
-- Text: emerald-700 (light) / emerald-200 (dark)
-- Slash: solid emerald-600 stroke
+- Background: sky-100 (light) / sky-900/60 (dark)
+- Text: sky-700 (light) / sky-200 (dark)
+- Slash: solid sky-600 stroke
 
 **Attention (Waiting Toast / "Chờ" ring)**
 - Background: amber-500/95 (toast); amber-500/45→0.85 inset ring (label)
@@ -145,7 +147,7 @@ to a darker step (`-700`).
 
 <!-- Draw / Go -->
 <button class="px-10 py-4 rounded-full font-semibold text-white text-lg
-               bg-emerald-600 hover:bg-emerald-700
+               bg-sky-700 hover:bg-sky-800
                active:scale-95 transition-all shadow-md">
   Xổ số
 </button>
@@ -175,7 +177,7 @@ on any cell aspect ratio; `vector-effect="non-scaling-stroke"` keeps
 the visual width constant.
 
 - Standard slash: `stroke: #ef4444` (red-500)
-- Winning-row slash (in `.cross-slash-win`): `stroke: #10b981` (emerald-500)
+- Winning-row slash (in `.cross-slash-win`): `stroke: #0284c7` (sky-600)
 - Draw animation: `stroke-dashoffset` 200→0 over 200ms (skipped under
   `prefers-reduced-motion`)
 
@@ -242,7 +244,7 @@ Keep emojis decorative only. Functional UI uses SVG glyphs.
   `aria-label="Số {n}, đã đánh dấu"` and `aria-pressed`.
 - Focus states: `focus:ring-2 focus:ring-rose-400` (interactive
   controls).
-- Contrast: Tailwind slate/rose/amber/emerald combos meet WCAG AA;
+- Contrast: Tailwind slate/rose/amber/sky combos meet WCAG AA;
   text-on-button pairs at 4.5:1 minimum.
 - Dark mode: respects `prefers-color-scheme`, not forced.
 - SVG glyphs: Simple, high-contrast shapes; keyboard-navigable via

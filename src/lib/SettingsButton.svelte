@@ -231,7 +231,7 @@
           <span
             aria-hidden="true"
             class="relative inline-block w-10 h-6 rounded-full transition-colors flex-none
-                   {isOn ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}"
+                   {isOn ? 'bg-sky-600' : 'bg-slate-300 dark:bg-slate-600'}"
           >
             <span
               class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform
