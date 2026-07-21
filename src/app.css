@@ -208,13 +208,13 @@ body {
   );
   animation: cross-draw 200ms ease-out;
 }
-/* Winning-row slash uses emerald instead of red so a completed row
+/* Winning-row slash uses sky blue instead of red so a completed row
    reads as "win" rather than "marked off". */
 .cell-crossed-win {
   background-image: linear-gradient(
     to bottom right,
     transparent calc(50% - 1.5px),
-    #10b981,
+    #0284c7,
     transparent calc(50% + 1.5px)
   );
 }

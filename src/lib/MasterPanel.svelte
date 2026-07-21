@@ -165,7 +165,7 @@
         class="px-10 py-4 rounded-full font-semibold text-white text-lg
                {autoRunning
                  ? 'bg-rose-600 hover:bg-rose-700'
-                 : 'bg-emerald-600 hover:bg-emerald-700'}
+                 : 'bg-sky-700 hover:bg-sky-800'}
                active:scale-95 transition-all shadow-md"
       >
         {autoRunning ? "Dừng" : "Bắt đầu"}
@@ -174,7 +174,7 @@
       <button
         onclick={handleDrawNext}
         class="px-10 py-4 rounded-full font-semibold text-white text-lg
-               bg-emerald-600 hover:bg-emerald-700
+               bg-sky-700 hover:bg-sky-800
                active:scale-95 transition-all shadow-md"
       >
         Xổ số
@@ -203,7 +203,6 @@
 
 <!-- Current number -->
 {#if lastCalled}
-  {@const lastIsLow = lastCalled <= 49}
   <div class="flex flex-col items-center mb-6">
     <div
       class="text-sm uppercase tracking-[0.2em] font-semibold text-slate-500 dark:text-slate-400 mb-2"
@@ -219,16 +218,12 @@
              bg-amber-50 dark:bg-amber-100
              border-[6px] sm:border-[10px]
              flex items-center justify-center
-             shadow-xl scroll-mt-4
-             {lastIsLow
-               ? 'border-sky-600 dark:border-sky-400 shadow-sky-500/30'
-               : 'border-emerald-500 dark:border-emerald-400 shadow-emerald-500/30'}"
+             border-sky-600 dark:border-sky-400 shadow-sky-500/30
+             shadow-xl scroll-mt-4"
     >
       <span
         class="text-6xl sm:text-8xl font-black tabular-nums
-               {lastIsLow
-                 ? 'text-sky-700 dark:text-sky-400'
-                 : 'text-emerald-500 dark:text-emerald-400'}"
+               text-sky-700 dark:text-sky-700"
       >
         {lastCalled}
       </span>
@@ -250,14 +245,11 @@
     </div>
     <div class="flex flex-wrap gap-1.5">
       {#each masterState.called as num, i (i)}
-        {@const isLow = num <= 49}
         <span
           class="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10
                  text-base sm:text-lg font-black tabular-nums rounded-full
                  border-2 bg-amber-50 dark:bg-amber-100
-                 {isLow
-                   ? 'border-sky-600 dark:border-sky-400 text-sky-700 dark:text-sky-400'
-                   : 'border-emerald-500 dark:border-emerald-400 text-emerald-600 dark:text-emerald-500'}"
+                 border-sky-600 dark:border-sky-400 text-sky-700 dark:text-sky-700"
         >
           {num}
         </span>
@@ -278,7 +270,6 @@
         {@const order = hasNumber ? callOrder.get(num) : undefined}
         {@const isCalled = order !== undefined}
         {@const isLast = isCalled && num === lastCalled}
-        {@const isLow = hasNumber && num <= 49}
         <div
           style:background-color={hasNumber ? null : "var(--empty-cell-bg)"}
           class="relative flex items-center justify-center
@@ -288,18 +279,16 @@
                  {isLast ? 'z-10' : ''}"
         >
           {#if hasNumber}
-            <!-- Token: cream inner when called (sky ≤49 / emerald ≥50 ring),
+            <!-- Token: cream inner with a sky-blue ring when called,
                  gray-ringed and dim when uncalled. -->
             <div
               class="flex items-center justify-center
                      w-[82%] h-[82%] rounded-full
                      text-xl sm:text-2xl font-black tabular-nums
                      border-[3px] transition-all
-                     {!isCalled
-                       ? 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'
-                       : isLow
-                         ? 'border-sky-600 dark:border-sky-400 bg-amber-50 dark:bg-amber-100 text-sky-700 dark:text-sky-700'
-                         : 'border-emerald-600 dark:border-emerald-400 bg-amber-50 dark:bg-amber-100 text-emerald-700 dark:text-emerald-700'}
+                     {isCalled
+                       ? 'border-sky-600 dark:border-sky-400 bg-amber-50 dark:bg-amber-100 text-sky-700 dark:text-sky-700'
+                       : 'border-slate-300 dark:border-slate-600 bg-slate-50/40 dark:bg-slate-700/30 text-slate-400 dark:text-slate-500 opacity-70'}
                      {isLast
                        ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800 scale-110 shadow-md'
                        : ''}"
