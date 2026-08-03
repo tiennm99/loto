@@ -1,7 +1,7 @@
 {
   "appId": "com.miti99.loto",
   "appName": "Lo To",
-  "webDir": "loto/build",
+  "webDir": "../web/build",
   "server": {
     "androidScheme": "https"
   }

@@ -2,11 +2,11 @@
   "name": "loto-android",
   "version": "0.1.0",
   "private": true,
-  "description": "Capacitor wrapper that bundles tiennm99/loto into a fully-offline Android APK.",
+  "description": "Capacitor wrapper that bundles the web/ app into a fully-offline Android APK.",
   "scripts": {
-    "build:loto": "corepack pnpm@11.1.1 --dir loto install --frozen-lockfile && corepack pnpm@11.1.1 --dir loto run build",
+    "build:web": "corepack pnpm@11.1.1 --dir ../web install --frozen-lockfile && corepack pnpm@11.1.1 --dir ../web run build",
     "sync": "cap sync android",
-    "build": "npm run build:loto && npm run sync",
+    "build": "npm run build:web && npm run sync",
     "open": "cap open android",
     "assemble:debug": "cd android && ./gradlew :app:assembleDebug",
     "assemble:release": "cd android && ./gradlew :app:bundleRelease :app:assembleRelease"

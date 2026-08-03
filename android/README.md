@@ -1,20 +1,20 @@
 # Lô tô — Android (Capacitor wrapper)
 
-![build-debug](https://github.com/tiennm99/loto-android/actions/workflows/build-debug.yml/badge.svg)
+![android-build-debug](https://github.com/tiennm99/loto/actions/workflows/android-build-debug.yml/badge.svg)
 
-Fully-offline Android wrapper around [tiennm99/loto](https://github.com/tiennm99/loto)
-(SvelteKit PWA). All assets — HTML, JS, CSS, and 184 voice MP3s — are bundled
-into the APK at build time. No network is required at runtime.
+Fully-offline Android wrapper around the [`web/`](../web) SvelteKit PWA. All
+assets — HTML, JS, CSS, and 184 voice MP3s — are bundled into the APK at build
+time. No network is required at runtime.
 
 > **Note:** the previous native Kotlin/Compose port lives in git history at
-> commit `9a35686` and earlier. This repo is now a thin wrapper; loto evolves
-> upstream and we just rebuild + ship.
+> the commit titled `docs: add post-implementation todo list` and earlier. This
+> is now a thin wrapper over `web/`; the web app evolves and we rebuild + ship.
 
 ## How it works
 
 ```
-loto/ (git submodule, pinned SHA)
-  └── pnpm run build →  loto/build/  (SvelteKit static output)
+../web/
+  └── pnpm run build →  ../web/build/  (SvelteKit static output)
                                 ↓
                          npx cap sync
                                 ↓
@@ -30,22 +30,16 @@ and the `<audio>` element all work offline.
 ## Stack
 
 - Capacitor 8 (Android wrapper)
-- Loto upstream: SvelteKit 2 + Vite 8 + `@sveltejs/adapter-static` + `@vite-pwa/sveltekit`
+- Web app in `web/`: SvelteKit 2 + Vite 8 + `@sveltejs/adapter-static` + `@vite-pwa/sveltekit`
 - minSdk 24 · targetSdk 36 · JDK 21 · Node 22 (Capacitor 8 requires both)
 
 ## Setup
 
 ```bash
-git clone --recurse-submodules https://github.com/tiennm99/loto-android.git
-cd loto-android
+git clone https://github.com/tiennm99/loto.git
+cd loto/android
 npm ci
-npm run build      # builds loto + cap sync into android/
-```
-
-If you cloned without `--recurse-submodules`:
-
-```bash
-git submodule update --init --recursive
+npm run build      # builds web/ + cap sync into android/
 ```
 
 ## Build
@@ -53,7 +47,7 @@ git submodule update --init --recursive
 ### Debug APK
 
 ```bash
-npm run build              # build loto + cap sync (must run after any loto change)
+npm run build              # build web/ + cap sync (must run after any web/ change)
 npm run assemble:debug     # → android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -76,21 +70,18 @@ npm run assemble:release
 npx cap open android
 ```
 
-## Updating loto
+## Picking up web/ changes
+
+`web/` and `android/` live in the same repository, so there is no pin to bump —
+rebuild and re-sync after any change under `web/`:
 
 ```bash
-cd loto
-git fetch origin
-git checkout <new-sha>
-cd ..
-git add loto
-npm run build              # rebuild + re-sync
-git commit -m "chore: bump loto submodule to <sha>"
+npm run build              # rebuild web/ + re-sync into android/
 ```
 
 ## Why no INTERNET permission?
 
-The whole loto build (HTML, JS, CSS, fonts, manifest, icons, all 184 MP3s)
+The whole web build (HTML, JS, CSS, fonts, manifest, icons, all 184 MP3s)
 ships inside the APK. The WebView loads from `https://localhost`, which is
 loopback. No remote fetches happen at runtime, so the permission is omitted —
 this makes "fully offline" a hard guarantee, not a convention.
@@ -107,8 +98,8 @@ If you ever add a remote feature (analytics, sync, etc.), add this back to
 The APK has no native libraries (`lib/` is empty), so it's architecture-
 independent — same APK installs on x86_64 emulators and ARM phones.
 
-1. Download the APK from the [Actions artifact](https://github.com/tiennm99/loto-android/actions) (debug)
-   or [Releases](https://github.com/tiennm99/loto-android/releases) (signed).
+1. Download the APK from the [Actions artifact](https://github.com/tiennm99/loto/actions) (debug)
+   or [Releases](https://github.com/tiennm99/loto/releases) (signed).
 2. Drag-drop the APK onto the BlueStacks window, or use **Install APK**
    from the sidebar.
 3. Launch "Lo To" from the BlueStacks home screen.
@@ -125,13 +116,15 @@ filter the app out.
 
 ## CI / CD
 
+Workflows live at the repository root in `.github/workflows/`.
+
 | Workflow | Trigger | Result |
 |----------|---------|--------|
-| `build-debug` | push to `main`, any PR | unsigned debug APK uploaded as artifact |
-| `release` | tag `v*.*.*` | signed AAB + APK attached to GH Release |
+| `android-build-debug` | push to `main`, any PR touching `web/` or `android/` | unsigned debug APK uploaded as artifact |
+| `android-release` | tag `v*.*.*` | signed AAB + APK attached to GH Release |
 
-Both workflows checkout the loto submodule, install npm deps, build loto,
-`cap sync`, then run Gradle inside `android/`.
+Both install npm deps in `android/`, build `web/`, `cap sync`, then run Gradle
+inside `android/android/`.
 
 ### GitHub Secrets (release only)
 
@@ -151,7 +144,7 @@ Both workflows checkout the loto submodule, install npm deps, build loto,
 
 1. Sign up at [play.google.com/console](https://play.google.com/console/signup) ($25 one-time)
 2. Create the app entry with package name `com.miti99.loto`
-3. Build a signed AAB (`npm run assemble:release` locally, or push a `v*.*.*` tag to use `release.yml`) and **upload manually** to the Internal Testing track via the Play Console UI — Google requires the first upload to be manual
+3. Build a signed AAB (`npm run assemble:release` locally, or push a `v*.*.*` tag to use `android-release.yml`) and **upload manually** to the Internal Testing track via the Play Console UI — Google requires the first upload to be manual
 4. Fill out store listing: icon (512×512), feature graphic (1024×500), 2–8 screenshots, short + full description, category, content rating, target audience, **privacy policy URL** (host on GH Pages), data safety form (declare "No data collected" since the app is offline)
 5. Submit for review (1–7 days first time)
 
@@ -162,11 +155,11 @@ Both workflows checkout the loto submodule, install npm deps, build loto,
 3. **Keys → Add Key → JSON** — download the JSON file
 4. In Play Console → **Users and permissions**, invite the service-account email and grant app-scoped *Release apps to testing tracks* + *View app information* permissions for Lo To
 5. Copy the entire JSON contents into a GitHub repo secret named `PLAY_SERVICE_ACCOUNT_JSON`
-6. Tag a release (`git tag v1.0.1 && git push origin v1.0.1`) — `release.yml` will:
+6. Tag a release (`git tag v1.0.1 && git push origin v1.0.1`) — `android-release.yml` will:
    - Build signed AAB + APK
    - Upload to GitHub Release
    - **If the secret is set**: upload AAB to Play Console **Internal track**
-7. Promote internal → closed → open → production via the Play Console UI (or change `tracks: internal` in `release.yml` to automate further)
+7. Promote internal → closed → open → production via the Play Console UI (or change `tracks: internal` in `android-release.yml` to automate further)
 
 **Important:** every release must increment `versionCode` in `android/app/build.gradle` before tagging — Play Console rejects duplicate versionCodes.
 
@@ -188,10 +181,10 @@ git push origin v1.0.0
 
 ## Audio
 
-Bundled by upstream loto under `loto/static/audio/{hoai-my,nam-minh}/{1..90,cho,kinh}.mp3`,
+Bundled by the web app under `web/static/audio/{hoai-my,nam-minh}/{1..90,cho,kinh}.mp3`,
 served by the wrapper from `https://localhost/audio/...`. No audio post-processing
 on the Android side.
 
 ## License
 
-Same license as upstream [`tiennm99/loto`](https://github.com/tiennm99/loto).
+Apache-2.0 — see [`LICENSE`](../LICENSE) at the repository root.
