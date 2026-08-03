@@ -1,0 +1,12 @@
+# Agent and editor state
+.agents/
+.claude/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tooling scratch
+repomix-output.xml

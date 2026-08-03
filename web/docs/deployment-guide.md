@@ -15,7 +15,7 @@ either profile without code changes.
 
 ## Production Deployment — GitHub Pages
 
-Canonical deploy. Wired via `.github/workflows/deploy-github-pages.yml`:
+Canonical deploy. Wired via `.github/workflows/web-deploy-github-pages.yml`:
 on push to `main`, runs `npm run build:gh`, uploads `build/` as the
 GitHub Pages artifact, and deploys.
 
@@ -135,9 +135,9 @@ Generates:
 ## CI/CD Pipeline
 
 Two workflows on `main`:
-- **`.github/workflows/deploy-github-pages.yml`** — canonical deploy. Builds
+- **`.github/workflows/web-deploy-github-pages.yml`** — canonical deploy. Builds
   with `npm run build:gh` and publishes `build/` to GitHub Pages.
-- **`.github/workflows/verify-build.yml`** — PR + push gate. Runs
+- **`.github/workflows/web-verify-build.yml`** — PR + push gate. Runs
   `npm test && npm run build` to catch regressions before they reach the
   deploy job.
 

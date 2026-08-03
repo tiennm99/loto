@@ -50,8 +50,8 @@
 | `svelte.config.js` | adapter-static (HTML export), dual basePath via BUILD_PROFILE env, SvelteKit PWA plugin config. |
 | `vite.config.js` | Tailwind + SvelteKit + PWA plugins. codeserver HMR config (port, allowedHosts, hmr). |
 | `package.json` | SvelteKit 2, Svelte 5 (runes), Tailwind 4, Vite, @vite-pwa/sveltekit. Scripts: dev, dev:codeserver, build, build:gh, lint, test, test:watch. |
-| `.github/workflows/deploy-github-pages.yml` | Canonical deploy. On push to `main`: `npm ci && npm run build:gh`, uploads `build/` as the GitHub Pages artifact, deploys to `https://tiennm99.github.io/loto/`. |
-| `.github/workflows/verify-build.yml` | CI: on push/PR to main runs `npm test && npm run build` as a regression gate before the deploy job. |
+| `.github/workflows/web-deploy-github-pages.yml` | Canonical deploy. On push to `main`: `npm ci && npm run build:gh`, uploads `build/` as the GitHub Pages artifact, deploys to `https://tiennm99.github.io/loto/`. |
+| `.github/workflows/web-verify-build.yml` | CI: on push/PR to main runs `npm test && npm run build` as a regression gate before the deploy job. |
 | `eslint.config.mjs` | ESLint 9 flat config (@eslint/js + eslint-plugin-svelte). Declares Svelte 5 rune globals. |
 | `jsconfig.json` | Path alias `$lib`, no checkJs. |
 | `.gitignore` | Excludes node_modules, build, .env.local, etc. |

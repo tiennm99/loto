@@ -7,7 +7,8 @@ No runtime TTS or server required.
 
 Live: [tiennm99.github.io/loto](https://tiennm99.github.io/loto)
 
-Android port: [tiennm99/loto-android](https://github.com/tiennm99/loto-android)
+Android port: [`android/`](../android) — a Capacitor wrapper that bundles this
+app into a fully-offline APK.
 
 ---
 
@@ -117,12 +118,12 @@ The script auto-discovers all available `vi-*` voices and writes an updated mani
 
 ## Deployment
 
-Deployed to GitHub Pages via `.github/workflows/deploy-github-pages.yml` on push to
-`main`. Build command: `pnpm build:gh` (sets `/loto` base path). Static output in
+Deployed to GitHub Pages via `.github/workflows/web-deploy-github-pages.yml` on push
+to `main`. Build command: `pnpm build:gh` (sets `/loto` base path). Static output in
 `build/`.
 
 ---
 
 ## License
 
-Apache 2.0
+Apache-2.0 — see [`LICENSE`](../LICENSE) at the repository root.

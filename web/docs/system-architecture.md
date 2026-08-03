@@ -74,7 +74,7 @@ npm run build:gh
 basePath="/loto"
 Output: build/index.html with /loto prefix
 Deploy: https://tiennm99.github.io/loto/
-Workflow: .github/workflows/deploy-github-pages.yml
+Workflow: .github/workflows/web-deploy-github-pages.yml
 ```
 
 ### Development (Local)

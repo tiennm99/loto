@@ -86,7 +86,7 @@ State is entirely client-side. Each card / panel instance uses a unique localSto
 
 ## Deployment
 
-- **Production**: GitHub Pages at `https://tiennm99.github.io/loto/` (canonical, basePath `/loto`). Deployed by `.github/workflows/deploy-github-pages.yml` on push to `main`.
+- **Production**: GitHub Pages at `https://tiennm99.github.io/loto/` (canonical, basePath `/loto`). Deployed by `.github/workflows/web-deploy-github-pages.yml` on push to `main`.
 - **Development**: `npm run dev` (local), `npm run dev:codeserver` (code-server via proxy).
 - **Build**: `npm run build:gh` generates static export to `build/` directory with the `/loto` basePath.
 
