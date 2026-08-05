@@ -41,7 +41,10 @@ with the subproject it serves and filtered on the paths it cares about.
 | `web-firebase-hosting-merge` | push to `main` touching `web/` | deploys to Firebase Hosting |
 | `web-firebase-hosting-pull-request` | PR touching `web/` | Firebase preview channel |
 | `android-build-debug` | push/PR touching `web/` or `android/` | unsigned debug APK artifact |
-| `android-release` | tag `v*.*.*` | signed AAB + APK on the GH Release |
+| `android-release` | tag `v*.*.*` | signed AAB + APK on the GH Release, plus Play Store internal-track upload |
+
+Release/secret setup for the Play Store pipeline is documented in
+[`docs/play-store-publishing.md`](docs/play-store-publishing.md).
 
 ## History
 

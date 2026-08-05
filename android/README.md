@@ -150,16 +150,14 @@ inside `android/android/`.
 
 ### Auto-publish setup (after first manual upload)
 
-1. Create/select a Google Cloud project and enable the **Google Play Android Developer API**
-2. In Google Cloud Console, create a **Service Account** without granting broad Cloud project roles
-3. **Keys → Add Key → JSON** — download the JSON file
-4. In Play Console → **Users and permissions**, invite the service-account email and grant app-scoped *Release apps to testing tracks* + *View app information* permissions for Lo To
-5. Copy the entire JSON contents into a GitHub repo secret named `PLAY_SERVICE_ACCOUNT_JSON`
-6. Tag a release (`git tag v1.0.1 && git push origin v1.0.1`) — `android-release.yml` will:
-   - Build signed AAB + APK
-   - Upload to GitHub Release
-   - **If the secret is set**: upload AAB to Play Console **Internal track**
-7. Promote internal → closed → open → production via the Play Console UI (or change `tracks: internal` in `android-release.yml` to automate further)
+See [`docs/play-store-publishing.md`](../docs/play-store-publishing.md) for the
+full walkthrough: service-account creation, granting Play Console permissions,
+setting the GitHub secrets (bash + PowerShell commands), cutting a release,
+and troubleshooting. Short version: once `PLAY_SERVICE_ACCOUNT_JSON` is set,
+every `v*.*.*` tag builds a signed AAB + APK, attaches both to a GitHub
+Release, and uploads the AAB to the Play Console **Internal track**. Promote
+internal → closed → open → production via the Play Console UI (or change
+`tracks: internal` in `android-release.yml` to automate further).
 
 **Important:** every release must increment `versionCode` in `android/app/build.gradle` before tagging — Play Console rejects duplicate versionCodes.
 
