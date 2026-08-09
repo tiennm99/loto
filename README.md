@@ -31,17 +31,33 @@ Per-project detail lives in [`web/README.md`](web/README.md) and
 
 ## CI
 
-Workflows live at the repository root in `.github/workflows/`; each is prefixed
-with the subproject it serves and filtered on the paths it cares about.
+Workflows live at the repository root in `.github/workflows/`. Because both
+subprojects ship from the same commit, ordinary CI is a single `ci.yml`;
+only the tag-driven release stands apart.
 
 | Workflow | Trigger | Result |
 |----------|---------|--------|
-| `web-verify-build` | push/PR touching `web/` | `pnpm test && pnpm build` |
-| `web-deploy-github-pages` | push to `main` touching `web/` | publishes to GitHub Pages |
-| `web-firebase-hosting-merge` | push to `main` touching `web/` | deploys to Firebase Hosting |
-| `web-firebase-hosting-pull-request` | PR touching `web/` | Firebase preview channel |
-| `android-build-debug` | push/PR touching `web/` or `android/` | unsigned debug APK artifact |
-| `android-release` | tag `v*.*.*` | signed AAB + APK on the GH Release, plus Play Store internal-track upload |
+| `ci` | push to `main` or PR touching `web/` or `android/` | see the job graph below |
+| `android-release` | tag `v*.*.*` | tests, then a signed AAB + APK on the GH Release, plus Play Store internal-track upload |
+
+`ci` builds the web app exactly twice — once per base path — and every
+consumer downloads the artifact rather than rebuilding it:
+
+```
+test (pnpm test)
+└── build (root, base "")   ── deploy-firebase   push to main
+    │                       ├─ preview-firebase  PR from this repo
+    │                       └─ android-debug     unsigned APK artifact
+    └── build (gh, base /loto) ── deploy-pages    push to main
+```
+
+Nothing deploys unless `test` is green. Deploy jobs are skipped on pull
+requests, and the Firebase preview is skipped for PRs from forks, which
+cannot read the service-account secret.
+
+Shared toolchain setup lives in `.github/actions/setup-web` and
+`.github/actions/setup-android` — composite actions used by both workflows,
+so Node stays on one version across the web build and the APK.
 
 Release/secret setup for the Play Store pipeline is documented in
 [`docs/play-store-publishing.md`](docs/play-store-publishing.md).
