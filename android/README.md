@@ -1,6 +1,6 @@
 # Lô tô — Android (Capacitor wrapper)
 
-![android-build-debug](https://github.com/tiennm99/loto/actions/workflows/android-build-debug.yml/badge.svg)
+![ci](https://github.com/tiennm99/loto/actions/workflows/ci.yml/badge.svg)
 
 Fully-offline Android wrapper around the [`web/`](../web) SvelteKit PWA. All
 assets — HTML, JS, CSS, and 184 voice MP3s — are bundled into the APK at build
@@ -31,7 +31,7 @@ and the `<audio>` element all work offline.
 
 - Capacitor 8 (Android wrapper)
 - Web app in `web/`: SvelteKit 2 + Vite 8 + `@sveltejs/adapter-static` + `@vite-pwa/sveltekit`
-- minSdk 24 · targetSdk 36 · JDK 21 · Node 22 (Capacitor 8 requires both)
+- minSdk 24 · targetSdk 36 · JDK 21 · Node 24 (Capacitor 8 requires the first two)
 
 ## Setup
 
@@ -120,11 +120,17 @@ Workflows live at the repository root in `.github/workflows/`.
 
 | Workflow | Trigger | Result |
 |----------|---------|--------|
-| `android-build-debug` | push to `main`, any PR touching `web/` or `android/` | unsigned debug APK uploaded as artifact |
-| `android-release` | tag `v*.*.*` | signed AAB + APK attached to GH Release |
+| `ci` (`android-debug` job) | push to `main`, any PR touching `web/` or `android/` | unsigned debug APK uploaded as artifact |
+| `android-release` | tag `v*.*.*` | tests, then signed AAB + APK attached to GH Release |
 
-Both install npm deps in `android/`, build `web/`, `cap sync`, then run Gradle
-inside `android/android/`.
+Both `cap sync` a web bundle into `android/android/`, then run Gradle there.
+They differ in where the bundle comes from: the `android-debug` job downloads
+the artifact `ci` already built, so `web/` is never built twice in one run,
+while `android-release` builds `web/` itself from the tagged tree. Neither
+runs `npm run build` in `android/` — that script would rebuild `web/`.
+
+Toolchain setup is shared through the composite actions
+`.github/actions/setup-web` and `.github/actions/setup-android`.
 
 ### GitHub Secrets (release only)
 

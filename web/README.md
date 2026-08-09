@@ -118,9 +118,12 @@ The script auto-discovers all available `vi-*` voices and writes an updated mani
 
 ## Deployment
 
-Deployed to GitHub Pages via `.github/workflows/web-deploy-github-pages.yml` on push
-to `main`. Build command: `pnpm build:gh` (sets `/loto` base path). Static output in
-`build/`.
+Deployed to GitHub Pages by the `deploy-pages` job in
+`.github/workflows/ci.yml` on push to `main`. Build command: `pnpm build:gh`
+(sets `/loto` base path). Static output in `build/`.
+
+The same workflow also deploys the base-`""` build to Firebase Hosting and
+bundles it into the debug APK, so `web/` is built once per base path per run.
 
 ---
 

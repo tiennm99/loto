@@ -1,0 +1,181 @@
+# One pipeline for both subprojects, because they ship from the same commit.
+#
+# The web app is built twice and only twice — once per base path — and every
+# consumer downloads an artifact instead of rebuilding:
+#
+#   build (root, base "")  -> deploy-firebase, preview-firebase, android-debug
+#   build (gh,   base /loto) -> deploy-pages
+#
+# Tags are handled by android-release.yml, which builds standalone.
+
+name: ci
+
+# Actions' parser rejects YAML anchors, so the two path lists are duplicated
+# by necessity — keep them identical.
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'android/**'
+      - '.github/actions/**'
+      - '.github/workflows/ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'android/**'
+      - '.github/actions/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Superseded PRs are safe to kill; a main run may be mid-deploy.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-web
+      - run: pnpm test
+        working-directory: web
+
+  build:
+    # Nothing is built, shipped or signed unless the suite is green.
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # Firebase and the APK serve from a domain root.
+          - profile: root
+            script: build
+            artifact: web-build
+          # GitHub Pages serves under /loto.
+          - profile: gh
+            script: 'build:gh'
+            artifact: web-build-gh
+    name: build (${{ matrix.profile }})
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-web
+      - run: pnpm ${{ matrix.script }}
+        working-directory: web
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact }}
+          path: web/build
+          # Hand-off within this run only; releases keep their own copies.
+          retention-days: 1
+
+  deploy-pages:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Guards the shared Pages environment against runs of other workflows.
+    concurrency:
+      group: github-pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: web-build-gh
+          path: build
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: build
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  deploy-firebase:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: firebase-hosting-live
+      cancel-in-progress: false
+    steps:
+      # entryPoint below reads web/firebase.json and web/.firebaserc.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: web-build
+          # firebase.json declares `public: "build"`, relative to entryPoint.
+          path: web/build
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOOTOO }}
+          channelId: live
+          projectId: lootoo
+          entryPoint: web
+
+  preview-firebase:
+    # Forks cannot read the service account, so skip rather than fail.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: web-build
+          path: web/build
+      - uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LOOTOO }}
+          projectId: lootoo
+          entryPoint: web
+
+  android-debug:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: web-build
+          # capacitor.config.json declares `webDir: "../web/build"`.
+          path: web/build
+      - uses: ./.github/actions/setup-android
+      # `npm run build` would rebuild web/; the bundle is already here.
+      - name: Sync web bundle into the native project
+        run: npm run sync
+        working-directory: android
+      - name: Assemble debug APK
+        run: ./gradlew :app:assembleDebug
+        working-directory: android/android
+      - uses: actions/upload-artifact@v7
+        with:
+          name: app-debug.apk
+          path: android/android/app/build/outputs/apk/debug/*.apk
+          archive: false
+          retention-days: 7
