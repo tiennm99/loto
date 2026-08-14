@@ -1,7 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Lo To</string>
-    <string name="title_activity_main">Lo To</string>
+    <string name="app_name">Lô tô</string>
+    <string name="title_activity_main">Lô tô</string>
     <string name="package_name">com.miti99.loto</string>
     <string name="custom_url_scheme">com.miti99.loto</string>
+
+    <!-- Exit confirmation, shown when back is pressed with no overlay open. -->
+    <string name="exit_title">Thoát Lô tô?</string>
+    <string name="exit_message">Ván đang chơi sẽ được lưu lại.</string>
+    <string name="exit_confirm">Thoát</string>
+    <string name="exit_cancel">Ở lại</string>
 </resources>

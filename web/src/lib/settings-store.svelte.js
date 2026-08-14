@@ -12,6 +12,13 @@ const STORAGE_KEY = "loto_settings";
 const HEX6 = /^#[0-9a-fA-F]{6}$/;
 const VALID_THEMES = /** @type {const} */ (["auto", "light", "dark"]);
 const VALID_MODES = /** @type {const} */ (["player", "master", "both"]);
+/**
+ * Board number sizes, as a multiplier on the responsive base size.
+ * The Android wrapper pins the WebView's textZoom to 100 so the system font
+ * setting can't break the fixed 9-column grid — this is the in-app
+ * replacement for that control, so the rungs need to reach genuinely large.
+ */
+export const BOARD_TEXT_SCALES = /** @type {const} */ ([0.9, 1, 1.15, 1.3]);
 /** Hard cap on stored settings JSON to keep poisoned origins from
  *  stalling the UI on mount. Real settings serialize to ~200 bytes. */
 const MAX_STORAGE_BYTES = 8_192;
@@ -35,6 +42,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   voiceWaitingNumber: false,
   /** Active voice id; matches an entry in audio manifest. */
   voice: DEFAULT_VOICE,
+  /** Multiplier on board number size; one of BOARD_TEXT_SCALES. */
+  boardTextScale: 1,
 });
 
 export const settings = $state({ ...DEFAULT_SETTINGS });
@@ -69,6 +78,13 @@ function validSpeed(v) {
 /** @param {unknown} v */
 function validVoiceId(v) {
   return typeof v === "string" && VOICE_IDS.has(v) ? v : null;
+}
+/** @param {unknown} v */
+function validBoardTextScale(v) {
+  return typeof v === "number" &&
+    BOARD_TEXT_SCALES.includes(/** @type {any} */ (v))
+    ? v
+    : null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -112,9 +128,18 @@ function applyTheme() {
   }
 }
 
+function applyBoardTextScale() {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.setProperty(
+    "--board-text-scale",
+    String(settings.boardTextScale),
+  );
+}
+
 function applyAll() {
   applyEmptyCellColor();
   applyTheme();
+  applyBoardTextScale();
 }
 
 /* ------------------------------------------------------------------ */
@@ -157,6 +182,9 @@ export function loadSettings() {
         DEFAULT_SETTINGS.voiceWaitingNumber;
       settings.voice =
         validVoiceId(parsed.voice) ?? DEFAULT_SETTINGS.voice;
+      settings.boardTextScale =
+        validBoardTextScale(parsed.boardTextScale) ??
+        DEFAULT_SETTINGS.boardTextScale;
     }
   } catch {
     /* private mode / quota / corrupt JSON — fall back to defaults */
@@ -183,5 +211,6 @@ export function resetSettings() {
   settings.voiceEnabledPlayer = DEFAULT_SETTINGS.voiceEnabledPlayer;
   settings.voiceWaitingNumber = DEFAULT_SETTINGS.voiceWaitingNumber;
   settings.voice = DEFAULT_SETTINGS.voice;
+  settings.boardTextScale = DEFAULT_SETTINGS.boardTextScale;
   saveSettings();
 }

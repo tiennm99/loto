@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  BOARD_TEXT_SCALES,
   DEFAULT_SETTINGS,
   loadSettings,
   resetSettings,
@@ -52,10 +53,12 @@ beforeEach(() => {
     "voiceEnabledPlayer",
     "voiceWaitingNumber",
     "voice",
+    "boardTextScale",
   ])) {
     /** @type {any} */ (settings)[k] = /** @type {any} */ (DEFAULT_SETTINGS)[k];
   }
   document.documentElement.style.removeProperty("--empty-cell-bg");
+  document.documentElement.style.removeProperty("--board-text-scale");
   document.documentElement.classList.remove("dark");
   mockMatchMedia(false);
 });
@@ -272,6 +275,7 @@ describe("settings-store — saveSettings", () => {
     settings.voiceEnabledPlayer = true;
     settings.voiceWaitingNumber = true;
     settings.voice = "nam-minh";
+    settings.boardTextScale = 1.15;
     saveSettings();
     const raw = localStorage.getItem(KEY);
     expect(raw).not.toBeNull();
@@ -285,6 +289,7 @@ describe("settings-store — saveSettings", () => {
       voiceEnabledPlayer: true,
       voiceWaitingNumber: true,
       voice: "nam-minh",
+      boardTextScale: 1.15,
     });
   });
 
@@ -365,5 +370,60 @@ describe("settings-store — applyTheme via load/save", () => {
     // After detach, OS pref change must NOT toggle the class anymore.
     fire(false);
     expect(document.documentElement.classList.contains("dark")).toBe(true);
+  });
+});
+
+describe("settings-store — boardTextScale", () => {
+  it("defaults to 1", () => {
+    expect(DEFAULT_SETTINGS.boardTextScale).toBe(1);
+    loadSettings();
+    expect(settings.boardTextScale).toBe(1);
+  });
+
+  it("applies the scale as a CSS custom property", () => {
+    settings.boardTextScale = 1.3;
+    saveSettings();
+    expect(
+      document.documentElement.style.getPropertyValue("--board-text-scale"),
+    ).toBe("1.3");
+  });
+
+  it("round-trips every allowed rung through storage", () => {
+    for (const scale of BOARD_TEXT_SCALES) {
+      settings.boardTextScale = scale;
+      saveSettings();
+      settings.boardTextScale = 1;
+      loadSettings();
+      expect(settings.boardTextScale).toBe(scale);
+    }
+  });
+
+  it("falls back to the default for a value outside the allowlist", () => {
+    localStorage.setItem(KEY, JSON.stringify({ boardTextScale: 2.5 }));
+    loadSettings();
+    expect(settings.boardTextScale).toBe(1);
+  });
+
+  it("falls back to the default for a non-number", () => {
+    localStorage.setItem(KEY, JSON.stringify({ boardTextScale: "1.15" }));
+    loadSettings();
+    expect(settings.boardTextScale).toBe(1);
+  });
+
+  it("leaves other keys intact when boardTextScale is missing", () => {
+    localStorage.setItem(KEY, JSON.stringify({ theme: "dark" }));
+    loadSettings();
+    expect(settings.theme).toBe("dark");
+    expect(settings.boardTextScale).toBe(1);
+  });
+
+  it("reset restores the default", () => {
+    settings.boardTextScale = 1.3;
+    saveSettings();
+    resetSettings();
+    expect(settings.boardTextScale).toBe(1);
+    expect(
+      document.documentElement.style.getPropertyValue("--board-text-scale"),
+    ).toBe("1");
   });
 });

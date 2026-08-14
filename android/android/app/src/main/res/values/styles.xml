@@ -17,6 +17,21 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <!-- API 31+ system splash. Colour follows light/dark via
+             values-night/colors.xml. -->
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <!-- Hand the activity a normal AppCompat theme once the splash is
+             done; Theme.SplashScreen is not meant to stay applied, and
+             AppCompat dialogs need an AppCompat-derived theme. -->
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+        <!-- Compat path for API < 31; see drawable/splash.xml. -->
         <item name="android:background">@drawable/splash</item>
     </style>
+
+    <!-- Exit-confirmation dialog. Declared with an explicit AppCompat parent
+         because the activity theme (Theme.SplashScreen) is not guaranteed to
+         be AppCompat-derived, and AppCompat's AlertDialog requires one.
+         DayNight so the dialog follows the app's light/dark setting. -->
+    <style name="AppTheme.ExitDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert" />
 </resources>

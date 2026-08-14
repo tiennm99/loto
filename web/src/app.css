@@ -39,6 +39,42 @@ html {
 }
 body {
   background-color: transparent;
+  /* Android 15+ (targetSdk 35+) forces edge-to-edge, so the WebView paints
+     under the status bar and gesture nav. Inset the content here rather than
+     on the page container: `html` carries the background colour, so padding
+     on `body` keeps the background full-bleed while content clears the bars.
+     `fixed inset-0` overlays are viewport-relative and deliberately
+     unaffected — their backdrops should still cover the whole screen.
+     Zero-width where there are no insets (desktop, older Android). */
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+/* Board number sizes, scaled by the in-app "Cỡ chữ bảng" setting.
+   These replace Tailwind's text-* utilities on the grid cells: the wrapper
+   pins the WebView's textZoom to 100 (a 9-column fixed grid clips badly at
+   200% system font), so the app has to own the size control itself.
+   Player card and master board keep separate rungs — the player card has a
+   md: step the master board never had, and merging them would silently
+   enlarge the master board on desktop. */
+.board-num {
+  font-size: calc(1.25rem * var(--board-text-scale, 1));
+}
+.master-num {
+  font-size: calc(1.25rem * var(--board-text-scale, 1));
+}
+@media (min-width: 640px) {
+  .board-num,
+  .master-num {
+    font-size: calc(1.5rem * var(--board-text-scale, 1));
+  }
+}
+@media (min-width: 768px) {
+  .board-num {
+    font-size: calc(1.875rem * var(--board-text-scale, 1));
+  }
 }
 
 /* Equal-width grid cells */

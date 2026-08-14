@@ -42,6 +42,7 @@
   import MasterEmptyState from "$lib/MasterEmptyState.svelte";
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playNumber } from "$lib/voice.js";
+  import { setWakeLock } from "$lib/wake-lock.js";
 
   let heroEl = $state(/** @type {HTMLDivElement | null} */ (null));
   let autoRunning = $state(false);
@@ -106,6 +107,20 @@
   // Stop any in-flight clip when the component unmounts (e.g. master mode
   // toggled off mid-clip) so audio doesn't outlive the panel.
   $effect(() => () => cancelPlayback());
+
+  // Hold the screen awake while numbers are still to be called. Auto-call
+  // advances on a timer with no touch input, so without this the display
+  // sleeps mid-round and the WebView throttles the interval.
+  //
+  // Keyed on `remaining` rather than `hasGame`: `hasGame` never returns to
+  // false once a round starts, which would pin the screen on for a finished
+  // board. Player-only mode never mounts this panel — those screens stay
+  // awake from the user's own cell taps. Android drops the lock whenever the
+  // page hides, so a backgrounded app holds nothing.
+  $effect(() => {
+    setWakeLock(masterState.remaining.length > 0);
+    return () => setWakeLock(false);
+  });
 
   // Scroll the "Số vừa xổ" hero into view on each new draw so the host
   // doesn't have to chase it on a phone. Gated by a user-interaction flag
@@ -282,9 +297,9 @@
             <!-- Token: cream inner with a sky-blue ring when called,
                  gray-ringed and dim when uncalled. -->
             <div
-              class="flex items-center justify-center
+              class="master-num flex items-center justify-center
                      w-[82%] h-[82%] rounded-full
-                     text-xl sm:text-2xl font-black tabular-nums
+                     font-black tabular-nums
                      border-[3px] transition-all
                      {isCalled
                        ? 'border-sky-600 dark:border-sky-400 bg-amber-50 dark:bg-amber-100 text-sky-700 dark:text-sky-700'

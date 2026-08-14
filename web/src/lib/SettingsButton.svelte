@@ -1,6 +1,8 @@
 <script>
   import { VOICES } from "$lib/audio-manifest.js";
+  import { pushOverlay } from "$lib/overlay-history.js";
   import {
+    BOARD_TEXT_SCALES,
     resetSettings,
     saveSettings,
     settings,
@@ -27,6 +29,14 @@
     ["auto", "Tự động"],
     ["light", "Sáng"],
     ["dark", "Tối"],
+  ]);
+
+  // Parallel to BOARD_TEXT_SCALES.
+  const BOARD_TEXT_SCALE_LABELS = /** @type {const} */ ([
+    "Nhỏ",
+    "Vừa",
+    "Lớn",
+    "Rất lớn",
   ]);
 
   const MODES = /** @type {const} */ ([
@@ -57,6 +67,12 @@
   /** @param {"auto"|"light"|"dark"} t */
   function pickTheme(t) {
     settings.theme = t;
+    saveSettings();
+  }
+
+  /** @param {number} s */
+  function pickBoardTextScale(s) {
+    settings.boardTextScale = s;
     saveSettings();
   }
 
@@ -109,15 +125,22 @@
 
   // Escape-to-close while open. Window listener avoids relying on focus
   // staying inside the modal — the dialog div may not receive keydown
-  // when the trigger button still holds focus on initial open.
+  // when the trigger button still holds focus on initial open. The history
+  // sentinel makes the Android back gesture close the sheet rather than
+  // leave the app.
   $effect(() => {
     if (!open) return;
+    const dispose = pushOverlay(close);
     /** @param {KeyboardEvent} e */
     const onKey = (e) => {
       if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      // No-op when back already popped the sentinel; pops it otherwise.
+      dispose();
+    };
   });
 </script>
 
@@ -203,6 +226,36 @@
                        : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
             >
               {label}
+            </button>
+          {/each}
+        </div>
+      </fieldset>
+
+      <!-- Board number size. The Android wrapper pins the WebView's textZoom
+           so the system font setting can't clip the fixed 9-column grid;
+           this is the in-app replacement for that control. -->
+      <fieldset class="mb-5">
+        <legend
+          class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2"
+        >
+          Cỡ chữ bảng
+        </legend>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
+          Cỡ số trên bảng người chơi và bảng quản trò
+        </p>
+        <div class="grid grid-cols-4 gap-2">
+          {#each BOARD_TEXT_SCALES as scale, i (scale)}
+            {@const selected = settings.boardTextScale === scale}
+            <button
+              type="button"
+              aria-pressed={selected}
+              onclick={() => pickBoardTextScale(scale)}
+              class="px-2 py-2 rounded-lg border-2 text-sm font-medium transition-all
+                     {selected
+                       ? 'border-rose-600 dark:border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300'
+                       : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'}"
+            >
+              {BOARD_TEXT_SCALE_LABELS[i]}
             </button>
           {/each}
         </div>

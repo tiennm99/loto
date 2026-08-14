@@ -13,6 +13,7 @@
     saveManualUnticks,
   } from "$lib/game-logic.js";
   import { masterState } from "$lib/master-store.svelte.js";
+  import { pushOverlay } from "$lib/overlay-history.js";
   import { applyMasterCalls } from "$lib/player-auto-cross.js";
   import { settings } from "$lib/settings-store.svelte.js";
   import { cancelPlayback, playBingo, playWaiting } from "$lib/voice.js";
@@ -213,16 +214,23 @@
     dismissToast();
   });
 
-  // Bingo modal: window-level Escape so it works regardless of which
-  // element holds focus (the inline backdrop button rarely does).
+  // Bingo modal dismissal. Window-level Escape so it works regardless of
+  // which element holds focus (the inline backdrop button rarely does), plus
+  // a history sentinel so the Android back gesture closes the modal instead
+  // of leaving the app.
   $effect(() => {
     if (!showCongrats) return;
+    const dispose = pushOverlay(() => (showCongrats = false));
     /** @param {KeyboardEvent} e */
     const onKey = (e) => {
       if (e.key === "Escape") showCongrats = false;
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      // No-op when back already popped the sentinel; pops it otherwise.
+      dispose();
+    };
   });
 
   // Auto-cross on master draws (only in "both" mode). Reads
@@ -448,9 +456,8 @@
                     aria-label="Số {num}{isCrossed ? ', đã đánh dấu' : ''}{isWaitingCell ? ', đang chờ' : ''}"
                     aria-pressed={isCrossed}
                     onclick={() => handleCellClick(row, col)}
-                    class="tan-tan-num relative flex items-center justify-center
+                    class="tan-tan-num board-num relative flex items-center justify-center
                            aspect-[3/4] sm:aspect-[3/5]
-                           text-xl sm:text-2xl md:text-3xl
                            border border-slate-400/50 dark:border-slate-600/40
                            transition-all select-none cursor-pointer active:scale-90
                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-400
