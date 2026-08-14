@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Compat splash for API < 31. API 31+ uses windowSplashScreenBackground /
+  windowSplashScreenAnimatedIcon from AppTheme.NoActionBarLaunch instead.
+  Night variant lives in drawable-night/.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item android:gravity="center">
+        <bitmap
+            android:src="@mipmap/ic_launcher_foreground"
+            android:gravity="center" />
+    </item>
+</layer-list>
