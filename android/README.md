@@ -93,6 +93,41 @@ If you ever add a remote feature (analytics, sync, etc.), add this back to
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
+## Permissions
+
+| Permission | Why |
+|------------|-----|
+| `VIBRATE` | Haptic feedback when a player taps a cell. A WebView app must declare this itself for `navigator.vibrate()` to work — in a browser, Chrome holds the permission on the page's behalf, which is why the web build needs no equivalent. Normal permission: no runtime prompt, no Play data-safety impact. |
+
+No `INTERNET` — see above.
+
+## Android-specific behaviour
+
+These exist because the wrapper differs from a browser tab. All three are
+invisible when testing the web app on a desktop.
+
+**Screen stays awake during a round.** Auto-call advances on a timer with no
+touch input, so a full round can run 15 minutes untouched — long enough for the
+display to sleep and the WebView to throttle its interval. `MasterPanel` holds a
+Screen Wake Lock while a round is live (`web/src/lib/wake-lock.js`). Android
+drops the lock whenever the page hides, so the module re-acquires on
+`visibilitychange`. Player-only mode never takes a lock; those screens stay
+awake from the user's own taps.
+
+**Back closes overlays, then confirms exit.** Android 16 (targetSdk 36) no
+longer calls `onBackPressed()` nor dispatches `KEYCODE_BACK`, so
+`MainActivity` registers an `OnBackPressedCallback` instead. Each open overlay
+pushes one history entry (`web/src/lib/overlay-history.js`), so "the WebView can
+go back" means exactly "an overlay is open": back closes the bingo modal or the
+settings sheet, and only at the root does it ask before quitting. Browsers get
+the same overlay behaviour for free.
+
+**Board text size is app-controlled.** The player card is a fixed 9-column grid
+that clips at large system font scales, so `MainActivity` pins the WebView's
+`textZoom` to 100. Taking the system control away obliges replacing it: Settings
+→ **Cỡ chữ bảng** scales the board numbers instead. The two ship together — if
+one is ever removed, remove both.
+
 ## Running on BlueStacks / NoxPlayer / Android emulators
 
 The APK has no native libraries (`lib/` is empty), so it's architecture-
@@ -182,6 +217,34 @@ git push origin v1.0.0
 ## App ID
 
 `com.miti99.loto` — set in `capacitor.config.json` and `android/app/build.gradle`.
+
+## Icons and splash
+
+Launcher art is generated from [`web/static/icons/source.svg`](../web/static/icons/source.svg)
+— the same brand mark the web app and PWA use — not hand-maintained per
+density. Resources:
+
+| Resource | What |
+|----------|------|
+| `mipmap-*/ic_launcher.png`, `ic_launcher_round.png` | Legacy icons, API ≤ 25 |
+| `mipmap-*/ic_launcher_foreground.png` | Adaptive foreground; text sized to fit the 66% safe circle |
+| `mipmap-*/ic_launcher_monochrome.png` | Android 13+ themed icons |
+| `drawable/ic_launcher_background.xml` | Adaptive background, brand gradient as a vector |
+| `drawable/splash.xml`, `drawable-night/splash.xml` | Splash, API < 31 |
+| `values*/colors.xml` → `splash_background` | Splash colour, light + dark |
+
+On API 31+ the splash comes from `windowSplashScreenBackground` /
+`windowSplashScreenAnimatedIcon` in `AppTheme.NoActionBarLaunch` instead of the
+drawable.
+
+Regenerating requires Roboto Condensed on the rendering host; the font ships as
+`.woff` in `web/node_modules/@fontsource/roboto-condensed` and has to be
+converted to `.ttf` for `rsvg-convert` to see it.
+
+> **Note:** `source.svg` sets `font-size="240"`, which overflows the 512px
+> canvas — the PNGs under `web/static/icons/` are visibly clipped on both
+> sides. The Android art is rendered at a corrected size. The web PWA icons
+> still carry the original bug.
 
 ## Audio
 
