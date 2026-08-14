@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Matches the web app's dark --background (app.css). The app ships a
-         full dark theme; a light splash flashed white before the WebView
-         painted. -->
+    <!-- Matches the dark background custom property in web/src/app.css. The
+         app ships a full dark theme; a light splash flashed white before the
+         WebView painted. -->
     <color name="splash_background">#050813</color>
 </resources>

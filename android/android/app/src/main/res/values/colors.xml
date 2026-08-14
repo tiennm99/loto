@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Matches the web app's light --background (app.css). -->
+    <!-- Matches the light background custom property in web/src/app.css. -->
     <color name="splash_background">#FFFBEB</color>
 </resources>
