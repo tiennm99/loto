@@ -44,7 +44,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-web
-      - run: pnpm test
+      - run: npm test
         working-directory: web
 
   build:
@@ -68,7 +68,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-web
-      - run: pnpm ${{ matrix.script }}
+      - run: npm run ${{ matrix.script }}
         working-directory: web
       - uses: actions/upload-artifact@v7
         with:

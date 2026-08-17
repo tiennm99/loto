@@ -28,12 +28,12 @@ jobs:
 
       # ci.yml does not run on tags, so this is the only gate before signing.
       - name: Test web
-        run: pnpm test
+        run: npm test
         working-directory: web
 
       # Base "" — the APK loads the bundle from the domain root.
       - name: Build web
-        run: pnpm build
+        run: npm run build
         working-directory: web
 
       - uses: ./.github/actions/setup-android

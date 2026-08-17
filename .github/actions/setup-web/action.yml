@@ -1,24 +1,18 @@
 name: Set up web toolchain
 description: >
-  Installs pnpm and Node, then restores web/ dependencies from the lockfile.
+  Installs Node, then restores web/ dependencies from the lockfile.
   Node stays in lockstep with .github/actions/setup-android so the SvelteKit
   app is tested and bundled into the APK on the same runtime.
 
 runs:
   using: composite
   steps:
-    # Must precede setup-node: `cache: pnpm` needs the pnpm binary to
-    # resolve the store path.
-    - uses: pnpm/action-setup@v6
-      with:
-        package_json_file: web/package.json
-
     - uses: actions/setup-node@v7
       with:
         node-version: '24'
-        cache: pnpm
-        cache-dependency-path: web/pnpm-lock.yaml
+        cache: npm
+        cache-dependency-path: web/package-lock.json
 
-    - run: pnpm install --frozen-lockfile
+    - run: npm ci
       shell: bash
       working-directory: web

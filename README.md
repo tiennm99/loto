@@ -9,7 +9,7 @@ Live: [tiennm99.github.io/loto](https://tiennm99.github.io/loto)
 
 | Path | What it is |
 |------|------------|
-| [`web/`](web) | SvelteKit static app — the game itself. pnpm, Vitest, deployed to GitHub Pages and Firebase Hosting. |
+| [`web/`](web) | SvelteKit static app — the game itself. npm, Vitest, deployed to GitHub Pages and Firebase Hosting. |
 | [`android/`](android) | Capacitor wrapper that bundles `web/build` into an APK. npm + Gradle; the native project sits in `android/android/`. |
 
 `android/` builds `web/` as part of its own build, so a change under `web/`
@@ -20,7 +20,7 @@ pin between them — they ship from the same commit.
 
 ```bash
 # web
-cd web && pnpm install && pnpm dev
+cd web && npm install && npm run dev
 
 # android debug APK (builds web/ first)
 cd android && npm ci && npm run build && npm run assemble:debug
@@ -44,7 +44,7 @@ only the tag-driven release stands apart.
 consumer downloads the artifact rather than rebuilding it:
 
 ```
-test (pnpm test)
+test (npm test)
 └── build (root, base "")   ── deploy-firebase   push to main
     │                       ├─ preview-firebase  PR from this repo
     │                       └─ android-debug     unsigned APK artifact

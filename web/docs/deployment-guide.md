@@ -17,7 +17,7 @@ either profile without code changes.
 
 Canonical deploy. Wired via the `deploy-pages` job in
 `.github/workflows/ci.yml`: on push to `main`, the `build (gh)` job runs
-`pnpm build:gh` and uploads `build/`; `deploy-pages` downloads that artifact
+`npm run build:gh` and uploads `build/`; `deploy-pages` downloads that artifact
 and publishes it. Both are gated on the `test` job.
 
 One-time setup (already done; documented for restoration):
@@ -137,10 +137,10 @@ Generates:
 
 One workflow, `.github/workflows/ci.yml`, covers PRs and pushes to `main`:
 
-- **`test`** — `pnpm test`. Every other job depends on it, so a red suite
+- **`test`** — `npm test`. Every other job depends on it, so a red suite
   blocks all deploys.
 - **`build`** — a two-entry matrix producing the only two web builds in the
-  run: `pnpm build` (base `""`, artifact `web-build`) and `pnpm build:gh`
+  run: `npm run build` (base `""`, artifact `web-build`) and `npm run build:gh`
   (base `/loto`, artifact `web-build-gh`).
 - **`deploy-pages`** — canonical deploy; publishes `web-build-gh`.
 - **`deploy-firebase`** / **`preview-firebase`** — Firebase live channel on

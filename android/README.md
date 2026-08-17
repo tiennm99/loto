@@ -14,7 +14,7 @@ time. No network is required at runtime.
 
 ```
 ../web/
-  └── pnpm run build →  ../web/build/  (SvelteKit static output)
+  └── npm run build   →  ../web/build/  (SvelteKit static output)
                                 ↓
                          npx cap sync
                                 ↓
