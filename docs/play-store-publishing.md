@@ -180,6 +180,42 @@ Promotion beyond the internal track (closed → open → production) stays manua
 in the Play Console UI, or change `tracks: internal` in
 `android-release.yml` to automate further.
 
+## Closed testing → production access
+
+`com.miti99.loto` ships from a personal developer account created after
+13 Nov 2023, so Play gates production behind a closed test. Organization
+accounts and personal accounts older than that date are exempt.
+
+The gate, verbatim from Play Console Help: **at least 12 testers opted in
+to your closed test, continuously, for the 14 days preceding the
+application.**
+
+What counts:
+
+- "Opted in" means the tester accepted the invite *and* installed the
+  build under the matching Google account. Invited-but-never-installed
+  does not count.
+- Real devices and genuine accounts only. Emulators and duplicate
+  accounts do not count.
+- The 14 days must be unbroken. A tester who opts out mid-window stops
+  counting, and re-opting in restarts their 14-day clock. Dropping to 11
+  resets the window — 12 is the floor, not a safe target. Recruit spares.
+- Since April 2026 Play also rejects applications for weak engagement.
+  The form asks whether testers exercised all features and how their
+  usage compared to expected production behaviour, plus a summary of
+  their feedback. Collect that feedback as the test runs; it is painful
+  to reconstruct afterwards.
+
+Review of the production application typically takes up to 7 days.
+
+**The CI track does not feed the closed test.** `android-release.yml`
+uploads to `tracks: internal`. Internal testing is a separate track and
+does **not** count toward the 12-tester requirement — only a closed test
+does. So today a tagged release reaches the internal track, and someone
+must promote that build to the closed track in the Play Console for
+testers to receive it. Either promote manually each release, or switch
+`tracks:` in the workflow to the closed track's name.
+
 ## Troubleshooting
 
 - **Play upload fails with duplicate versionCode** — `versionCode` in
