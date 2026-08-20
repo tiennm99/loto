@@ -2,11 +2,12 @@
 
 How to configure GitHub secrets so pushing a `v*.*.*` tag builds a signed
 AAB/APK, attaches both to a GitHub Release, and uploads the AAB to the Play
-Console **Internal track** automatically. Driven by
+Console **closed testing track** automatically. Driven by
 [`.github/workflows/android-release.yml`](../.github/workflows/android-release.yml).
 
-Verified working: tag `v0.0.2` (2026-08-05) built, released, and uploaded to
-the internal track end-to-end.
+Verified working: tag `v0.0.2` (2026-08-05) built, released, and uploaded
+end-to-end. Uploads targeted the internal track until v0.1.1; from v0.1.2 the
+workflow publishes to `alpha`, the closed-testing track.
 
 ## Prerequisites (one-time, manual)
 
@@ -118,7 +119,7 @@ users):
    - **View app information and download bulk reports (read-only)** — the
      API needs it to read the app's edit state
    - **Release apps to testing tracks** — enough for the workflow's
-     `tracks: internal` upload
+     `tracks: alpha` upload
    Leave everything else (production releases, store presence, financial
    data, user management) unchecked. If you later automate production rollout
    (`tracks: production`), come back and add **Release to production, exclude
@@ -176,9 +177,8 @@ work before Play setup is finished.
    gh release view v0.0.3 -R tiennm99/loto
    ```
 
-Promotion beyond the internal track (closed → open → production) stays manual
-in the Play Console UI, or change `tracks: internal` in
-`android-release.yml` to automate further.
+Promotion beyond closed testing (open → production) stays manual in the Play
+Console UI, or change `tracks:` in `android-release.yml` to automate further.
 
 ## Closed testing → production access
 
@@ -208,13 +208,17 @@ What counts:
 
 Review of the production application typically takes up to 7 days.
 
-**The CI track does not feed the closed test.** `android-release.yml`
-uploads to `tracks: internal`. Internal testing is a separate track and
-does **not** count toward the 12-tester requirement — only a closed test
-does. So today a tagged release reaches the internal track, and someone
-must promote that build to the closed track in the Play Console for
-testers to receive it. Either promote manually each release, or switch
-`tracks:` in the workflow to the closed track's name.
+**CI publishes straight to the closed test.** `android-release.yml`
+uploads to `tracks: alpha`, so every tagged release reaches the testers
+whose opt-ins count toward the 14-day window. This matters because
+internal testing is a separate track that does **not** count toward the
+requirement — only a closed test does. Builds tagged before v0.1.2 went
+to the internal track and need promoting by hand if they are wanted in
+the closed test.
+
+An unknown track id fails the upload step with `Track(s) "..." could not
+be found. Available tracks are: [...]` rather than publishing somewhere
+unintended, so a typo here is loud, not silent.
 
 ## Troubleshooting
 

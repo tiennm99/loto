@@ -72,11 +72,15 @@ and which features they exercised while the test runs — the production
 application asks for both, and Play has been rejecting thin engagement
 since April 2026.
 
-Blocker to resolve first: CI uploads to the **internal** track, which does
-not count toward the requirement. Builds must reach the **closed** track —
-promote each release in the Console, or repoint `tracks:` in
-`.github/workflows/android-release.yml`. See
+Delivery is wired: `android-release.yml` uploads to `tracks: alpha`, the
+closed track, as of 2026-08-20. Tagged releases now reach the testers
+directly. v0.1.1 and earlier went to the internal track — promote them by
+hand if any is wanted in the closed test. See
 `docs/play-store-publishing.md` → "Closed testing → production access".
+
+- [ ] Cut v0.1.2 to confirm the first upload actually lands on `alpha`.
+      Untested until a tag runs; the track id is unverified against the
+      Console. A wrong id fails the step and prints the valid tracks.
 
 ### Clipped web PWA icons
 

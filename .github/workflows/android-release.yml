@@ -66,8 +66,11 @@ jobs:
       # Auto-publish to Google Play (gated on the service-account secret).
       # Skips silently if PLAY_SERVICE_ACCOUNT_JSON is not configured, so
       # tagging a release before Play setup still produces a GH Release.
-      # Default track is "internal" — change to alpha/beta/production
-      # once you trust the pipeline.
+      # Uploads to "alpha", the closed-testing track. Internal testing is a
+      # separate track and does not count toward the 12-tester requirement
+      # for production access, so releases have to land here to reach the
+      # testers. An unknown track name fails the step with the list of
+      # valid tracks rather than publishing somewhere unintended.
       - name: Check Play Store config
         id: play
         env:
@@ -80,14 +83,14 @@ jobs:
             echo "::notice::PLAY_SERVICE_ACCOUNT_JSON not set; skipping Play Store upload."
           fi
 
-      - name: Upload to Google Play (internal track)
+      - name: Upload to Google Play (closed testing track)
         if: steps.play.outputs.configured == 'true'
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.miti99.loto
           releaseFiles: android/android/app/build/outputs/bundle/release/*.aab
-          tracks: internal
+          tracks: alpha
           status: completed
           # Bumps versionCode automatically? No — must be incremented
           # manually in android/android/app/build.gradle before tagging.

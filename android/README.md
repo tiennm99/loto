@@ -196,9 +196,10 @@ full walkthrough: service-account creation, granting Play Console permissions,
 setting the GitHub secrets (bash + PowerShell commands), cutting a release,
 and troubleshooting. Short version: once `PLAY_SERVICE_ACCOUNT_JSON` is set,
 every `v*.*.*` tag builds a signed AAB + APK, attaches both to a GitHub
-Release, and uploads the AAB to the Play Console **Internal track**. Promote
-internal → closed → open → production via the Play Console UI (or change
-`tracks: internal` in `android-release.yml` to automate further).
+Release, and uploads the AAB to the Play Console **closed testing track**
+(`alpha`), which is the one whose testers count toward production access.
+Promote closed → open → production via the Play Console UI (or change
+`tracks:` in `android-release.yml` to automate further).
 
 **Important:** every release must increment `versionCode` in `android/app/build.gradle` before tagging — Play Console rejects duplicate versionCodes.
 
