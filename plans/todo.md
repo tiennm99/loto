@@ -78,9 +78,9 @@ directly. v0.1.1 and earlier went to the internal track — promote them by
 hand if any is wanted in the closed test. See
 `docs/play-store-publishing.md` → "Closed testing → production access".
 
-- [ ] Cut v0.1.2 to confirm the first upload actually lands on `alpha`.
-      Untested until a tag runs; the track id is unverified against the
-      Console. A wrong id fails the step and prints the valid tracks.
+- [x] Track id confirmed. v0.1.2 (2026-08-20) logged
+      `Validating tracks: 'alpha'` and committed the edit, so `alpha`
+      exists on `com.miti99.loto` and the AAB reached it.
 
 ### Clipped web PWA icons
 
