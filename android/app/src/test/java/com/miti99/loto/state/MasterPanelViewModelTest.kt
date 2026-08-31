@@ -93,7 +93,7 @@ class MasterPanelViewModelTest {
     }
 
     @Test
-    fun `auto-call stops when the deck is exhausted`() = runTest(dispatcher) {
+    fun `auto-call stops immediately when a draw exhausts the deck (L5)`() = runTest(dispatcher) {
         val env = env(autoSettings)
         env.repository.saveMasterState(
             MasterRoundState(called = (1..89).toList(), remaining = listOf(90)),
@@ -104,9 +104,31 @@ class MasterPanelViewModelTest {
 
         advanceTimeBy(2001)
         assertEquals(90, env.masterStore.state.value.called.size)
+        // L5: the draw that exhausts the deck must flip autoRunning off
+        // right away (inside drawNext()) rather than waiting for a next
+        // tick that never comes once the "Dừng" button is hidden by the
+        // UI's remaining-empty guard — and toggleAuto() can no longer
+        // reach it either, since it early-returns while remaining is
+        // empty.
+        assertFalse(env.viewModel.autoRunning.value)
+        // Stays false — no spurious re-arm on a later tick.
         advanceTimeBy(2001)
         assertFalse(env.viewModel.autoRunning.value)
     }
+
+    @Test
+    fun `manual drawNext exhausting the deck leaves autoRunning false (L5)`() =
+        runTest(dispatcher) {
+            val env = env(autoSettings.copy(autoCallEnabled = false))
+            env.repository.saveMasterState(
+                MasterRoundState(called = (1..89).toList(), remaining = listOf(90)),
+            )
+            env.masterStore.restore()
+            env.viewModel.drawNext() // manual "Xổ số" draw, no auto-call involved
+            runCurrent()
+            assertEquals(90, env.masterStore.state.value.called.size)
+            assertFalse(env.viewModel.autoRunning.value)
+        }
 
     @Test
     fun `disabling the auto setting mid-run stops the run`() = runTest(dispatcher) {

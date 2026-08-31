@@ -1,9 +1,12 @@
 package com.miti99.loto.ui.player
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -19,76 +22,98 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.miti99.loto.R
 import com.miti99.loto.ui.theme.LotoTheme
 
 /**
  * The "Kinh!" (row win) celebration modal, ported from PlayerBoard.svelte.
  * Back press and backdrop tap dismiss it (Dialog's onDismissRequest).
+ *
+ * Tier-2 confetti is composed *inside* this Dialog's own window
+ * (`usePlatformDefaultWidth = false` so the window spans the full screen)
+ * rather than as a sibling in the caller's scroll column: a sibling both
+ * degrades to wrap size under an unbounded-height `verticalScroll` and
+ * renders behind the dialog's dim scrim, making it invisible (H2).
  */
 @Composable
 fun KinhDialog(
     congratsRow: Int,
+    showConfetti: Boolean,
     onDismiss: () -> Unit,
 ) {
     val palette = LotoTheme.palette
-    Dialog(onDismissRequest = onDismiss) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(palette.dialogBg)
-                .padding(32.dp),
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(text = "🎉", fontSize = 48.sp)
-            Text(
-                text = stringResource(R.string.kinh_title),
-                color = palette.kinhTitle,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-            Text(
-                text = stringResource(R.string.kinh_row_prefix),
-                color = palette.dialogText,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-            Text(
-                text = congratsRow.toString(),
-                color = palette.kinhRow,
-                fontSize = 56.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(vertical = 4.dp),
-            )
-            Text(
-                text = stringResource(R.string.kinh_row_suffix),
-                color = palette.dialogText,
-                fontSize = 16.sp,
-            )
-            Text(
-                text = stringResource(R.string.kinh_shout),
-                color = palette.subtitle,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 6.dp),
-            )
-            Button(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = palette.buttonPrimary,
-                    contentColor = Color.White,
-                ),
-                modifier = Modifier.padding(top = 24.dp),
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .widthIn(max = 360.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(palette.dialogBg)
+                    .padding(32.dp),
             ) {
+                Text(text = "🎉", fontSize = 48.sp)
                 Text(
-                    text = stringResource(R.string.kinh_dismiss),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    text = stringResource(R.string.kinh_title),
+                    color = palette.kinhTitle,
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.padding(top = 8.dp),
                 )
+                Text(
+                    text = stringResource(R.string.kinh_row_prefix),
+                    color = palette.dialogText,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                Text(
+                    text = congratsRow.toString(),
+                    color = palette.kinhRow,
+                    fontSize = 56.sp,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                )
+                Text(
+                    text = stringResource(R.string.kinh_row_suffix),
+                    color = palette.dialogText,
+                    fontSize = 16.sp,
+                )
+                Text(
+                    text = stringResource(R.string.kinh_shout),
+                    color = palette.subtitle,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = palette.buttonPrimary,
+                        contentColor = Color.White,
+                    ),
+                    modifier = Modifier.padding(top = 24.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.kinh_dismiss),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
+                }
+            }
+            // Drawn after (on top of) the card, still within this window and
+            // above its scrim.
+            if (showConfetti) {
+                ConfettiOverlay()
             }
         }
     }

@@ -28,6 +28,9 @@ class MasterPanelViewModel(
     /** Master round data (called history + remaining deck). */
     val masterState: StateFlow<MasterRoundState> = masterStore.state
 
+    /** True until the startup restore has resolved; gates "Ván mới" (H1). */
+    val loading: StateFlow<Boolean> = masterStore.loading
+
     private val _autoRunning = MutableStateFlow(false)
     val autoRunning: StateFlow<Boolean> = _autoRunning
 
@@ -85,6 +88,18 @@ class MasterPanelViewModel(
     fun drawNext() {
         val next = masterStore.drawNext() ?: return
         _tickKey.value += 1
+        // L5: flip autoRunning off the instant the draw that empties the
+        // deck lands, not on the *next* tick. Previously only the ticker
+        // loop's own top-of-loop check caught this, one tick late — and
+        // once the button hiding on remaining.isNotEmpty() kicks in,
+        // toggleAuto() can no longer reach it either (it early-returns when
+        // remaining is empty), so the stale `true` was unrecoverable until
+        // that late tick. Also correct for a manual "Xổ số" draw (not from
+        // the auto ticker) that happens to be the one that exhausts the
+        // deck while auto-call was separately left on.
+        if (masterStore.state.value.remaining.isEmpty()) {
+            _autoRunning.value = false
+        }
         if (settings.value.voiceEnabledMaster) {
             voicePlayer.playNumber(next)
         }
@@ -103,7 +118,17 @@ class MasterPanelViewModel(
     }
 
     override fun onCleared() {
-        voicePlayer.cancel()
+        // L2: voicePlayer is an app-scoped singleton also cancelled by
+        // PlayerBoardViewModel.onCleared(). Both VMs are activity-scoped
+        // (LotoViewModelFactory), so onCleared() only fires together, on a
+        // real finish — MainActivity.onDestroy() already stops/releases the
+        // player unconditionally on that same isFinishing path (L1). A
+        // per-VM cancel() here was therefore redundant *and* fragile: if
+        // either VM's scope ever changed to clear independently of the
+        // other, one screen tearing down could cut audio the other screen
+        // is still using. Not cancelling here relies solely on
+        // MainActivity's guarded release() to stop playback on exit.
+        super.onCleared()
     }
 }
 

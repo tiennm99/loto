@@ -47,6 +47,21 @@ class MainActivity : ComponentActivity() {
         masterViewModel.setForeground(false)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // L1: release the app-scoped ExoPlayer only on an explicit, final
+        // exit (the "Thoát" confirm below calls finish()), not on a
+        // recreate (rotation/config change also calls onDestroy without
+        // isFinishing). finish() does not guarantee the process dies —
+        // Android can relaunch into the same cached process/Application
+        // instance — so LotoApplication.releaseVoicePlayer() (H1) drops the
+        // reference rather than leaving a terminal `by lazy` player behind;
+        // the next voicePlayer access rebuilds a working one.
+        if (isFinishing) {
+            (application as LotoApplication).releaseVoicePlayer()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)

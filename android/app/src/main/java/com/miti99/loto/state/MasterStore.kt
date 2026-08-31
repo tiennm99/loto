@@ -21,15 +21,29 @@ class MasterStore(
     private val _state = MutableStateFlow(MasterRoundState(emptyList(), emptyList()))
     val state: StateFlow<MasterRoundState> = _state
 
+    private val _loading = MutableStateFlow(true)
+    /** True until [restore] has resolved once at startup; drives button gating. */
+    val loading: StateFlow<Boolean> = _loading
+
+    // Set by startNewGame()/drawNext() so a still-in-flight restore() never
+    // clobbers a round the user already started while the DataStore read was
+    // pending (H1: restore races "Ván mới" the same way it races the
+    // player's "Tạo bảng mới").
+    private var mutatedBeforeRestore = false
+
     /** Restore the persisted round, if any. Call once on startup. */
     suspend fun restore() {
-        val saved = repository.loadMasterState() ?: return
-        deck.restore(saved.called, saved.remaining)
-        _state.value = saved
+        val saved = repository.loadMasterState()
+        if (saved != null && !mutatedBeforeRestore) {
+            deck.restore(saved.called, saved.remaining)
+            _state.value = saved
+        }
+        _loading.value = false
     }
 
     /** Start a fresh round: empty called, full shuffled remaining. */
     fun startNewGame() {
+        mutatedBeforeRestore = true
         deck.startNewGame()
         publishAndSave()
     }
@@ -40,6 +54,7 @@ class MasterStore(
      */
     fun drawNext(): Int? {
         val next = deck.drawNext() ?: return null
+        mutatedBeforeRestore = true
         publishAndSave()
         return next
     }

@@ -17,12 +17,16 @@ class FakeVoicePlayer : VoicePlayerApi {
     var released = false
         private set
 
+    var cancelCount = 0
+        private set
+
     override fun speak(clipNames: List<String>) {
         utterances.add(clipNames)
         active = clipNames
     }
 
     override fun cancel() {
+        cancelCount++
         active = null
     }
 

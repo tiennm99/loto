@@ -19,8 +19,6 @@ android {
         versionCode = 7
         versionName = "0.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // The app ships Vietnamese-only copy; trim library translations.
-        resourceConfigurations += listOf("vi")
     }
 
     sourceSets {
@@ -33,6 +31,10 @@ android {
     }
 
     androidResources {
+        // The app ships Vietnamese-only copy; trim library translations.
+        // `resourceConfigurations` (defaultConfig) is deprecated for locales
+        // in AGP 8.13 in favor of this (L11).
+        localeFilters += listOf("vi")
         // Keep only the audio/ subtree from the mounted web/static dir.
         // Pattern extends AAPT's default ignore list (hidden files, VCS dirs).
         ignoreAssetsPattern =
@@ -71,6 +73,17 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    testOptions {
+        unitTests {
+            // L4 added android.util.Log calls in the persistence-failure
+            // fallback paths; the stock android.jar stub throws on any
+            // unmocked call, which would crash those JVM unit tests without
+            // pulling in Robolectric. Default-value stubbing is enough here
+            // since no test asserts on the logged message itself.
+            isReturnDefaultValues = true
+        }
     }
 }
 

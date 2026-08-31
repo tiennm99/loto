@@ -1,5 +1,6 @@
 package com.miti99.loto.settings
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
@@ -13,6 +14,7 @@ import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * DataStore-backed settings store. Every field is validated independently on
@@ -44,11 +46,35 @@ class SettingsRepository(
     /** Defaults with the manifest-derived voice filled in. */
     val defaults: Settings = Settings(voice = defaultVoiceId)
 
-    // IO failures fall back to defaults instead of failing the app-scoped
-    // stateIn collector (the web swallows every localStorage read error).
+    // Every read failure — IOException (full disk, revoked storage
+    // permission) or anything else — falls back to defaults instead of
+    // failing the app-scoped stateIn collector (the web swallows every
+    // localStorage read error). M4: an earlier version only swallowed
+    // IOException and re-threw everything else, which cancelled every
+    // collector of this flow forever on a non-IO failure — "settings never
+    // save" (acceptable, L4) had regressed into "settings never load and
+    // auto-cross is dead for the rest of the process" (not acceptable). A
+    // broken settings store must degrade to defaults, not to a dead board.
     val settingsFlow: Flow<Settings> = dataStore.data
-        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .catch {
+            Log.w(TAG, "Failed to read settings; falling back to defaults", it)
+            emit(emptyPreferences())
+        }
         .map { prefs -> toSettings(prefs) }
+
+    /**
+     * True once [settingsFlow] has produced its first value — either the
+     * real persisted read or the [catch] fallback after a read failure.
+     * False only for the brief startup window before that read lands (M4
+     * residual): [LotoApplication]'s `settingsOrNull` is
+     * `stateIn(..., SharingStarted.Eagerly, null)`, so its *initial* value
+     * cannot be confused with a real `mode = PLAYER` — a consumer that
+     * needs to tell "not loaded yet" apart from "loaded and actually
+     * PLAYER" (e.g. gating a master-history replay on the real mode) reads
+     * that instead. This property is kept for callers that only need a
+     * plain boolean signal (e.g. tests) rather than the settings snapshot.
+     */
+    val loaded: Flow<Boolean> = settingsFlow.map { true }.onStart { emit(false) }
 
     private fun toSettings(prefs: Preferences): Settings = Settings(
         emptyCellColor = prefs[Keys.EMPTY_CELL_COLOR]
@@ -108,7 +134,12 @@ class SettingsRepository(
     private suspend fun write(block: (MutablePreferences) -> Unit) {
         try {
             dataStore.edit(block)
-        } catch (_: IOException) {
+        } catch (e: IOException) {
+            Log.w(TAG, "Failed to persist settings; change was not saved", e)
         }
+    }
+
+    private companion object {
+        const val TAG = "SettingsRepository"
     }
 }

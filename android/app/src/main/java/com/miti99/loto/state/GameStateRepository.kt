@@ -1,5 +1,6 @@
 package com.miti99.loto.state
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
@@ -66,6 +67,12 @@ class GameStateRepository(private val dataStore: DataStore<Preferences>) {
         val prefs = readPrefs()
         val called = parseNumberList(prefs[Keys.MASTER_CALLED]) ?: return null
         val remaining = parseNumberList(prefs[Keys.MASTER_REMAINING]) ?: return null
+        // L3: called and remaining must exactly partition the 90-number
+        // deck — disjoint and covering everything. Without this, a
+        // partially-written/tampered file could restore an overlapping or
+        // short deck, which PlayerAutoCross would then cross twice (or
+        // never) on different cells.
+        if (!isCompleteDeckPartition(called, remaining)) return null
         return MasterRoundState(called, remaining)
     }
 
@@ -78,14 +85,18 @@ class GameStateRepository(private val dataStore: DataStore<Preferences>) {
 
     private suspend fun readPrefs(): Preferences = try {
         dataStore.data.first()
-    } catch (_: IOException) {
+    } catch (e: IOException) {
+        // L4: was silently swallowed — a persistently failing store used to
+        // degrade to "round never restores" with zero signal for device QA.
+        Log.w(TAG, "Failed to read game state; falling back to empty state", e)
         emptyPreferences()
     }
 
     private suspend fun write(block: (MutablePreferences) -> Unit) {
         try {
             dataStore.edit(block)
-        } catch (_: IOException) {
+        } catch (e: IOException) {
+            Log.w(TAG, "Failed to persist game state; change was not saved", e)
         }
     }
 
@@ -94,6 +105,10 @@ class GameStateRepository(private val dataStore: DataStore<Preferences>) {
         if (raw.isNullOrEmpty()) return null
         val nums = raw.split(",").map { it.toIntOrNull() ?: return null }
         if (nums.size != cells || nums.any { it !in 0..90 }) return null
+        // L3: a real card never repeats a number; a tampered/corrupt file
+        // could otherwise restore duplicate cells.
+        val nonZero = nums.filter { it != 0 }
+        if (nonZero.toSet().size != nonZero.size) return null
         return nums.chunked(CardGenerator.NUM_COLS)
     }
 
@@ -103,12 +118,37 @@ class GameStateRepository(private val dataStore: DataStore<Preferences>) {
         return raw.map { it == '1' }.chunked(CardGenerator.NUM_COLS)
     }
 
-    /** Comma-separated ints, each in 1..90. Empty string = empty list. */
+    /** Comma-separated ints, each in 1..90, no duplicates. Empty string = empty list. */
     private fun parseNumberList(raw: String?): List<Int>? {
         if (raw == null) return null
         if (raw.isEmpty()) return emptyList()
         val nums = raw.split(",").map { it.toIntOrNull() ?: return null }
         if (nums.any { it !in 1..90 }) return null
+        // L3: reject duplicates rather than silently accepting them — a
+        // repeated `called`/`remaining` entry would double-cross a cell.
+        if (nums.toSet().size != nums.size) return null
         return nums
+    }
+
+    /**
+     * L3: [called] and [remaining] must be disjoint and together cover
+     * exactly 1..90 (every number in range appears exactly once across the
+     * two lists). [parseNumberList] already rejects duplicates and
+     * out-of-range values within each list individually, so checking the
+     * combined size against 90 is sufficient to also catch an overlap
+     * between the two lists.
+     */
+    private fun isCompleteDeckPartition(called: List<Int>, remaining: List<Int>): Boolean {
+        val total = called.size + remaining.size
+        if (total != DECK_SIZE) return false
+        val combined = HashSet<Int>(total)
+        combined.addAll(called)
+        combined.addAll(remaining)
+        return combined.size == total
+    }
+
+    private companion object {
+        const val DECK_SIZE = 90
+        const val TAG = "GameStateRepository"
     }
 }

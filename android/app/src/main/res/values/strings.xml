@@ -11,9 +11,10 @@
     <string name="player_empty_hint_prefix">Nhấn</string>
     <string name="player_empty_hint_suffix">để bắt đầu chơi</string>
     <string name="player_empty_wish">🎫 Chúc cả nhà một ván vui vẻ</string>
-    <string name="player_board_label">Bảng lô tô</string>
     <string name="toast_waiting">Chờ %1$d</string>
-    <string name="toast_dismiss">Đóng thông báo</string>
+    <string name="player_cell_number">Số %1$d</string>
+    <string name="player_cell_crossed_suffix">, đã đánh dấu</string>
+    <string name="player_cell_waiting_suffix">, đang chờ</string>
 
     <!-- Section bands (Tân Tân physical card) -->
     <string name="section_label_1">Lô tô</string>
@@ -26,7 +27,6 @@
     <string name="kinh_row_suffix">đã đầy đủ!</string>
     <string name="kinh_shout">Hãy hô to "Kinh!" 🎶</string>
     <string name="kinh_dismiss">Tuyệt vời! 🥳</string>
-    <string name="kinh_close">Đóng</string>
 
     <!-- Master panel -->
     <string name="master_heading">Quản trò</string>
@@ -39,7 +39,6 @@
     <string name="master_last_called">Số vừa xổ</string>
     <string name="master_called_count">Đã xổ: %1$d/90 · Còn lại: %2$d</string>
     <string name="master_call_order">Thứ tự đã xổ:</string>
-    <string name="master_board_label">Bảng theo dõi số đã xổ</string>
     <string name="master_countdown">Đếm ngược: %1$d giây</string>
     <string name="master_empty_badge">Chế độ Quản trò</string>
     <string name="master_empty_hint_prefix">Nhấn</string>

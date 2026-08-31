@@ -71,6 +71,11 @@ fun PlayerBoardScreen(
                 onClick = {
                     if (state.grid != null) confirmGenerate = true else viewModel.generate()
                 },
+                // Gated on loading (H1): while the startup restore is still
+                // resolving, `grid` reads null regardless of what is
+                // actually persisted, so an early tap would call generate()
+                // with no confirmation and race the restore.
+                enabled = !state.loading,
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = palette.buttonPrimary,
@@ -127,13 +132,13 @@ fun PlayerBoardScreen(
                     },
                 )
                 // Chờ toast — centered overlay chip, tap to dismiss.
-                state.toast?.let { message ->
+                state.waitingNumber?.let { waitNum ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.matchParentSize(),
                     ) {
                         Text(
-                            text = message,
+                            text = stringResource(R.string.toast_waiting, waitNum),
                             color = Color.White,
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Black,
@@ -152,10 +157,16 @@ fun PlayerBoardScreen(
     }
 
     if (state.showCongrats) {
-        KinhDialog(congratsRow = state.congratsRow, onDismiss = { viewModel.dismissCongrats() })
-        if (state.celebrationTier >= 2 && !reducedMotion) {
-            ConfettiOverlay()
-        }
+        // H2: confetti must render inside the same window as the Kinh
+        // dialog. As a sibling in this screen's scrolling column,
+        // ConfettiOverlay's fillMaxSize degrades to wrap (unbounded max
+        // height under verticalScroll), and it would draw behind the
+        // dialog's dim scrim regardless. KinhDialog hosts it internally.
+        KinhDialog(
+            congratsRow = state.congratsRow,
+            showConfetti = state.celebrationTier >= 2 && !reducedMotion,
+            onDismiss = { viewModel.dismissCongrats() },
+        )
     }
 
     if (confirmGenerate) {

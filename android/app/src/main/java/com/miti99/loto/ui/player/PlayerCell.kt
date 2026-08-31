@@ -20,12 +20,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.miti99.loto.R
 import com.miti99.loto.ui.theme.CondensedNumberFont
 import com.miti99.loto.ui.theme.LotoTheme
 
@@ -72,6 +74,12 @@ fun PlayerCell(
         else -> palette.cellText
     }
     val crossColor = if (rowComplete) palette.crossWinStroke else palette.crossStroke
+
+    // M3/L7-adjacent cleanup: cell accessibility copy lives in strings.xml
+    // rather than hardcoded Vietnamese, matching the toast fix.
+    val cellNumberDesc = stringResource(R.string.player_cell_number, num)
+    val crossedSuffixDesc = stringResource(R.string.player_cell_crossed_suffix)
+    val waitingSuffixDesc = stringResource(R.string.player_cell_waiting_suffix)
 
     // Waiting pulse — 1.6s breathing ring, static at 0.7 alpha under
     // reduced motion (mirrors the web's cell-waiting keyframes).
@@ -122,9 +130,9 @@ fun PlayerCell(
             .clickable(onClick = onClick)
             .semantics {
                 stateDescription = buildString {
-                    append("Số $num")
-                    if (isCrossed) append(", đã đánh dấu")
-                    if (isWaiting) append(", đang chờ")
+                    append(cellNumberDesc)
+                    if (isCrossed) append(crossedSuffixDesc)
+                    if (isWaiting) append(waitingSuffixDesc)
                 }
             },
     ) {

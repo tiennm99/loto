@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.miti99.loto.R
 import com.miti99.loto.ui.theme.LotoTheme
 import com.miti99.loto.ui.toComposeColor
+import kotlin.math.roundToInt
 
 /** Office "Standard Colors" palette (10 swatches), same as the web. Default is Purple. */
 private val PRESETS = listOf(
@@ -56,9 +57,11 @@ fun EmptyCellColorPicker(
     var draft by remember { mutableStateOf<String?>(null) }
     val shown = draft ?: value
     val color = shown.toComposeColor()
-    val r = (color.red * 255).toInt()
-    val g = (color.green * 255).toInt()
-    val b = (color.blue * 255).toInt()
+    // roundToInt, not toInt: truncation drifted the untouched channels down
+    // on every drag since `draft` is rebuilt from these derived values (M1).
+    val r = (color.red * 255).roundToInt()
+    val g = (color.green * 255).roundToInt()
+    val b = (color.blue * 255).roundToInt()
     val commitDraft: () -> Unit = {
         draft?.let(onPick)
         draft = null

@@ -60,6 +60,7 @@ fun MasterPanelScreen(
 ) {
     val palette = LotoTheme.palette
     val master by viewModel.masterState.collectAsState()
+    val loading by viewModel.loading.collectAsState()
     val autoRunning by viewModel.autoRunning.collectAsState()
     val tickKey by viewModel.tickKey.collectAsState()
     val reducedMotion = rememberReducedMotion()
@@ -69,7 +70,10 @@ fun MasterPanelScreen(
     val lastCalled = master.called.lastOrNull()
     val heroRequester = remember { BringIntoViewRequester() }
 
-    // Keep the hero visible on each draw (the web scrolls it into view).
+    // Keep the hero visible on each draw, including in `both` mode: web
+    // parity confirmed against MasterPanel.svelte's `handleDrawNext`, which
+    // sets `scrollOnNextDraw = true` unconditionally for both the manual
+    // draw button and the auto-call interval, regardless of `settings.mode`.
     LaunchedEffect(tickKey) {
         if (tickKey > 0 && lastCalled != null) heroRequester.bringIntoView()
     }
@@ -83,6 +87,11 @@ fun MasterPanelScreen(
             PillButton(
                 text = stringResource(R.string.master_new_game),
                 container = palette.masterNewGame,
+                // Gated on loading (H1): while the startup restore is still
+                // resolving, `hasGame` reads false regardless of what is
+                // actually persisted, so an early tap would call newGame()
+                // with no confirmation and race the restore.
+                enabled = !loading,
                 onClick = { if (hasGame) confirmNewGame = true else viewModel.newGame() },
             )
             if (hasGame && master.remaining.isNotEmpty()) {
@@ -234,9 +243,15 @@ fun MasterPanelScreen(
 }
 
 @Composable
-private fun PillButton(text: String, container: Color, onClick: () -> Unit) {
+private fun PillButton(
+    text: String,
+    container: Color,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = Color.White),
     ) {

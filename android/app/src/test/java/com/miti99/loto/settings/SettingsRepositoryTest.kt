@@ -7,7 +7,14 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.miti99.loto.InMemoryDataStore
+import com.miti99.loto.SlowDataStore
+import com.miti99.loto.ThrowingDataStore
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -18,6 +25,7 @@ import org.junit.Test
  * counterpart: DataStore keys are typed, so a wrong-typed value is
  * unrepresentable — range/allowlist violations are what remain.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class SettingsRepositoryTest {
 
     private val voiceIds = setOf("hoai-my", "nam-minh")
@@ -185,5 +193,61 @@ class SettingsRepositoryTest {
         assertEquals("#7030A0", s.emptyCellColor)
         assertEquals(ThemeSetting.AUTO, s.theme)
         assertEquals(AppMode.PLAYER, s.mode)
+    }
+
+    @Test
+    fun `IO failure on read falls back to defaults instead of throwing (L4)`() = runTest {
+        val repository = repo(ThrowingDataStore())
+        val s = repository.settingsFlow.first()
+        assertEquals("#7030A0", s.emptyCellColor)
+        assertEquals(ThemeSetting.AUTO, s.theme)
+        assertEquals(AppMode.PLAYER, s.mode)
+    }
+
+    @Test
+    fun `IO failure on write is swallowed instead of throwing (L4)`() = runTest {
+        val repository = repo(ThrowingDataStore())
+        // Must not throw even though every underlying write fails.
+        repository.setEmptyCellColor("#112233")
+    }
+
+    @Test
+    fun `non-IO failure on read still falls back to defaults instead of cancelling the flow (M4)`() =
+        runTest {
+            // Before M4's fix, only IOException was caught here; anything
+            // else re-threw and cancelled every collector of settingsFlow
+            // forever, leaving `loaded` stuck at false and auto-cross dead
+            // for the rest of the process.
+            val repository = repo(ThrowingDataStore(RuntimeException("boom")))
+            val s = repository.settingsFlow.first()
+            assertEquals("#7030A0", s.emptyCellColor)
+            assertEquals(AppMode.PLAYER, s.mode)
+        }
+
+    @Test
+    fun `loaded still flips true after a non-IO read failure (M4)`() = runTest {
+        val repository = repo(ThrowingDataStore(RuntimeException("boom")))
+        val states = mutableListOf<Boolean>()
+        backgroundScope.launch { repository.loaded.toList(states) }
+        runCurrent()
+        assertEquals(listOf(false, true), states)
+    }
+
+    @Test
+    fun `loaded stays false until the first DataStore read resolves`() = runTest {
+        // M4 residual: consumers (PlayerBoardViewModel) need to tell "the
+        // read hasn't landed yet" apart from "it landed and is really
+        // PLAYER" — SlowDataStore reproduces the real async gap that
+        // InMemoryDataStore alone resolves synchronously.
+        val gate = CompletableDeferred<Unit>()
+        val repository = repo(SlowDataStore(InMemoryDataStore(), gate))
+        val states = mutableListOf<Boolean>()
+        backgroundScope.launch { repository.loaded.toList(states) }
+        runCurrent()
+        assertEquals(listOf(false), states)
+
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(listOf(false, true), states)
     }
 }

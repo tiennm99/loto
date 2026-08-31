@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pre-API 31 counterpart of data_extraction_rules.xml (L9): android:fullBackupContent
+    is what the platform reads on API 24-30, where android:dataExtractionRules
+    does not apply. Same exclusions, same rationale — see that file's comment.
+-->
+<full-backup-content>
+    <exclude domain="file" path="datastore/loto_game_state.preferences_pb" />
+    <exclude domain="file" path="datastore/loto_game_state.preferences_pb.tmp" />
+</full-backup-content>

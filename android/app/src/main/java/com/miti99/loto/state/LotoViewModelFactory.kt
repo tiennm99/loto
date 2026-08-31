@@ -16,8 +16,9 @@ class LotoViewModelFactory(private val app: LotoApplication) : ViewModelProvider
             PlayerBoardViewModel(
                 repository = app.gameStateRepository,
                 masterStore = app.masterStore,
-                settings = app.settingsState,
+                settingsOrNull = app.settingsOrNull,
                 voicePlayer = app.voicePlayer,
+                fallbackSettings = app.settingsRepository.defaults,
             ) as T
 
         modelClass.isAssignableFrom(MasterPanelViewModel::class.java) ->
