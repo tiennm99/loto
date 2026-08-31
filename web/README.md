@@ -7,8 +7,9 @@ No runtime TTS or server required.
 
 Live: [tiennm99.github.io/loto](https://tiennm99.github.io/loto)
 
-Android port: [`android/`](../android) — a Capacitor wrapper that bundles this
-app into a fully-offline APK.
+Android port: [`android/`](../android) — a native Kotlin + Jetpack Compose
+app at feature parity with this one (this app is the behavioral spec). It
+mounts `static/audio/` straight into its APK, so the voice clips exist once.
 
 ---
 

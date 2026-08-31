@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Framework-level shell theme only; the real theming (colors, dark
+         mode) lives in Compose MaterialTheme. windowBackground matches the
+         web's page background so the pre-composition frame doesn't flash.
+         Night variant lives in values-night/. -->
+    <style name="Theme.Loto" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+
+    <!-- Launch theme: API 31+ system splash via core-splashscreen; the
+         android:background item is the compat splash for API < 31. -->
+    <style name="Theme.Loto.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Loto</item>
+        <item name="android:background">@drawable/splash</item>
+    </style>
+</resources>

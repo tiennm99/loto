@@ -1,19 +1,12 @@
 name: Set up Android toolchain
 description: >
-  Installs Node, JDK and Gradle, then restores android/ dependencies from the
-  lockfile. Covers the Capacitor CLI only — the web bundle it syncs is built
-  separately and must already exist at web/build.
+  Installs the JDK and configures Gradle caching for the native Android
+  project in android/. The app is pure Kotlin/Compose — no Node, no web
+  build artifact.
 
 runs:
   using: composite
   steps:
-    # Keep in lockstep with .github/actions/setup-web.
-    - uses: actions/setup-node@v7
-      with:
-        node-version: '24'
-        cache: npm
-        cache-dependency-path: android/package-lock.json
-
     - uses: actions/setup-java@v5
       with:
         distribution: temurin
@@ -22,7 +15,3 @@ runs:
     - uses: gradle/actions/setup-gradle@v6
       with:
         cache-provider: basic
-
-    - run: npm ci
-      shell: bash
-      working-directory: android

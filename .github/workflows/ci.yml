@@ -3,9 +3,11 @@
 # The web app is built twice and only twice — once per base path — and every
 # consumer downloads an artifact instead of rebuilding:
 #
-#   build (root, base "")  -> deploy-firebase, preview-firebase, android-debug
+#   build (root, base "")  -> deploy-firebase, preview-firebase
 #   build (gh,   base /loto) -> deploy-pages
 #
+# The Android app is native Kotlin/Compose and builds independently of the
+# web bundle (it mounts web/static/audio straight from the checkout).
 # Tags are handled by android-release.yml, which builds standalone.
 
 name: ci
@@ -154,28 +156,20 @@ jobs:
           entryPoint: web
 
   android-debug:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@v7
-        with:
-          name: web-build
-          # capacitor.config.json declares `webDir: "../web/build"`.
-          path: web/build
       - uses: ./.github/actions/setup-android
-      # `npm run build` would rebuild web/; the bundle is already here.
-      - name: Sync web bundle into the native project
-        run: npm run sync
+      # assembleRelease runs R8 with no secrets needed (unsigned without
+      # LOTO_KEYSTORE_PATH) so a missing keep rule fails CI, not the tag.
+      - name: Lint, test and assemble debug + release APKs
+        run: ./gradlew :app:lint :app:test :app:assembleDebug :app:assembleRelease
         working-directory: android
-      - name: Assemble debug APK
-        run: ./gradlew :app:assembleDebug
-        working-directory: android/android
       - uses: actions/upload-artifact@v7
         with:
           name: app-debug.apk
-          path: android/android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/*.apk
           archive: false
           retention-days: 7

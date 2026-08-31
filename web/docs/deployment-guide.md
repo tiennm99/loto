@@ -145,11 +145,11 @@ One workflow, `.github/workflows/ci.yml`, covers PRs and pushes to `main`:
 - **`deploy-pages`** — canonical deploy; publishes `web-build-gh`.
 - **`deploy-firebase`** / **`preview-firebase`** — Firebase live channel on
   `main`, preview channel on same-repo PRs; both consume `web-build`.
-- **`android-debug`** — syncs `web-build` into the Capacitor project and
-  assembles an unsigned APK.
+- **`android-debug`** — independent of the web build: lints, tests and
+  assembles the native app's unsigned APK straight from the checkout.
 
-Tags run `.github/workflows/android-release.yml` instead, which builds the
-web app itself because no `ci` run exists to take artifacts from.
+Tags run `.github/workflows/android-release.yml` instead, which builds
+standalone because no `ci` run exists to take artifacts from.
 
 ## Performance Checklist
 

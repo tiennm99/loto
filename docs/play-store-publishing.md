@@ -151,22 +151,23 @@ work before Play setup is finished.
 
 ## Cutting a release
 
-1. Bump **both** values in `android/android/app/build.gradle` — Play rejects
-   duplicate `versionCode`s:
+1. Bump **both** values in `android/app/build.gradle.kts` — Play rejects
+   duplicate `versionCode`s (the release workflow also fails fast if the
+   tag's `versionCode` is not higher than the previous release tag's):
 
-   ```groovy
-   versionCode 3          // must increase every release
-   versionName "0.0.3"    // should match the tag
+   ```kotlin
+   versionCode = 8          // must increase every release
+   versionName = "0.2.1"    // should match the tag
    ```
 
 2. Commit, push, tag:
 
    ```bash
-   git add android/android/app/build.gradle
-   git commit -m "chore(android): bump version to 0.0.3 (versionCode 3)"
+   git add android/app/build.gradle.kts
+   git commit -m "chore(android): bump version to 0.2.1 (versionCode 8)"
    git push origin main
-   git tag v0.0.3
-   git push origin v0.0.3
+   git tag v0.2.1
+   git push origin v0.2.1
    ```
 
 3. Watch and verify:
@@ -223,7 +224,8 @@ unintended, so a typo here is loud, not silent.
 ## Troubleshooting
 
 - **Play upload fails with duplicate versionCode** — `versionCode` in
-  `android/android/app/build.gradle` was not bumped before tagging.
+  `android/app/build.gradle.kts` was not bumped before tagging (the
+  workflow's guard step should have caught this before the build).
 - **`The '<' operator is reserved for future use`** — PowerShell does not
   support `<` input redirection; use the `Get-Content -Raw ... |` form above.
 - **Play upload step skipped** — `PLAY_SERVICE_ACCOUNT_JSON` secret is not

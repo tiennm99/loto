@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lô tô</string>
+    <string name="app_subtitle">🏮 Hội chợ TN1</string>
+
+    <!-- Player board -->
+    <string name="player_new_card">Tạo bảng mới</string>
+    <string name="player_clear_marks">Xoá đánh dấu</string>
+    <string name="player_confirm_new_card">Bạn có muốn tạo lại bảng không?</string>
+    <string name="player_confirm_clear_marks">Bạn có muốn xoá tất cả đánh dấu không?</string>
+    <string name="player_empty_hint_prefix">Nhấn</string>
+    <string name="player_empty_hint_suffix">để bắt đầu chơi</string>
+    <string name="player_empty_wish">🎫 Chúc cả nhà một ván vui vẻ</string>
+    <string name="player_board_label">Bảng lô tô</string>
+    <string name="toast_waiting">Chờ %1$d</string>
+    <string name="toast_dismiss">Đóng thông báo</string>
+
+    <!-- Section bands (Tân Tân physical card) -->
+    <string name="section_label_1">Lô tô</string>
+    <string name="section_label_2">TN1 (2014–2017)</string>
+    <string name="section_label_3">Độc-Đỉnh-Điên</string>
+
+    <!-- Kinh celebration -->
+    <string name="kinh_title">Kinh!</string>
+    <string name="kinh_row_prefix">Hàng</string>
+    <string name="kinh_row_suffix">đã đầy đủ!</string>
+    <string name="kinh_shout">Hãy hô to "Kinh!" 🎶</string>
+    <string name="kinh_dismiss">Tuyệt vời! 🥳</string>
+    <string name="kinh_close">Đóng</string>
+
+    <!-- Master panel -->
+    <string name="master_heading">Quản trò</string>
+    <string name="master_new_game">Ván mới</string>
+    <string name="master_confirm_new_game">Bạn có muốn tạo ván mới không?</string>
+    <string name="master_draw">Xổ số</string>
+    <string name="master_auto_start">Bắt đầu</string>
+    <string name="master_auto_stop">Dừng</string>
+    <string name="master_auto_speed">Tự động: %1$ds/số</string>
+    <string name="master_last_called">Số vừa xổ</string>
+    <string name="master_called_count">Đã xổ: %1$d/90 · Còn lại: %2$d</string>
+    <string name="master_call_order">Thứ tự đã xổ:</string>
+    <string name="master_board_label">Bảng theo dõi số đã xổ</string>
+    <string name="master_countdown">Đếm ngược: %1$d giây</string>
+    <string name="master_empty_badge">Chế độ Quản trò</string>
+    <string name="master_empty_hint_prefix">Nhấn</string>
+    <string name="master_empty_hint_suffix">để bắt đầu xổ số</string>
+    <string name="master_empty_ready">🎤 Đã sẵn sàng</string>
+
+    <!-- Footer -->
+    <string name="footer_inspiration">Lấy cảm hứng từ những buổi họp lớp thiếu bộ lô tô của TN1 (2014–2017)</string>
+    <string name="footer_credit">Made by miti99 with ❤️</string>
+
+    <!-- Shared dialogs -->
+    <string name="dialog_confirm">Đồng ý</string>
+    <string name="dialog_cancel">Hủy</string>
+
+    <!-- Settings sheet -->
+    <string name="settings_open">Cài đặt</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_subtitle">Tuỳ chỉnh giao diện bảng lô tô</string>
+    <string name="settings_theme">Giao diện</string>
+    <string name="settings_theme_auto">Tự động</string>
+    <string name="settings_theme_light">Sáng</string>
+    <string name="settings_theme_dark">Tối</string>
+    <string name="settings_text_scale">Cỡ chữ bảng</string>
+    <string name="settings_text_scale_hint">Cỡ số trên bảng người chơi và bảng quản trò</string>
+    <string name="settings_text_scale_s">Nhỏ</string>
+    <string name="settings_text_scale_m">Vừa</string>
+    <string name="settings_text_scale_l">Lớn</string>
+    <string name="settings_text_scale_xl">Rất lớn</string>
+    <string name="settings_mode">Chế độ hiển thị</string>
+    <string name="settings_mode_hint">Chọn vai trò để chỉ hiện phần liên quan</string>
+    <string name="settings_mode_player">Người chơi</string>
+    <string name="settings_mode_master">Quản trò</string>
+    <string name="settings_mode_both">Cả hai</string>
+    <string name="settings_mode_hint_player">Chỉ bảng người chơi</string>
+    <string name="settings_mode_hint_master">Chỉ bảng quản trò (xổ số, theo dõi)</string>
+    <string name="settings_mode_hint_both">Cả hai bảng — quản trò tự đánh dấu cho người chơi</string>
+    <string name="settings_auto_call">Tự động xổ</string>
+    <string name="settings_auto_call_hint">Tự xổ số liên tiếp khi đang ở chế độ quản trò</string>
+    <string name="settings_auto_call_switch">Tự xổ số</string>
+    <string name="settings_auto_call_speed">Tốc độ: %1$d giây/số</string>
+    <string name="settings_sound">Âm thanh</string>
+    <string name="settings_sound_hint">Đọc số bằng tiếng Việt</string>
+    <string name="settings_voice_master">Quản trò đọc số</string>
+    <string name="settings_voice_master_hint_both">Đọc số đã xổ + báo Chờ/Kinh.</string>
+    <string name="settings_voice_master_hint">Đọc số đã xổ.</string>
+    <string name="settings_voice_player">Báo Chờ / Kinh</string>
+    <string name="settings_voice_waiting">Đọc thêm số đang chờ</string>
+    <string name="settings_voice_waiting_hint">Tắt: chỉ nói "Chờ". Bật: nói "Chờ {số}".</string>
+    <string name="settings_voice_picker">Giọng đọc</string>
+    <string name="settings_empty_color">Màu ô trống</string>
+    <string name="settings_empty_color_custom">Tuỳ chỉnh</string>
+    <string name="settings_empty_color_presets">Mẫu sẵn</string>
+    <string name="settings_reset">Đặt lại</string>
+    <string name="settings_reset_confirm">Đặt lại tất cả cài đặt về mặc định?</string>
+    <string name="settings_done">Xong</string>
+
+    <!-- Exit confirmation (back press with nothing to close) -->
+    <string name="exit_title">Thoát Lô tô?</string>
+    <string name="exit_message">Ván đang chơi sẽ được lưu lại.</string>
+    <string name="exit_confirm">Thoát</string>
+    <string name="exit_cancel">Ở lại</string>
+</resources>

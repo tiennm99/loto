@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark variant of the shell theme; splash_background resolves to the
+         near-black navy from values-night/colors.xml. -->
+    <style name="Theme.Loto" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+</resources>
