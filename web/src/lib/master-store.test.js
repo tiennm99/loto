@@ -13,6 +13,7 @@ beforeEach(() => {
   localStorage.clear();
   masterState.called = [];
   masterState.remaining = [];
+  masterState.hydrated = false;
 });
 
 describe("master-store", () => {
@@ -84,5 +85,54 @@ describe("master-store", () => {
     localStorage.setItem("loto_master", big);
     loadMaster();
     expect(masterState.called).toEqual([]);
+  });
+
+  describe("hydrated flag (reclaim-a-frozen-tab fix, H2)", () => {
+    it("starts false and flips true after the first loadMaster()", () => {
+      expect(masterState.hydrated).toBe(false);
+      loadMaster();
+      expect(masterState.hydrated).toBe(true);
+    });
+
+    it("flips true even when there is nothing to load", () => {
+      // No localStorage entry at all — still counts as "a load happened",
+      // so a consumer's save-effect gate (MasterPanel) is safe to write.
+      loadMaster();
+      expect(masterState.hydrated).toBe(true);
+    });
+
+    it("flips true even when the stored payload is corrupt", () => {
+      localStorage.setItem("loto_master", "{not valid");
+      loadMaster();
+      expect(masterState.hydrated).toBe(true);
+    });
+
+    it("re-loading picks up a peer tab's newer writes instead of this tab's stale copy", () => {
+      // Simulates the reclaim sequence: this tab drew a couple of numbers,
+      // froze (its in-memory masterState is untouched but stale), a peer
+      // tab drew more and persisted them, then this tab reclaims and must
+      // re-read localStorage before anything re-saves.
+      startNewGame();
+      drawNext();
+      drawNext();
+      saveMaster();
+      const staleCalled = [...masterState.called];
+      const thirdDraw = masterState.remaining[0];
+
+      // Peer tab: independently draws one more and persists.
+      const peerCalled = [...staleCalled, thirdDraw];
+      localStorage.setItem(
+        "loto_master",
+        JSON.stringify({
+          called: peerCalled,
+          remaining: masterState.remaining.slice(1),
+        }),
+      );
+
+      // Reclaim: claimActiveTab()'s fix re-hydrates before re-enabling.
+      loadMaster();
+      expect(masterState.called).toEqual(peerCalled);
+      expect(masterState.called).not.toEqual(staleCalled);
+    });
   });
 });

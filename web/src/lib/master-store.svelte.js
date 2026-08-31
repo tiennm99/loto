@@ -19,6 +19,14 @@ export const masterState = $state({
   called: [],
   /** @type {number[]} */
   remaining: [],
+  /**
+   * True once `loadMaster()` has run at least once in this tab's current
+   * active session. Consumers should gate `saveMaster()` on this so a
+   * component that mounts (or remounts after reclaiming a frozen tab)
+   * never persists stale in-memory state over a peer tab's newer writes
+   * before this tab has re-read localStorage.
+   */
+  hydrated: false,
 });
 
 function shuffled1to90() {
@@ -56,6 +64,8 @@ export function loadMaster() {
     masterState.remaining = parsed.remaining;
   } catch {
     /* private mode / corrupt JSON — leave defaults */
+  } finally {
+    masterState.hydrated = true;
   }
 }
 

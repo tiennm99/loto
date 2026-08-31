@@ -12,7 +12,9 @@ function firePopState() {
   window.dispatchEvent(new Event("popstate"));
 }
 
+/** @type {ReturnType<typeof vi.spyOn>} */
 let back;
+/** @type {ReturnType<typeof vi.spyOn>} */
 let pushState;
 
 beforeEach(() => {

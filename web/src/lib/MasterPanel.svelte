@@ -41,7 +41,7 @@
   } from "$lib/master-store.svelte.js";
   import MasterEmptyState from "$lib/MasterEmptyState.svelte";
   import { settings } from "$lib/settings-store.svelte.js";
-  import { cancelPlayback, playNumber } from "$lib/voice.js";
+  import { cancelPlayback, playNumber, unlockAudio } from "$lib/voice.js";
   import { setWakeLock } from "$lib/wake-lock.js";
 
   let heroEl = $state(/** @type {HTMLDivElement | null} */ (null));
@@ -67,10 +67,13 @@
   // against an empty `masterState.called` and replay the back-history
   // when MasterPanel later loads.
   $effect(() => {
-    // Subscribe to both arrays so any mutation re-saves.
+    // Subscribe to both arrays so any mutation re-saves. Gated on
+    // `hydrated` so a mount can never persist stale in-memory state before
+    // `loadMaster()` has (re-)run — see `claimActiveTab()` in
+    // active-tab.svelte.js for the reclaim-a-frozen-tab case this guards.
     masterState.called;
     masterState.remaining;
-    saveMaster();
+    if (masterState.hydrated) saveMaster();
   });
 
   // Map number -> 1-based draw order for fast Kinh! verification.
@@ -150,6 +153,11 @@
   }
 
   function handleDrawNext() {
+    // "Xổ số" is a real click — prime the shared <audio> element here so
+    // later auto-call playback (fired from a setInterval callback, which
+    // iOS does not treat as a user gesture) is already unlocked. No-op
+    // after the first call.
+    unlockAudio();
     const next = drawNext();
     if (next === null) return;
     scrollOnNextDraw = true;
@@ -159,6 +167,8 @@
 
   function toggleAuto() {
     if (masterState.remaining.length === 0) return;
+    // "Bắt đầu" is a real click — see handleDrawNext's comment.
+    unlockAudio();
     autoRunning = !autoRunning;
   }
 </script>

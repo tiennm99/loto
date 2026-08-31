@@ -23,28 +23,50 @@ export const BOARD_TEXT_SCALES = /** @type {const} */ ([0.9, 1, 1.15, 1.3]);
  *  stalling the UI on mount. Real settings serialize to ~200 bytes. */
 const MAX_STORAGE_BYTES = 8_192;
 
-export const DEFAULT_SETTINGS = Object.freeze({
-  /** Excel "Standard Color: Purple". */
-  emptyCellColor: "#7030A0",
-  /** "auto" follows OS prefers-color-scheme; "light"/"dark" overrides it. */
-  theme: /** @type {"auto"|"light"|"dark"} */ ("auto"),
-  /** Which panels are visible: player only, master only, or both inline. */
-  mode: /** @type {"player"|"master"|"both"} */ ("player"),
-  /** When true, the master "Xổ số" button becomes "Bắt đầu/Dừng" + auto interval. */
-  autoCallEnabled: false,
-  /** Auto-call interval, seconds per number. Integer 1..10. */
-  autoCallSpeed: 5,
-  /** Speak the called number aloud when master draws. */
-  voiceEnabledMaster: true,
-  /** Speak "Chờ" / "Kinh" on player events. */
-  voiceEnabledPlayer: false,
-  /** When voiceEnabledPlayer is on, also speak the awaited number after "Chờ". */
-  voiceWaitingNumber: false,
-  /** Active voice id; matches an entry in audio manifest. */
-  voice: DEFAULT_VOICE,
-  /** Multiplier on board number size; one of BOARD_TEXT_SCALES. */
-  boardTextScale: 1,
-});
+/**
+ * Field types for `settings`/`DEFAULT_SETTINGS`. Declared explicitly (rather
+ * than left to inference) so `Object.freeze()` below doesn't narrow each
+ * field to its literal default value (e.g. `autoCallSpeed: 5` inferred as
+ * the type `5`, not `number`) — that literal type would otherwise leak into
+ * `settings = $state({ ...DEFAULT_SETTINGS })` and reject every later
+ * assignment of a different, still-valid value for the field.
+ * @typedef {Object} Settings
+ * @property {string} emptyCellColor
+ * @property {"auto"|"light"|"dark"} theme
+ * @property {"player"|"master"|"both"} mode
+ * @property {boolean} autoCallEnabled
+ * @property {number} autoCallSpeed
+ * @property {boolean} voiceEnabledMaster
+ * @property {boolean} voiceEnabledPlayer
+ * @property {boolean} voiceWaitingNumber
+ * @property {string} voice
+ * @property {number} boardTextScale
+ */
+
+export const DEFAULT_SETTINGS = Object.freeze(
+  /** @type {Settings} */ ({
+    /** Excel "Standard Color: Purple". */
+    emptyCellColor: "#7030A0",
+    /** "auto" follows OS prefers-color-scheme; "light"/"dark" overrides it. */
+    theme: "auto",
+    /** Which panels are visible: player only, master only, or both inline. */
+    mode: "player",
+    /** When true, the master "Xổ số" button becomes "Bắt đầu/Dừng" + auto interval. */
+    autoCallEnabled: false,
+    /** Auto-call interval, seconds per number. Integer 1..10. */
+    autoCallSpeed: 5,
+    /** Speak the called number aloud when master draws. */
+    voiceEnabledMaster: true,
+    /** Speak "Chờ" / "Kinh" on player events. */
+    voiceEnabledPlayer: false,
+    /** When voiceEnabledPlayer is on, also speak the awaited number after "Chờ". */
+    voiceWaitingNumber: false,
+    /** Active voice id; matches an entry in audio manifest. */
+    voice: DEFAULT_VOICE,
+    /** Multiplier on board number size; one of BOARD_TEXT_SCALES. */
+    boardTextScale: 1,
+  }),
+);
 
 export const settings = $state({ ...DEFAULT_SETTINGS });
 

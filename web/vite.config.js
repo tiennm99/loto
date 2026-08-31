@@ -4,6 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { SvelteKitPWA } from "@vite-pwa/sveltekit";
 import { defineConfig, loadEnv } from "vite";
 
+import { resolveBase } from "./base-path.js";
+
 // Precache the default voice's clips so the app is fully offline-capable
 // on first install (without bloating the install with every voice).
 // Alternate voices fall through to runtime CacheFirst on first play.
@@ -18,8 +20,14 @@ const clipNames = [
   "cho",
   "kinh",
 ];
+// `additionalManifestEntries` are passed to workbox-build verbatim — the
+// plugin only base-prefixes entries it generates itself from globs. Without
+// this, the GitHub Pages build (base "/loto") precaches origin-rooted
+// "/audio/..." URLs that 404 under "/loto/", and Workbox aborts the SW
+// `install` event on the first failed precache request.
+const base = resolveBase();
 const defaultVoicePrecacheEntries = clipNames.map((n) => ({
-  url: `/audio/${defaultVoiceId}/${n}.mp3`,
+  url: `${base}/audio/${defaultVoiceId}/${n}.mp3`,
   // Workbox needs a revision string to invalidate stale clips.
   // Bump the prefix when audio is regenerated.
   revision: `audio-v1-${defaultVoiceId}-${n}`,
@@ -37,9 +45,14 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       sveltekit(),
       SvelteKitPWA({
-        // Do NOT add `skipWaiting` without a reload-prompt UI — it would
-        // swap the SW mid-game and lose state.
-        registerType: "autoUpdate",
+        // "prompt" (not "autoUpdate"): a deploy must never force-reload a
+        // live tab mid-round — that would drop in-memory state
+        // (autoRunning, showCongrats, the auto-call countdown). The new SW
+        // installs and waits; `+layout.svelte` registers
+        // `onNeedRefresh: showUpdatePrompt` (see lib/update-prompt.svelte.js)
+        // so the host sees a small "Có bản mới. Tải lại?" banner and the
+        // reload only happens on an explicit tap.
+        registerType: "prompt",
         // Ship a hand-written manifest so the icons/theme stay aligned
         // with /static; the plugin can also generate one but mixing is
         // confusing.

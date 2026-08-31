@@ -12,6 +12,7 @@
     saveGrid,
     saveManualUnticks,
   } from "$lib/game-logic.js";
+  import { focusTrap } from "$lib/focus-trap.js";
   import { masterState } from "$lib/master-store.svelte.js";
   import { pushOverlay } from "$lib/overlay-history.js";
   import { applyMasterCalls } from "$lib/player-auto-cross.js";
@@ -39,6 +40,11 @@
   let congratsRow = $state(-1);
   let celebrationTier = $state(/** @type {1 | 2} */ (1));
   let toast = $state(/** @type {string | null} */ (null));
+  // Bumped on every showToast() call so `{#key toastId}` force-remounts the
+  // toast node — otherwise a 2nd "Chờ" within 5s reuses the same DOM node,
+  // the CSS fade-out animation never restarts, and the node (still
+  // pointer-events-auto) sits invisible-but-clickable over the board.
+  let toastId = $state(0);
 
   // 12 confetti emoji indices. Stable per-render — values don't matter,
   // only the count drives the {#each}.
@@ -68,24 +74,29 @@
   // player crossed in both mode per locked product decision.
   let prevCalledLen = $state(0);
 
-  // Memoized per-row completeness — avoid 81×/render isRowComplete calls
-  const rowCompleteness = $derived(
-    grid && crossed.length
-      ? grid.map((_, r) => isRowComplete(grid, crossed, r))
-      : []
-  );
+  // Memoized per-row completeness — avoid 81×/render isRowComplete calls.
+  // Reads `grid` into a local `g` first: TS can't carry the null-narrowing
+  // from the ternary condition into the `.map()` callback closure for a
+  // mutable outer binding, even though nothing reassigns `grid` mid-eval.
+  const rowCompleteness = $derived.by(() => {
+    const g = grid;
+    return g && crossed.length
+      ? g.map((_, r) => isRowComplete(g, crossed, r))
+      : [];
+  });
 
   // Per-row "Chờ" flag — one cell away AND not already complete. Reuses
   // rowCompleteness so we don't re-walk the row twice.
-  const waitingRows = $derived(
-    grid && crossed.length
-      ? grid.map(
+  const waitingRows = $derived.by(() => {
+    const g = grid;
+    return g && crossed.length
+      ? g.map(
           (_, r) =>
             !rowCompleteness[r] &&
-            getWaitingNumber(grid, crossed, r) !== null,
+            getWaitingNumber(g, crossed, r) !== null,
         )
-      : []
-  );
+      : [];
+  });
 
   // "row,col" keys of cells holding the awaited number for any waiting
   // row. Drives the per-cell pulse animation so the user can spot which
@@ -117,6 +128,7 @@
   function showToast(msg) {
     dismissToast();
     toast = msg;
+    toastId++;
     toastTimer = setTimeout(() => {
       toast = null;
     }, 5000);
@@ -160,7 +172,11 @@
 
   // Detect newly completed and waiting rows. Two passes prevent skipped resets.
   $effect(() => {
-    if (!grid || crossed.length === 0) return;
+    // Captured into `g` so the null-narrowing survives the `.some()`
+    // callback below (TS drops narrowing of a mutable outer binding once
+    // it's referenced inside a nested function expression).
+    const g = grid;
+    if (!g || crossed.length === 0) return;
 
     // The master takes over announcer duties in "both" mode, so its
     // voice flag also drives Chờ/Kinh. Solo players keep their own flag.
@@ -168,9 +184,16 @@
       settings.voiceEnabledPlayer ||
       (settings.voiceEnabledMaster && settings.mode === "both");
 
+    // Set when pass 1 fires playBingo() this run, so pass 2 knows not to
+    // cut it off — playWaiting()/playBingo() both start with
+    // cancelPlayback(), so an unconditional pass-2 call would silence the
+    // win announcement in the exact "completed one row, one away on
+    // another" run where it matters most.
+    let announcedBingo = false;
+
     // Pass 1: at most one bingo popup per render
-    for (let i = 0; i < grid.length; i++) {
-      if (!celebratedRows.has(i) && isRowComplete(grid, crossed, i)) {
+    for (let i = 0; i < g.length; i++) {
+      if (!celebratedRows.has(i) && isRowComplete(g, crossed, i)) {
         celebratedRows.add(i);
         notifiedWaitingRows.add(i);
         congratsRow = i + 1;
@@ -178,29 +201,32 @@
         // Tier 2 confetti: 2nd bingo, OR 1st bingo while another row
         // is one cell away. The previous "3+ bingos" threshold rarely
         // fired on a 9-row card so most wins felt under-celebrated.
-        const hasActiveCho = grid.some(
+        const hasActiveCho = g.some(
           (_, r) =>
             !celebratedRows.has(r) &&
-            getWaitingNumber(grid, crossed, r) !== null,
+            getWaitingNumber(g, crossed, r) !== null,
         );
         celebrationTier =
           celebratedRows.size >= 2 ||
           (celebratedRows.size >= 1 && hasActiveCho)
             ? 2
             : 1;
-        if (announce) playBingo();
+        if (announce) {
+          playBingo();
+          announcedBingo = true;
+        }
         break;
       }
     }
 
     // Pass 2: update waiting state for every non-celebrated row
-    for (let i = 0; i < grid.length; i++) {
+    for (let i = 0; i < g.length; i++) {
       if (celebratedRows.has(i)) continue;
-      const waitNum = getWaitingNumber(grid, crossed, i);
+      const waitNum = getWaitingNumber(g, crossed, i);
       if (waitNum !== null && !notifiedWaitingRows.has(i)) {
         notifiedWaitingRows.add(i);
         showToast(`Chờ ${waitNum}`);
-        if (announce) playWaiting(waitNum);
+        if (announce && !announcedBingo) playWaiting(waitNum);
       } else if (waitNum === null && notifiedWaitingRows.has(i)) {
         notifiedWaitingRows.delete(i);
       }
@@ -494,21 +520,26 @@
       <!-- Centered overlay over the card. Lower opacity + pointer-events
            routing keeps cell taps unblocked while the chip is visible.
            Cell-pulse on the awaited number is the persistent visual
-           anchor; this chip is the textual fresh-event cue. -->
-      <div
-        role="status"
-        aria-live="polite"
-        class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
-      >
-        <button
-          type="button"
-          onclick={dismissToast}
-          aria-label="Đóng thông báo"
-          class="pointer-events-auto px-6 py-3 rounded-2xl bg-amber-500/75 dark:bg-amber-600/75 text-white text-2xl sm:text-3xl font-black shadow-2xl animate-toast backdrop-blur-sm"
+           anchor; this chip is the textual fresh-event cue.
+           {#key toastId} forces a full remount on every showToast() call
+           so the 5s CSS fade-out always restarts from a fresh node — see
+           toastId's declaration for why a reused node was a real bug. -->
+      {#key toastId}
+        <div
+          role="status"
+          aria-live="polite"
+          class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
         >
-          {toast}
-        </button>
-      </div>
+          <button
+            type="button"
+            onclick={dismissToast}
+            aria-label="Đóng thông báo"
+            class="pointer-events-auto px-6 py-3 rounded-2xl bg-amber-500/75 dark:bg-amber-600/75 text-white text-2xl sm:text-3xl font-black shadow-2xl animate-toast backdrop-blur-sm"
+          >
+            {toast}
+          </button>
+        </div>
+      {/key}
     {/if}
   </div>
 {:else}
@@ -568,6 +599,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="congrats-title"
+    use:focusTrap
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
   >
     <button

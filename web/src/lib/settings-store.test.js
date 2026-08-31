@@ -18,8 +18,14 @@ function mockMatchMedia(matches = false) {
   const mql = {
     matches,
     media: "(prefers-color-scheme: dark)",
-    addEventListener: (/** @type {string} */ _t, fn) => listeners.add(fn),
-    removeEventListener: (/** @type {string} */ _t, fn) => listeners.delete(fn),
+    addEventListener: (
+      /** @type {string} */ _t,
+      /** @type {(e: MediaQueryListEvent) => void} */ fn,
+    ) => listeners.add(fn),
+    removeEventListener: (
+      /** @type {string} */ _t,
+      /** @type {(e: MediaQueryListEvent) => void} */ fn,
+    ) => listeners.delete(fn),
     addListener: () => {},
     removeListener: () => {},
     onchange: null,

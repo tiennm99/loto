@@ -1,5 +1,6 @@
 <script>
   import { VOICES } from "$lib/audio-manifest.js";
+  import { focusTrap } from "$lib/focus-trap.js";
   import { pushOverlay } from "$lib/overlay-history.js";
   import {
     BOARD_TEXT_SCALES,
@@ -177,6 +178,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="settings-title"
+    use:focusTrap
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
   >
     <!-- Backdrop: click-to-close, hidden from a11y tree. Window-level
@@ -261,7 +263,11 @@
         </div>
       </fieldset>
 
-      {#snippet switchRow(label, isOn, onToggle)}
+      {#snippet switchRow(
+        /** @type {string} */ label,
+        /** @type {boolean} */ isOn,
+        /** @type {() => void} */ onToggle,
+      )}
         <!-- Whole row is the switch — role/tabindex/click here, not on the
              inner pill, so tapping the label text also toggles. -->
         <div

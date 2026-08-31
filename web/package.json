@@ -10,6 +10,8 @@
     "build:gh": "BUILD_PROFILE=gh vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "check": "svelte-check --tsconfig ./jsconfig.json",
+    "verify:pwa": "node scripts/verify-pwa-build.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -34,6 +36,7 @@
     "globals": "^17",
     "happy-dom": "20.11.0",
     "svelte": "^5",
+    "svelte-check": "^4.7.6",
     "tailwindcss": "^4",
     "vite": "^8.1.5",
     "vitest": "4.1.10"

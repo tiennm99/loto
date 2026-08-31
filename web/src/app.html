@@ -9,6 +9,44 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="format-detection" content="telephone=no" />
+    <!-- Blocking pre-paint theme script. `loadSettings()` in +layout.svelte
+         (client-only, runs in onMount) is the authoritative pass and keeps
+         its own validation; this duplicate, defensively-guarded read only
+         has to get the FIRST paint right so dark-mode users don't see a
+         full-page light flash before hydration. Runs before app.css's
+         <link> (injected by %sveltekit.head% further down) so `.dark`/the
+         custom property are already set by the time styles apply. -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("loto_settings");
+          var parsed = raw ? JSON.parse(raw) : null;
+          var theme =
+            parsed && typeof parsed.theme === "string" ? parsed.theme : "auto";
+          var dark =
+            theme === "dark" ||
+            (theme !== "light" &&
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+          var color =
+            parsed &&
+            typeof parsed.emptyCellColor === "string" &&
+            /^#[0-9a-fA-F]{6}$/.test(parsed.emptyCellColor)
+              ? parsed.emptyCellColor
+              : null;
+          if (color) {
+            document.documentElement.style.setProperty(
+              "--empty-cell-bg",
+              color,
+            );
+          }
+        } catch (e) {
+          /* private mode / corrupt JSON — fall back to light + default
+             color, same as loadSettings()'s own catch. */
+        }
+      })();
+    </script>
     <title>Lô tô — Hội chợ TN1</title>
     <meta
       name="description"
