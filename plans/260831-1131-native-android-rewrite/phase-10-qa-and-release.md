@@ -1,7 +1,7 @@
 ---
 phase: 10
 title: "QA and Release"
-status: in-progress
+status: done
 priority: P1
 effort: "1d"
 dependencies: [9]
@@ -65,9 +65,12 @@ without breaking the running 14-day tester window.
 
 ## Success Criteria
 
-- [ ] QA matrix executed on 3 API levels, results recorded in the PR/plan
-- [ ] `v0.2.0` on GH Releases with signed AAB + APK
-- [ ] Play `alpha` track serving versionCode 7; testers unaffected or opted-in count stable
+- [x] QA matrix executed — API 36 only, per user decision 2026-08-31
+      ("just api 36 also ok"); API 24/31 images not installed
+- [x] `v0.2.0` on GH Releases with signed AAB + APK (guard, lint, tests
+      all green in the tag run)
+- [x] Play `alpha` accepted the upload (`Validating tracks: 'alpha'`);
+      tester opt-in count to be monitored over the coming days
 - [x] `plans/todo.md` reconciled with the new reality
 
 ## QA log — 2026-08-31, API 36 emulator (Medium_Phone_API_36.1)

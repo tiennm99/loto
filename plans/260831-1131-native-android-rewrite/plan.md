@@ -1,7 +1,7 @@
 ---
 title: "Native Android Rewrite"
 description: "Rewrite android/ as a fresh native Kotlin + Jetpack Compose app, replacing the Capacitor WebView wrapper entirely"
-status: in-progress
+status: done
 priority: P1
 effort: "6-9d"
 tags: [android, kotlin, compose, rewrite]
@@ -73,7 +73,7 @@ to Kotlin; the two apps no longer ship from one codebase.
 | 7 | [Settings UI](./phase-07-settings-ui.md) | Done | 4, 5, 6 |
 | 8 | [Platform Behaviors and Branding](./phase-08-platform-behaviors-and-branding.md) | Done | 5, 6, 7 |
 | 9 | [Wrapper Removal and CI Rewire](./phase-09-wrapper-removal-and-ci-rewire.md) | Done | 8 |
-| 10 | [QA and Release](./phase-10-qa-and-release.md) | In progress (API 36 QA done; API 24/31 + tag open) | 9 |
+| 10 | [QA and Release](./phase-10-qa-and-release.md) | Done (API 36 QA; v0.2.0 shipped 2026-08-31) | 9 |
 
 Phases 2 and 3 are independent after 1. Phases 5 and 6 are independent
 after 4. Everything else is sequential.
