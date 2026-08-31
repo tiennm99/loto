@@ -1,5 +1,13 @@
 # Loto upstream sync — 2026-04-29
 
+> **SUPERSEDED (2026-08-31)** by
+> [260831-1131-native-android-rewrite](../260831-1131-native-android-rewrite/plan.md).
+> This plan targeted the retired 2026-04 native port (baseline `fe52232`),
+> which is not being resurrected — the rewrite starts fresh. Phases 01–04
+> remain useful as behavioral specs (confetti tiers, chờ ring, palette,
+> per-mode hint copy) and are referenced from the new plan. No phase here
+> will be executed.
+
 Pull 6 logic/UX changes from `tiennm99/loto` (web) into the Android port.
 Behavior-faithful where the platform allows; idiomatic Compose where it
 matters.
