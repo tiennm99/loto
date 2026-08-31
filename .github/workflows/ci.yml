@@ -46,6 +46,10 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-web
+      - run: npm run lint
+        working-directory: web
+      - run: npm run check
+        working-directory: web
       - run: npm test
         working-directory: web
 
@@ -60,10 +64,12 @@ jobs:
           - profile: root
             script: build
             artifact: web-build
+            buildProfile: ''
           # GitHub Pages serves under /loto.
           - profile: gh
             script: 'build:gh'
             artifact: web-build-gh
+            buildProfile: gh
     name: build (${{ matrix.profile }})
     steps:
       - uses: actions/checkout@v7
@@ -72,6 +78,12 @@ jobs:
       - uses: ./.github/actions/setup-web
       - run: npm run ${{ matrix.script }}
         working-directory: web
+      # Fails the build if the SW registration wiring or the audio precache
+      # base-path prefixing regresses — see scripts/verify-pwa-build.mjs.
+      - run: npm run verify:pwa
+        working-directory: web
+        env:
+          BUILD_PROFILE: ${{ matrix.buildProfile }}
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact }}

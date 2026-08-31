@@ -76,6 +76,14 @@ jobs:
           LOTO_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew :app:bundleRelease :app:assembleRelease
 
+      # L10: the decoded keystore has no real exposure on this ephemeral
+      # runner (nothing archives the workspace), but removing it explicitly
+      # closes the class of mistake where a future step does. if: always()
+      # so it runs even if the build step above fails.
+      - name: Remove decoded keystore
+        if: always()
+        run: rm -f "$GITHUB_WORKSPACE/keystore.p12"
+
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
