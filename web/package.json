@@ -9,6 +9,7 @@
     "build": "vite build",
     "build:gh": "BUILD_PROFILE=gh vite build",
     "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
     "lint": "eslint .",
     "check": "svelte-check --tsconfig ./jsconfig.json",
     "verify:pwa": "node scripts/verify-pwa-build.mjs",
