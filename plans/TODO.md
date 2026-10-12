@@ -148,9 +148,19 @@ iOS Safari. No code; verification only.
 ## Tech debt
 
 - **M6 recomposition perf** — needs a profiled baseline on a device first.
-- **`web/package.json` overrides.** `cookie` still forces 0.7.2 over
-  Kit's `^0.6.0`. `serialize-javascript` stays: it holds the floor
-  above the advisory-affected 7.0.4. `ws` was dropped 2026-10-12.
+  Reviewed 2026-10-12: Kotlin 2.2 enables strong skipping, but the 99
+  `MasterBoard` cells are inlined in `for` loops inside one composable,
+  so every draw re-runs all of them. If profiling shows jank, the cheap
+  fix is a `MasterCell(num, order, isLast)` composable so only the two
+  changed cells recompose per draw.
+- **`web/package.json` overrides** (re-checked 2026-10-12).
+  `cookie`: still needed — Kit 2.70.x still declares `cookie ^0.6.0`,
+  below the 0.7.0 fix. Kit 3.0.1 (now `latest`) declares `^2.0.1`, so
+  the override goes away with a Kit 3 migration (a major upgrade, not
+  done). `serialize-javascript`: effectively redundant — the consumer
+  (`@rollup/plugin-terser`, via `workbox-build`) declares `^7.0.3`, which
+  already resolves to 7.1.x; the `^7.0.5` override only guards a lockfile
+  that pins 7.0.3/7.0.4. Safe to drop.
 - **Voice list growth.** If we add voices > 2 (esp. > 10), revisit
   the precache strategy — currently we precache only the default
   voice. The 7d runtime cache covers the rest, but cold-start cost
