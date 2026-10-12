@@ -66,14 +66,6 @@ hand if any is wanted in the closed test. See
       `Validating tracks: 'alpha'` and committed the edit, so `alpha`
       exists on `com.miti99.loto` and the AAB reached it.
 
-### Clipped web PWA icons
-
-`web/static/icons/*.png` are visibly clipped. Root cause is
-`font-size="240"` in `source.svg`, which overflows the 512 canvas. The
-Android art was regenerated at a corrected 200/160, but the web icons
-still carry the bug — it was out of scope for that pass. Fixing it
-changes the GitHub Pages / PWA / OG card images.
-
 ### PWA install verification (manual, post-deploy)
 
 Needs production deploy on GitHub Pages + physical Android Chrome +
@@ -94,7 +86,8 @@ iOS Safari. No code; verification only.
 - Airplane mode → reload from home → app shell + default voice work.
 - Maskable icon: long-press app icon, ensure mask doesn't crop the
   centered glyph. Verify in DevTools "Show maskable preview" too.
-  May need to drop safe-zone 70% → 65% if mask crops tight.
+  The maskable art (`source-maskable.svg`) is now full-bleed with the
+  glyph inside the 80% safe zone, matching the Android adaptive icon.
 
 **iOS Safari**
 - Share → Add to Home Screen.
@@ -111,11 +104,10 @@ iOS Safari. No code; verification only.
 
 ## Supply chain
 
-- [ ] `npm audit` `web/`. `android/` is native Kotlin since the
-      2026-08-31 rewrite and has no `package.json`; its dependencies are
-      Gradle (version catalog).
-- [ ] Add Dependabot for `npm` (`web/`), `gradle` (`android/`) and
-      `github-actions`. No config exists yet.
+- [x] `npm audit` `web/` — 0 vulnerabilities as of 2026-10-12 (vitest
+      moved to `^4.1.11`). `android/` has no npm dependencies.
+- [x] Dependabot covers `npm` (`web/`), `gradle` (`android/`) and
+      `github-actions` (`.github/dependabot.yml`).
 
 ## Parked (Android)
 
@@ -152,34 +144,19 @@ iOS Safari. No code; verification only.
 
 ## Tech debt
 
-- **Code-review follow-ups (native rewrite, 2026-08-31).** Deferred minors
-  from `plans/reports/code-reviewer-260831-native-android-rewrite.md`
-  (H1–H5, M1, M3, L2 were fixed the same day; `VoicePlayerApi.release()`
-  is now called from `MainActivity` via `releaseVoicePlayer()`):
-  `rememberReducedMotion()` reads the animator scale once per
-  composition (stale until restart if toggled mid-session); voice-manifest
-  parse runs on the main thread at startup (sub-ms, StrictMode-visible);
-  `ignoreAssetsPattern` is a denylist over `web/static` (a new web static
-  file would silently ship in the APK — add a web-side note or allowlist);
-  empty `KEYSTORE_BASE64` still yields a confusing zero-byte keystore
-  failure — the 2026-09-01 cleanup added no empty-secret guard to the
-  decode step.
-
-- **Review follow-up deferrals (2026-08-31).** Left open by
-  `plans/260831-2314-review-followups/plan.md`: M6 recomposition perf
-  (needs a profiled baseline first); web `loadMaster` deck-validation
-  parity with Android; `unlockAudio` on the player-side gesture;
-  timeouts on loading flags; the `verify-pwa` chunk heuristic; an empty
-  `onCleared`; a Robolectric-less `VoicePlayerHolder` glue test.
-
-- **`web/package.json` overrides — re-checked 2026-08-19.**
-  `cookie` is still doing work: `@sveltejs/kit` declares `^0.6.0`, and
-  the override is what forces 0.7.2. `serialize-javascript` is now
-  marginal — the consumer is `@rollup/plugin-terser` at `^7.0.3` (not
-  `workbox-build`, as this note used to claim), so the pin only holds
-  the floor above 7.0.4. `ws` is redundant: `happy-dom` already
-  declares `^8.21.0`, above the `^8.20.1` pin. Drop `ws` first if
-  trimming; keep `cookie` until Kit moves.
+- **Android build not yet run on the 2026-10-12 fixes.** The tech-debt
+  pass changed the APK asset mount (`web/static/audio/` is now the
+  assets root, so clip paths dropped the `audio/` prefix) and was only
+  compiled against a JVM-only harness — no Android SDK on the dev host.
+  CI's `android-debug` job (lint, test, assembleDebug/Release) must pass,
+  and a debug APK must play a clip, before the next release tag.
+- **Android loading-flag timeouts.** `MasterStore.loading` and
+  `PlayerUiState.loading` have no timeout; a hung DataStore read would
+  leave the UI on its loading state. (Web has no async loads.)
+- **M6 recomposition perf** — needs a profiled baseline on a device first.
+- **`web/package.json` overrides.** `cookie` still forces 0.7.2 over
+  Kit's `^0.6.0`. `serialize-javascript` stays: it holds the floor
+  above the advisory-affected 7.0.4. `ws` was dropped 2026-10-12.
 - **Voice list growth.** If we add voices > 2 (esp. > 10), revisit
   the precache strategy — currently we precache only the default
   voice. The 7d runtime cache covers the rest, but cold-start cost
