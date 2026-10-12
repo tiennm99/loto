@@ -1,20 +1,20 @@
 <script>
   import { onMount } from "svelte";
   import "../app.css";
-  import { loadMaster } from "$lib/master-store.svelte.js";
-  import { loadSettings } from "$lib/settings-store.svelte.js";
+  import { loadMaster } from "#lib/master-store.svelte.js";
+  import { loadSettings } from "#lib/settings-store.svelte.js";
   import {
     activeTab,
     claimActiveTab,
     watchActiveTab,
-  } from "$lib/active-tab.svelte.js";
+  } from "#lib/active-tab.svelte.js";
   import {
     applyUpdate,
     dismissUpdate,
     setUpdateSW,
     showUpdatePrompt,
     updatePrompt,
-  } from "$lib/update-prompt.svelte.js";
+  } from "#lib/update-prompt.svelte.js";
 
   let { children } = $props();
 
@@ -30,10 +30,10 @@
     return watchActiveTab();
   });
 
-  // `adapter-static` renders page HTML during `adapt()`, which runs AFTER
-  // the PWA plugin's `closeBundle` — so `@vite-pwa/sveltekit` never gets a
-  // chance to inject its own registration tag into the built HTML. We have
-  // to call the plugin's registration entry point ourselves. Dynamic import
+  // SvelteKit renders `src/app.html` itself, so vite-plugin-pwa never gets a
+  // chance to inject its own registration tag into the built HTML (it is
+  // configured with `injectRegister: false`). We have to call the plugin's
+  // registration entry point ourselves. Dynamic import
   // (not a static one) so this module is never evaluated during SSR/
   // prerendering — `virtual:pwa-register` reaches into `navigator` and
   // `workbox-window`, both browser-only.

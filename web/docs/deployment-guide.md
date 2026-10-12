@@ -7,11 +7,12 @@
 | `npm run build` | `""` (root) | Local preview / generic static host |
 | `npm run build:gh` | `/loto` | GitHub Pages → `https://tiennm99.github.io/loto` (canonical) |
 
-Implementation: `svelte.config.js` reads `BUILD_PROFILE` env. Default is empty
+Implementation: `base-path.js` reads `BUILD_PROFILE` env and `vite.config.js`
+passes the result to the `sveltekit()` plugin's `paths.base`. Default is empty
 basePath; `BUILD_PROFILE=gh npm run build` switches to `/loto`.
 
-Internal links use `import { base } from '$app/paths'` so they survive
-either profile without code changes.
+Static-file URLs go through `asset()` and route links through `resolve()`
+from `$app/paths`, so they survive either profile without code changes.
 
 ## Production Deployment — GitHub Pages
 
@@ -98,7 +99,7 @@ Generates:
 - `.svelte-kit/` — Build cache (not needed for deployment)
 
 ### Export Settings
-- `adapter-static` in `svelte.config.js`
+- `adapter-static`, passed to the `sveltekit()` plugin in `vite.config.js`
 - No server-side rendering (SSR disabled via `ssr: false`)
 - All pages pre-rendered to HTML + JS bundles
 

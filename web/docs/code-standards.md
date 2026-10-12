@@ -127,19 +127,19 @@ function randomANumberInRow(weights) {
 
 ## Internal Navigation
 
-- Use `import { base } from '$app/paths'` for internal links/asset URLs to preserve basePath across deployments.
-- Example: `<img src="{base}/icon.svg">` resolves on both root (`""`) and subpath (`/loto`) builds.
+- Use `asset()` (static files) and `resolve()` (routes) from `$app/paths` to preserve basePath across deployments. Their arguments don't start with `/` (route IDs passed to `resolve()` are the exception).
+- Example: `<img src={asset("icons/icon-192.png")}>` resolves on both root (`""`) and subpath (`/loto`) builds.
 
 ## Import Organization
 
-1. SvelteKit imports (`$app/paths`, `$lib/...`)
+1. SvelteKit and app-library imports (`$app/paths`, `#lib/...`, always with the file extension)
 2. Third-party imports
 3. Local component/utility imports
 
 ```js
-import { base } from "$app/paths";
-import { generateGrid, isRowComplete } from "$lib/game-logic.js";
-import PlayerBoard from "$lib/PlayerBoard.svelte";
+import { asset } from "$app/paths";
+import { generateGrid, isRowComplete } from "#lib/game-logic.js";
+import PlayerBoard from "#lib/PlayerBoard.svelte";
 ```
 
 ## Component Patterns

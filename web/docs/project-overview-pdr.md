@@ -68,7 +68,7 @@ That format is intentionally out of scope.
 
 ## Tech Stack
 
-- **Framework**: SvelteKit 2 with Svelte 5 (runes mode)
+- **Framework**: SvelteKit 3 with Svelte 5 (runes mode)
 - **Runtime**: Svelte 5 runes ($state, $derived, $effect, $props)
 - **Styling**: Tailwind CSS 4 (utility-first, animations)
 - **Persistence**: localStorage (no backend)

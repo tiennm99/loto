@@ -10,7 +10,7 @@
  * @module lib/player-auto-cross
  */
 
-import { findUncrossedCell } from "$lib/game-logic.js";
+import { findUncrossedCell } from "#lib/game-logic.js";
 
 /**
  * @param {object} args

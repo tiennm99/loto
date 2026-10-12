@@ -1,10 +1,10 @@
 <script>
   import { slide } from "svelte/transition";
-  import MasterPanel from "$lib/MasterPanel.svelte";
-  import PageFooter from "$lib/PageFooter.svelte";
-  import PlayerBoard from "$lib/PlayerBoard.svelte";
-  import SettingsButton from "$lib/SettingsButton.svelte";
-  import { settings } from "$lib/settings-store.svelte.js";
+  import MasterPanel from "#lib/MasterPanel.svelte";
+  import PageFooter from "#lib/PageFooter.svelte";
+  import PlayerBoard from "#lib/PlayerBoard.svelte";
+  import SettingsButton from "#lib/SettingsButton.svelte";
+  import { settings } from "#lib/settings-store.svelte.js";
 </script>
 
 <div

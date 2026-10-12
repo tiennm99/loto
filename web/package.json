@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  },
   "scripts": {
     "dev": "vite dev",
     "dev:codeserver": "VITE_DEV_PROFILE=codeserver vite dev --host 0.0.0.0",
@@ -19,25 +22,22 @@
   "optionalDependencies": {
     "lightningcss-linux-x64-gnu": "1.33.0"
   },
-  "overrides": {
-    "cookie": "^0.7.2"
-  },
   "devDependencies": {
     "@eslint/js": "^10",
     "@fontsource/roboto-condensed": "^5.3.0",
-    "@sveltejs/adapter-static": "^3",
-    "@sveltejs/kit": "^2",
+    "@sveltejs/adapter-static": "^4",
+    "@sveltejs/kit": "^3",
     "@sveltejs/vite-plugin-svelte": "^7",
     "@tailwindcss/vite": "^4",
-    "@vite-pwa/sveltekit": "^1.1.0",
     "eslint": "^10",
     "eslint-plugin-svelte": "^3",
     "globals": "^17",
     "happy-dom": "20.11.0",
-    "svelte": "^5",
+    "svelte": "^5.57.1",
     "svelte-check": "^4.7.6",
     "tailwindcss": "^4",
     "vite": "^8.1.5",
+    "vite-plugin-pwa": "^1",
     "vitest": "^4.1.11"
   }
 }

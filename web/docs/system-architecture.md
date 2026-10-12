@@ -174,7 +174,7 @@ Each draw creates a new object (even repeat numbers) to ensure reactive re-fire.
 
 **Static Storage**: All game state in localStorage. No API calls. Fully functional offline.
 
-**Service Worker**: @vite-pwa/sveltekit auto-generates `/sw.js` with:
+**Service Worker**: vite-plugin-pwa generates `/sw.js` (wired into the SvelteKit build in `vite.config.js`) with:
 - App shell precache (~353 KB): HTML, CSS, JS bundles for instant load
 - Audio runtime caching: Voice clips cached on-demand (CacheFirst strategy)
 - Navigation: NetworkFirst (try network, fallback to cache)

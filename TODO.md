@@ -71,6 +71,15 @@ hand if any is wanted in the closed test. See
 
 ### PWA install verification (manual, post-deploy)
 
+**Priority after the SvelteKit 3 upgrade (2026-10-12).** Before the
+upgrade, the Pages build's `sw.js` precached `/` and bound navigations to
+`/`. Both point at the origin root, which returns 404 on Pages, so the
+service worker most likely never installed there. The new build (plain
+`vite-plugin-pwa`, replacing `@vite-pwa/sveltekit`, which breaks under
+Kit 3) uses `/loto/`. On Pages, confirm that the service worker installs,
+that the app works offline, and that the update banner appears after the
+next deploy.
+
 Needs production deploy on GitHub Pages + physical Android Chrome +
 iOS Safari. No code; verification only.
 
@@ -153,14 +162,6 @@ iOS Safari. No code; verification only.
   so every draw re-runs all of them. If profiling shows jank, the cheap
   fix is a `MasterCell(num, order, isLast)` composable so only the two
   changed cells recompose per draw.
-- **`web/package.json` overrides** (re-checked 2026-10-12).
-  `cookie`: still needed — Kit 2.70.x still declares `cookie ^0.6.0`,
-  below the 0.7.0 fix. Kit 3.0.1 (now `latest`) declares `^2.0.1`, so
-  the override goes away with a Kit 3 migration (a major upgrade, not
-  done). `serialize-javascript`: dropped 2026-10-12 — redundant — the consumer
-  (`@rollup/plugin-terser`, via `workbox-build`) declares `^7.0.3`, which
-  already resolves to 7.1.x; the `^7.0.5` override only guards a lockfile
-  that pins 7.0.3/7.0.4.
 - **Voice list growth.** If we add voices > 2 (esp. > 10), revisit
   the precache strategy — currently we precache only the default
   voice. The 7d runtime cache covers the rest, but cold-start cost

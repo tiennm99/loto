@@ -32,17 +32,17 @@
 </script>
 
 <script>
-  import AutoCountdown from "$lib/AutoCountdown.svelte";
+  import AutoCountdown from "#lib/AutoCountdown.svelte";
   import {
     drawNext,
     masterState,
     saveMaster,
     startNewGame,
-  } from "$lib/master-store.svelte.js";
-  import MasterEmptyState from "$lib/MasterEmptyState.svelte";
-  import { settings } from "$lib/settings-store.svelte.js";
-  import { cancelPlayback, playNumber, unlockAudio } from "$lib/voice.js";
-  import { setWakeLock } from "$lib/wake-lock.js";
+  } from "#lib/master-store.svelte.js";
+  import MasterEmptyState from "#lib/MasterEmptyState.svelte";
+  import { settings } from "#lib/settings-store.svelte.js";
+  import { cancelPlayback, playNumber, unlockAudio } from "#lib/voice.js";
+  import { setWakeLock } from "#lib/wake-lock.js";
 
   let heroEl = $state(/** @type {HTMLDivElement | null} */ (null));
   let autoRunning = $state(false);

@@ -2,9 +2,8 @@
 /**
  * Build-time regression guard for the PWA layer.
  *
- * `adapter-static` renders page HTML during `adapt()`, which runs AFTER the
- * PWA plugin's `closeBundle` — so `@vite-pwa/sveltekit` never gets to inject
- * its own registration tag into the built HTML, and a plain grep on
+ * SvelteKit renders page HTML itself, so vite-plugin-pwa never injects its
+ * own registration tag into the built HTML, and a plain grep on
  * `build/index.html` proves nothing either way. `+layout.svelte` registers
  * the service worker itself via a dynamically-imported `virtual:pwa-register`
  * chunk instead; this script asserts that wiring survived the build rather
@@ -13,7 +12,10 @@
  * Also asserts the audio precache manifest in `build/sw.js` is prefixed
  * with the SAME base path SvelteKit itself resolved for this build — a
  * mismatch here 404s every precached clip and fails the SW `install` event
- * on that origin (this exact bug shipped once already).
+ * on that origin (this exact bug shipped once already). The same goes for
+ * the prerendered index page, which is also the navigation fallback: it is
+ * precached at the base URL only if `sw.js` was generated after SvelteKit
+ * prerendered (see `svelteKitPWA` in vite.config.js).
  *
  * Usage: run AFTER `npm run build` / `npm run build:gh` (see package.json's
  * `verify:pwa` script), with the same `BUILD_PROFILE`/`NEXT_BASE_PATH` env
@@ -90,12 +92,13 @@ if (!registerKey) {
     fail("No client chunk dynamically imports virtual:pwa-register.");
   }
 }
-if (!jsFiles.some((f) => readFileSync(f, "utf8").includes("sw.js"))) {
-  fail(`No built JS under ${appDir} references "sw.js" — nothing registers it.`);
+const base = resolveBase();
+const swUrl = `${base}/sw.js`;
+if (!jsFiles.some((f) => readFileSync(f, "utf8").includes(swUrl))) {
+  fail(`No built JS under ${appDir} references "${swUrl}" — nothing registers it.`);
 }
 
-// --- H1: precached audio entries carry the resolved base path -----------
-const base = resolveBase();
+// --- precached audio entries carry the resolved base path ---------------
 const audioUrls = [...swSrc.matchAll(/"([^"]*\/audio\/[^"]*\.mp3)"/g)].map(
   (m) => m[1],
 );
@@ -107,10 +110,22 @@ if (audioUrls.length === 0) {
     fail(
       `${badUrls.length}/${audioUrls.length} precached audio URL(s) don't ` +
         `start with "${base}/audio/" (resolved base "${base}") — e.g. "${badUrls[0]}". ` +
-        "additionalManifestEntries in vite.config.js and svelte.config.js's " +
-        "paths.base have drifted apart again.",
+        "additionalManifestEntries and the sveltekit() paths.base in " +
+        "vite.config.js have drifted apart again.",
     );
   }
+}
+
+// --- the app shell is precached at the base URL and serves navigations ---
+const indexUrl = `${base}/`;
+if (!swSrc.includes(`{url:"${indexUrl}",revision:`)) {
+  fail(
+    `${swPath} doesn't precache the index page at "${indexUrl}" — the service ` +
+      "worker was generated before prerendering, or with the wrong base.",
+  );
+}
+if (!swSrc.includes(`createHandlerBoundToURL("${indexUrl}")`)) {
+  fail(`${swPath} doesn't route navigations to "${indexUrl}".`);
 }
 
 if (!ok) process.exit(1);

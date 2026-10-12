@@ -56,6 +56,8 @@ npm run dev     # dev server at http://localhost:5173
 | `npm run preview` | Preview production build locally |
 | `npm test` | Run unit tests |
 | `npm run lint` | ESLint check |
+| `npm run check` | svelte-check type check (JSDoc) |
+| `npm run verify:pwa` | Check the service worker in `build/` (after a build, same `BUILD_PROFILE`) |
 
 ---
 
@@ -97,6 +99,37 @@ scripts/
 ```
 
 Game state lives entirely in Svelte 5 rune stores; no server round-trips.
+
+### Build config
+
+- **No `svelte.config.js`.** SvelteKit 3 takes its options (adapter-static,
+  `paths.base` from `base-path.js`) as arguments to the `sveltekit()` plugin
+  in `vite.config.js`.
+- **`#lib/*` imports.** `src/lib` is reached through the `imports` field in
+  `package.json` (`import { settings } from "#lib/settings-store.svelte.js"`),
+  always with the file extension. `jsconfig.json` extends `$app/tsconfig`.
+- **Base-path-safe URLs.** Static files go through `asset()` from
+  `$app/paths` (no leading `/`: `asset("audio/…")`), so they resolve under
+  both `""` and `/loto`.
+
+### PWA
+
+The service worker comes from
+[vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (`generateSW`,
+`registerType: "prompt"`); the manifest is the hand-written
+`static/manifest.webmanifest`. `+layout.svelte` registers it through
+`virtual:pwa-register` and wires `onNeedRefresh` to the update banner in
+`src/lib/update-prompt.svelte.js`. It precaches the app shell plus the default
+voice; other voices are cached on first play.
+
+`@vite-pwa/sveltekit` is not used: it generates `sw.js` when Vite's SSR build
+closes, which assumed SvelteKit 2's build order. SvelteKit 3 builds SSR first,
+then the client, then prerenders, all inside its `buildApp` hook, so
+`vite.config.js` drops vite-plugin-pwa's own build step and calls its
+`generateSW()` from a `buildApp` hook that runs after SvelteKit's and before
+the adapter copies `.svelte-kit/output` into `build/`.
+`npm run verify:pwa` checks the result after a build (run it with the same
+`BUILD_PROFILE`).
 Audio manifest is generated once at build prep time — the app reads a JSON manifest
 on load and plays the appropriate clip for each drawn number.
 

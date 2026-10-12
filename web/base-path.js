@@ -1,9 +1,9 @@
 /**
- * SvelteKit `paths.base` resolution, shared between `svelte.config.js`
- * (page routing / prerendering) and `vite.config.js` (PWA precache
- * manifest). Both consumers MUST agree on the base or the service
- * worker's `additionalManifestEntries` end up origin-rooted while the
- * app itself serves under a sub-path (e.g. GitHub Pages `/loto`),
+ * SvelteKit `paths.base` resolution, shared between the `sveltekit()`
+ * plugin options (page routing / prerendering) and the PWA precache
+ * manifest, both in `vite.config.js`. Both consumers MUST agree on the
+ * base or the service worker's `additionalManifestEntries` end up
+ * origin-rooted while the app itself serves under a sub-path (e.g. GitHub Pages `/loto`),
  * causing every precached URL to 404 and the SW install to fail.
  *
  * Resolution order:
@@ -16,9 +16,14 @@
  */
 import { loadEnv } from "vite";
 
-/** @returns {string} */
+/**
+ * SvelteKit validates the shape (leading `/`, no trailing `/`) when it loads
+ * its config, so a malformed NEXT_BASE_PATH fails the build there.
+ * @returns {"" | `/${string}`}
+ */
 export function resolveBase() {
-  if (process.env.NEXT_BASE_PATH != null) return process.env.NEXT_BASE_PATH;
+  if (process.env.NEXT_BASE_PATH != null)
+    return /** @type {"" | `/${string}`} */ (process.env.NEXT_BASE_PATH);
   if (process.env.VITE_DEV_PROFILE === "codeserver") {
     // .env.local lives outside process.env at config-eval time; loadEnv reads it.
     const env = loadEnv(

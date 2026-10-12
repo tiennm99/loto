@@ -1,8 +1,10 @@
 import { readFileSync } from "node:fs";
+import adapter from "@sveltejs/adapter-static";
 import { sveltekit } from "@sveltejs/kit/vite";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
-import { SvelteKitPWA } from "@vite-pwa/sveltekit";
 import { defineConfig, loadEnv } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 import { resolveBase } from "./base-path.js";
 
@@ -33,6 +35,69 @@ const defaultVoicePrecacheEntries = clipNames.map((n) => ({
   revision: `audio-v1-${defaultVoiceId}-${n}`,
 }));
 
+// SvelteKit writes its build to `.svelte-kit/output` (`client/` for
+// static files and JS, `prerendered/pages/` for the HTML), and the adapter
+// copies both into `build/` as its last step.
+const KIT_OUTPUT = ".svelte-kit/output";
+
+/**
+ * Maps a path under KIT_OUTPUT to the URL the deployed app serves it at.
+ * Regular files become paths relative to `sw.js` (which sits at the app
+ * root, so Workbox resolves them under the base); the prerendered index
+ * page becomes the base URL itself, matching `navigateFallback`.
+ * @param {string} file
+ * @returns {string}
+ */
+function precacheUrl(file) {
+  if (file.startsWith("client/")) return file.slice("client/".length);
+  const page = file
+    .replace(/^prerendered\/pages\//, "")
+    .replace(/(^|\/)index\.html$/, "$1")
+    .replace(/\.html$/, "");
+  return page === "" ? `${base}/` : page;
+}
+
+/**
+ * vite-plugin-pwa wired into SvelteKit's build. The plugin's own build step
+ * generates `sw.js` when each Vite environment closes, but SvelteKit 3 builds
+ * SSR first, then the client, then prerenders, all inside its `buildApp`
+ * hook, so at those moments the app shell isn't on disk yet. Instead this
+ * drops that step and generates the service worker from a `buildApp` hook
+ * that runs after SvelteKit's (it must come after `sveltekit()` in the
+ * plugin list) and before the adapter's `post`-ordered one, which then
+ * copies `sw.js` into `build/` along with everything else.
+ *
+ * Also dropped, because SvelteKit renders `src/app.html` itself and warns
+ * about any plugin with a `transformIndexHtml` hook: `pwa-assets` (serves
+ * the unused `pwaAssets` icon generator; icons live in /static) and
+ * `dev-sw` (only acts when `devOptions.enabled` is true). Re-enabling
+ * either feature means keeping its plugin.
+ * @param {Partial<import("vite-plugin-pwa").VitePWAOptions>} options
+ * @returns {import("vite").Plugin[]}
+ */
+function svelteKitPWA(options) {
+  const plugins = VitePWA(options);
+  const main = plugins.find((p) => p.name === "vite-plugin-pwa");
+  const dropped = new Set([
+    "vite-plugin-pwa:build",
+    "vite-plugin-pwa:pwa-assets",
+    "vite-plugin-pwa:dev-sw",
+  ]);
+  return [
+    ...plugins.filter((p) => !dropped.has(p.name)),
+    {
+      name: "loto:pwa-generate-sw",
+      apply: "build",
+      async buildApp() {
+        /** @type {import("vite-plugin-pwa").VitePluginPWAAPI | undefined} */
+        const api = main?.api;
+        if (!api) throw new Error("vite-plugin-pwa API not found");
+        await api.generateSW();
+      },
+    },
+  ];
+}
+
 export default defineConfig(({ mode }) => {
   // .env.local lives outside process.env at config-eval time; loadEnv reads it.
   const env = loadEnv(mode, process.cwd(), "");
@@ -43,8 +108,23 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       tailwindcss(),
-      sveltekit(),
-      SvelteKitPWA({
+      sveltekit({
+        preprocess: vitePreprocess(),
+        adapter: adapter({
+          pages: "build",
+          assets: "build",
+          fallback: undefined,
+          precompress: false,
+          strict: true,
+        }),
+        paths: { base },
+        // Kit 3 polls `_app/version.json` hourly by default. The PWA's
+        // service worker already owns update detection (see the
+        // `registerType: "prompt"` note below), so keep polling off as it
+        // was under Kit 2.
+        version: { pollInterval: 0 },
+      }),
+      svelteKitPWA({
         // "prompt" (not "autoUpdate"): a deploy must never force-reload a
         // live tab mid-round — that would drop in-memory state
         // (autoRunning, showCongrats, the auto-call countdown). The new SW
@@ -58,8 +138,30 @@ export default defineConfig(({ mode }) => {
         // confusing.
         strategies: "generateSW",
         manifest: false,
+        // `+layout.svelte` imports `virtual:pwa-register` itself, so the
+        // plugin must not inject a registration script of its own.
+        injectRegister: false,
+        // Absolute SW URL and scope (`/loto/sw.js`, `/loto/`), so
+        // registration never depends on the page URL's trailing slash.
+        base: `${base}/`,
+        outDir: `${KIT_OUTPUT}/client`,
         workbox: {
-          globPatterns: ["**/*.{js,css,html,svg,png,woff2,webmanifest}"],
+          globDirectory: KIT_OUTPUT,
+          // manifest.webmanifest is left out: the browser fetches it
+          // itself when installing, outside the service worker's cache.
+          globPatterns: [
+            "client/**/*.{js,css,html,svg,png,woff2}",
+            "prerendered/pages/**/*.html",
+          ],
+          manifestTransforms: [
+            async (entries) => ({
+              manifest: entries.map((e) => ({ ...e, url: precacheUrl(e.url) })),
+            }),
+          ],
+          // Content-hashed files need no revision. Tested against the glob
+          // path, before `manifestTransforms` strips the `client/` prefix.
+          dontCacheBustURLsMatching: /^client\/_app\/immutable\//,
+          navigateFallback: `${base}/`,
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           // App shell + DEFAULT voice clips → guaranteed offline. Other
           // voices fall through to the CacheFirst runtime rule below

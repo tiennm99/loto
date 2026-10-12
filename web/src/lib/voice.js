@@ -4,8 +4,8 @@
  * and are picked by `settings.voice`.
  * @module lib/voice
  */
-import { base } from "$app/paths";
-import { settings } from "$lib/settings-store.svelte.js";
+import { asset } from "$app/paths";
+import { settings } from "#lib/settings-store.svelte.js";
 
 /**
  * Single reusable <audio> element, `.src` swapped per clip. iOS Safari
@@ -76,7 +76,10 @@ export function unlockAudio() {
 function clipUrl(name) {
   // `settings.voice` is allowlist-validated and `name` is internal-only,
   // but encode anyway as defense-in-depth in case either ever escapes.
-  return `${base}/audio/${encodeURIComponent(settings.voice)}/${encodeURIComponent(name)}.mp3`;
+  // `asset()` is typed against the literal file list in /static, which a
+  // runtime-composed path can't match, hence the cast.
+  const file = `audio/${encodeURIComponent(settings.voice)}/${encodeURIComponent(name)}.mp3`;
+  return asset(/** @type {Parameters<typeof asset>[0]} */ (file));
 }
 
 /**

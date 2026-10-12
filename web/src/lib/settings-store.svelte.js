@@ -6,7 +6,7 @@
  * @module lib/settings-store
  */
 
-import { DEFAULT_VOICE, VOICE_IDS } from "$lib/audio-manifest.js";
+import { DEFAULT_VOICE, VOICE_IDS } from "#lib/audio-manifest.js";
 
 const STORAGE_KEY = "loto_settings";
 const HEX6 = /^#[0-9a-fA-F]{6}$/;

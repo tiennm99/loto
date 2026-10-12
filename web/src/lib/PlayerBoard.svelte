@@ -11,18 +11,18 @@
     saveCrossedState,
     saveGrid,
     saveManualUnticks,
-  } from "$lib/game-logic.js";
-  import { focusTrap } from "$lib/focus-trap.js";
-  import { masterState } from "$lib/master-store.svelte.js";
-  import { pushOverlay } from "$lib/overlay-history.js";
-  import { applyMasterCalls } from "$lib/player-auto-cross.js";
-  import { settings } from "$lib/settings-store.svelte.js";
+  } from "#lib/game-logic.js";
+  import { focusTrap } from "#lib/focus-trap.js";
+  import { masterState } from "#lib/master-store.svelte.js";
+  import { pushOverlay } from "#lib/overlay-history.js";
+  import { applyMasterCalls } from "#lib/player-auto-cross.js";
+  import { settings } from "#lib/settings-store.svelte.js";
   import {
     cancelPlayback,
     playBingo,
     playWaiting,
     unlockAudio,
-  } from "$lib/voice.js";
+  } from "#lib/voice.js";
 
   const STORAGE_PREFIX = "loto";
   const PREVIEW_CELLS = [...Array(27).keys()];

@@ -1,14 +1,14 @@
 <script>
-  import { VOICES } from "$lib/audio-manifest.js";
-  import { focusTrap } from "$lib/focus-trap.js";
-  import { pushOverlay } from "$lib/overlay-history.js";
+  import { VOICES } from "#lib/audio-manifest.js";
+  import { focusTrap } from "#lib/focus-trap.js";
+  import { pushOverlay } from "#lib/overlay-history.js";
   import {
     BOARD_TEXT_SCALES,
     resetSettings,
     saveSettings,
     settings,
-  } from "$lib/settings-store.svelte.js";
-  import { clearAudioCache } from "$lib/voice.js";
+  } from "#lib/settings-store.svelte.js";
+  import { clearAudioCache } from "#lib/voice.js";
 
   let open = $state(false);
 
