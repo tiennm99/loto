@@ -32,6 +32,9 @@ Every item is device/emulator-only.
 - [ ] Audio: draw a number → Vietnamese voice plays; both voices switch
       correctly (`hoai-my` ↔ `nam-minh`); rapid draws cut each other off;
       chờ + number plays gaplessly when the setting is on.
+      v0.2.1 moved the clips to the assets root (paths lost the `audio/`
+      prefix); CI built and tested it, but playback is unconfirmed on a
+      device.
 - [ ] Audio focus: playback layers over background music without pausing
       it (decided: no focus request — see `ExoVoicePlayer`); incoming
       call behaves normally.
@@ -144,12 +147,6 @@ iOS Safari. No code; verification only.
 
 ## Tech debt
 
-- **Android build not yet run on the 2026-10-12 fixes.** The tech-debt
-  pass changed the APK asset mount (`web/static/audio/` is now the
-  assets root, so clip paths dropped the `audio/` prefix) and was only
-  compiled against a JVM-only harness — no Android SDK on the dev host.
-  CI's `android-debug` job (lint, test, assembleDebug/Release) must pass,
-  and a debug APK must play a clip, before the next release tag.
 - **Android loading-flag timeouts.** `MasterStore.loading` and
   `PlayerUiState.loading` have no timeout; a hung DataStore read would
   leave the UI on its loading state. (Web has no async loads.)
