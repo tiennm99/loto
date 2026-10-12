@@ -1,6 +1,7 @@
 # Next-session TODO
 
-Hand-off list as of 2026-08-31. Covers both `web/` (SvelteKit PWA,
+Hand-off list as of 2026-10-12 (reconciled against the code after the
+2026-09-01 fix cycle). Covers both `web/` (SvelteKit PWA,
 deployed to GitHub Pages at the `/loto/` base) and `android/` (native
 Kotlin + Jetpack Compose app — the Capacitor wrapper was retired
 2026-08-31). Shipped plan folders are swept after release; residual and
@@ -43,14 +44,17 @@ fails fast when the tag's `versionCode` in `android/app/build.gradle.kts`
 is not greater than the previous release tag's. Bumping stays manual;
 forgetting is no longer silent.
 
-### Play production access (clock running)
+### Play production access (status unrecorded)
 
-12 testers collected as of 2026-08-19 — the closed-test minimum is met.
-Now the 14-day continuous window has to hold: if opt-ins drop below 12 at
-any point the window resets, so keep spares on hand. Log tester feedback
-and which features they exercised while the test runs — the production
-application asks for both, and Play has been rejecting thin engagement
-since April 2026.
+12 testers were collected on 2026-08-19, so the 14-day continuous window
+could have closed around 2026-09-02 if opt-ins never dropped below 12.
+Whether the production-access application was filed or granted is not
+recorded here — check Play Console and record the outcome. The
+application asks for tester feedback and the features they exercised;
+Play has been rejecting thin engagement since April 2026.
+
+- [ ] Record the production-access outcome (applied / granted / window
+      reset).
 
 Delivery is wired: `android-release.yml` uploads to `tracks: alpha`, the
 closed track, as of 2026-08-20. Tagged releases now reach the testers
@@ -107,10 +111,11 @@ iOS Safari. No code; verification only.
 
 ## Supply chain
 
-- [ ] `npm audit` both `web/` and `android/`. The old note about auditing
-      "the loto submodule" is obsolete — `web/` is a plain directory in
-      this monorepo, there is no submodule.
-- [ ] Consider Dependabot or Renovate for both `package.json` files.
+- [ ] `npm audit` `web/`. `android/` is native Kotlin since the
+      2026-08-31 rewrite and has no `package.json`; its dependencies are
+      Gradle (version catalog).
+- [ ] Add Dependabot for `npm` (`web/`), `gradle` (`android/`) and
+      `github-actions`. No config exists yet.
 
 ## Parked (Android)
 
@@ -149,15 +154,23 @@ iOS Safari. No code; verification only.
 
 - **Code-review follow-ups (native rewrite, 2026-08-31).** Deferred minors
   from `plans/reports/code-reviewer-260831-native-android-rewrite.md`
-  (H1–H5, M1, M3, L2 were fixed the same day): `VoicePlayerApi.release()`
-  has no call site (app-scoped player lives for the process — fine, but
-  dead API); `rememberReducedMotion()` reads the animator scale once per
+  (H1–H5, M1, M3, L2 were fixed the same day; `VoicePlayerApi.release()`
+  is now called from `MainActivity` via `releaseVoicePlayer()`):
+  `rememberReducedMotion()` reads the animator scale once per
   composition (stale until restart if toggled mid-session); voice-manifest
   parse runs on the main thread at startup (sub-ms, StrictMode-visible);
   `ignoreAssetsPattern` is a denylist over `web/static` (a new web static
   file would silently ship in the APK — add a web-side note or allowlist);
-  empty `KEYSTORE_BASE64` yields a confusing zero-byte keystore failure in
-  the release workflow.
+  empty `KEYSTORE_BASE64` still yields a confusing zero-byte keystore
+  failure — the 2026-09-01 cleanup added no empty-secret guard to the
+  decode step.
+
+- **Review follow-up deferrals (2026-08-31).** Left open by
+  `plans/260831-2314-review-followups/plan.md`: M6 recomposition perf
+  (needs a profiled baseline first); web `loadMaster` deck-validation
+  parity with Android; `unlockAudio` on the player-side gesture;
+  timeouts on loading flags; the `verify-pwa` chunk heuristic; an empty
+  `onCleared`; a Robolectric-less `VoicePlayerHolder` glue test.
 
 - **`web/package.json` overrides — re-checked 2026-08-19.**
   `cookie` is still doing work: `@sveltejs/kit` declares `^0.6.0`, and
@@ -179,9 +192,6 @@ iOS Safari. No code; verification only.
 - Spacebar to draw next number (master power-user shortcut).
 - Internationalization (English UI). Vi default; en strings in a flat
   map. Maybe pick `paraglide-js` or roll our own minimal map.
-- "New version available" reload toast for SW autoUpdate. Today the
-  swap is silent; if users complain about content jumping mid-game,
-  add a non-blocking notice.
 
 ## Open questions (carried from the Android pass)
 

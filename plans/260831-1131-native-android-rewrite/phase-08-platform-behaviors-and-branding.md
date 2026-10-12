@@ -13,7 +13,7 @@ dependencies: [5, 6, 7]
 
 Everything that made the wrapper feel like a real Android app, now
 native-first: keep-screen-on, back handling, theming, splash, launcher
-icons, edge-to-edge. The wrapper-era device-QA list in `plans/todo.md`
+icons, edge-to-edge. The wrapper-era device-QA list in `plans/TODO.md`
 is the acceptance spec.
 
 ## Requirements
@@ -56,7 +56,7 @@ is the acceptance spec.
   `res/values*/themes.xml`, `values-night/`
 - Modify: `MainActivity.kt` (back callback, edge-to-edge),
   `LotoAppRoot.kt` (footer, keep-screen-on binding)
-- Spec: `plans/todo.md` device-QA list, wrapper `MainActivity.java` +
+- Spec: `plans/TODO.md` device-QA list, wrapper `MainActivity.java` +
   `res/` in git history, `web/src/app.css` (colors), `web/src/lib/PageFooter.svelte`
 
 ## Implementation Steps
@@ -72,7 +72,7 @@ is the acceptance spec.
 
 ## Success Criteria
 
-- [ ] Wrapper-era QA items in `plans/todo.md` that are still applicable pass on an emulator (screen-awake, back chain, exit dialog copy, themed icon, dark splash)
+- [ ] Wrapper-era QA items in `plans/TODO.md` that are still applicable pass on an emulator (screen-awake, back chain, exit dialog copy, themed icon, dark splash)
 - [ ] No hardcoded color literals outside `ui/theme` (lint check or grep)
 - [ ] App label, icon, splash match the brand in light + dark
 

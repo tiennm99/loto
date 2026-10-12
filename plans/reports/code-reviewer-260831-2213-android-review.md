@@ -211,7 +211,7 @@ per-frame `withFrameNanos` loop in `AutoCountdown.kt:143-153`, auto-call at
 1 s/number keeps the main thread busy.
 
 Not a blocker for a fairground app on modern hardware, but worth measuring
-on the API 24 target listed in `plans/todo.md`. Cheap mitigations: hoist
+on the API 24 target listed in `plans/TODO.md`. Cheap mitigations: hoist
 `MasterBoardLayout.BOARD` rows into `key(num)` blocks, or pass `isCalled` /
 `isLast` as lambdas so the token colour changes without recomposing the cell.
 
@@ -321,7 +321,7 @@ Recorded so a future audit does not re-litigate them:
   animation so the digit still ticks under "remove animations"
   (`AutoCountdown.kt:139-153`) — correct, and the comment explains why.
 - `KeepScreenOn` releases the flag in `onDispose` and is keyed on `remaining`,
-  matching the `plans/todo.md` QA items.
+  matching the `plans/TODO.md` QA items.
 - Manifest surface is minimal: `VIBRATE` only, `ACCESS_NETWORK_STATE`
   stripped, one exported activity with a LAUNCHER filter.
 
@@ -391,5 +391,5 @@ Then assert that `generate()` before `gate.complete(Unit)` wins.
 3. **L8** — was `launchMode="singleTask"` carried over deliberately from the
    Capacitor wrapper manifest, or copied without a reason?
 4. **M6** — has the master panel been profiled on the API 24 device named in
-   `plans/todo.md`, or is that QA item still open? The `todo.md` list shows
+   `plans/TODO.md`, or is that QA item still open? The `todo.md` list shows
    all device-QA boxes unchecked.

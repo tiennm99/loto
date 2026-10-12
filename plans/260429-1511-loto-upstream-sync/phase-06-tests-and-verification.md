@@ -95,7 +95,7 @@ pending.
 - [ ] `./gradlew :app:test` clean
 - [ ] `./gradlew :app:assembleDebug` clean
 - [ ] Manual smoke per checklist
-- [ ] Update `plans/todo.md` once verified
+- [ ] Update `plans/TODO.md` once verified
 
 ## Success criteria
 

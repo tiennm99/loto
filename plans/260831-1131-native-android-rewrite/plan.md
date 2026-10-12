@@ -21,7 +21,7 @@ behavioral spec; the retired 2026-04 native port (git `f7cbb6e`) is
 2026-08-31). The wrapper is deleted in the same effort; the native app
 takes over the package id, signing key, and tag-driven release pipeline.
 
-**Decision reversal on record:** `plans/todo.md` records "Native
+**Decision reversal on record:** `plans/TODO.md` records "Native
 Kotlin/Compose port retired (2026-05-10) in favour of the wrapper, for
 maintenance parity." The user explicitly reversed this on 2026-08-31.
 Trade-off accepted: every future `web/` feature must now be hand-ported
@@ -54,7 +54,7 @@ to Kotlin; the two apps no longer ship from one codebase.
 ## Non-goals
 
 - iOS target, multiplayer, i18n, background audio, share sheet — all stay
-  in the `plans/todo.md` parking lot.
+  in the `plans/TODO.md` parking lot.
 - Migrating WebView `localStorage` (wrapper users' settings/round state)
   into the native app — loss accepted (Validation Session 1); release
   notes must state it.
@@ -87,7 +87,7 @@ after 4. Everything else is sequential.
 | Settings contract | `web/src/lib/settings-store.svelte.js` (DEFAULT_SETTINGS) |
 | Voice semantics (cancellation, chờ+N sequence) | `web/src/lib/voice.js` + test |
 | Auto-cross, auto-countdown | `web/src/lib/player-auto-cross.js`, `AutoCountdown.svelte` |
-| Wrapper-era platform behaviors | `plans/todo.md` (device QA list), old `android/.../MainActivity.java`, `web/src/lib/wake-lock.js`, `overlay-history.js` |
+| Wrapper-era platform behaviors | `plans/TODO.md` (device QA list), old `android/.../MainActivity.java`, `web/src/lib/wake-lock.js`, `overlay-history.js` |
 | Visual parity details (confetti tiers, chờ ring, palette, hint copy) | superseded plan `plans/260429-1511-loto-upstream-sync/` phase files |
 | Old port architecture (reference only, no code reuse) | git `f7cbb6e` tree, commit message of `90a9dd1` |
 
@@ -136,7 +136,7 @@ phase files; chờ = exactly-one-remaining-in-row
 
 Failures/refinements (both propagated):
 1. [Fact Checker] `plans/reports/researcher-260427-*` — not found;
-   phase 3 now cites only the `f7cbb6e:android/plans/todo.md` decision
+   phase 3 now cites only the `f7cbb6e:android/plans/TODO.md` decision
    record for the ExoPlayer pick.
 2. [Fact Checker] Exit-dialog Vietnamese strings live in wrapper
    `res/values/strings.xml:9-12`, not `MainActivity.java` — phase 8

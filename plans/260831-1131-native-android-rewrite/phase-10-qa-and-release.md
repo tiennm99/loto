@@ -41,7 +41,7 @@ without breaking the running 14-day tester window.
 ## Related Code Files
 
 - Modify: `android/app/build.gradle.kts` (only if versionCode/Name
-  need correction), `plans/todo.md` (retire completed QA items, carry
+  need correction), `plans/TODO.md` (retire completed QA items, carry
   genuinely open ones — e.g. store-listing assets)
 - No feature code — QA findings each become a fix commit or a tracked
   todo item; do not batch silent fixes into the release commit.
@@ -53,13 +53,13 @@ without breaking the running 14-day tester window.
    Studio/SDK command-line tools on this machine, create AVDs for
    API 24, 31, 36 (or attach a physical device via ADB). Budget ~0.5d
    extra the first time.
-1. Build QA matrix from `plans/todo.md` device-QA list + the checklist
+1. Build QA matrix from `plans/TODO.md` device-QA list + the checklist
    above; run on API 24 / 31 / 36 emulators (BlueStacks optional).
 2. File and fix blockers; re-run the affected checks.
 3. Verify versionCode/Name; tag `v0.2.0`; watch `android-release` run.
 4. Confirm Play console shows the build on `alpha`; monitor tester
    opt-in count for the next days (window must not dip below 12).
-5. Sweep `plans/todo.md`: mark superseded wrapper items, record the
+5. Sweep `plans/TODO.md`: mark superseded wrapper items, record the
    decision reversal, keep the production-access log going (tester
    feedback + exercised features — Play asks for both).
 
@@ -71,7 +71,7 @@ without breaking the running 14-day tester window.
       all green in the tag run)
 - [x] Play `alpha` accepted the upload (`Validating tracks: 'alpha'`);
       tester opt-in count to be monitored over the coming days
-- [x] `plans/todo.md` reconciled with the new reality
+- [x] `plans/TODO.md` reconciled with the new reality
 
 ## QA log — 2026-08-31, API 36 emulator (Medium_Phone_API_36.1)
 
