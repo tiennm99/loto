@@ -39,7 +39,7 @@ pipeline stays untouched.
   `android/README.md` full rewrite (native stack, build, release,
   permissions rationale kept — no INTERNET), `docs/play-store-publishing.md`
   spot-check (paths to build.gradle change),
-  `plans/TODO.md`: drop wrapper-only items, keep still-valid ones.
+  `TODO.md`: drop wrapper-only items, keep still-valid ones.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ Move, don't rewrite: `git rm -r` the Capacitor tree, `git mv
 android-native android`, fix the audio-assets relative path
 (`../web/static/audio` from `android/app/`), fix workflow paths.
 History preserves the wrapper (like the old native port before it) —
-note the swap in the commit message and `plans/TODO.md` decisions record.
+note the swap in the commit message and `TODO.md` decisions record.
 
 ## Related Code Files
 
@@ -56,7 +56,7 @@ note the swap in the commit message and `plans/TODO.md` decisions record.
 - Move: `android-native/**` → `android/**`
 - Modify: `.github/workflows/ci.yml`, `.github/workflows/android-release.yml`,
   `.github/actions/setup-android/action.yml`, root `README.md`,
-  `docs/play-store-publishing.md`, `plans/TODO.md`
+  `docs/play-store-publishing.md`, `TODO.md`
 - Create: `android/README.md` (rewritten)
 
 ## Implementation Steps

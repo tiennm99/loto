@@ -114,7 +114,7 @@ Scope: `android/` only (per delegation; `web/` read-only for M2 parity check;
 
 - **Deferred, not applied.** The report frames this as "not a blocker...
   worth measuring," conditional on API 24 device profiling that
-  `plans/TODO.md` shows as still unchecked. The suggested mitigations
+  `TODO.md` shows as still unchecked. The suggested mitigations
   (`key(num)` blocks or lambda-based cell props) touch the hot
   `MasterBoard`/cell-render path with no compose UI test harness in this
   project to catch a visual regression — the risk/verification ratio didn't
@@ -193,7 +193,7 @@ Scope: `android/` only (per delegation; `web/` read-only for M2 parity check;
    in-progress round acceptable/desired? Needs a product call, not a code
    fix.
 3. M6: is there an actual profiled slowdown on the API 24 device from
-   `plans/TODO.md`, or should this stay deferred until QA reports one?
+   `TODO.md`, or should this stay deferred until QA reports one?
 
 Status: DONE_WITH_CONCERNS
 Summary: Fixed H1, H2, M1, M3, M4 (partial, documented gap), M5, L1, and the two clear-cut manifest/gradle hygiene items (L8, L11); confirmed M2 already matches web and left as-is; deferred M6, L2-L7, L9, L10 with reasons. All unit tests (including 5 new race-regression tests) and lint pass.

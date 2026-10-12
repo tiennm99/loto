@@ -57,7 +57,7 @@ generate/clear replays (H2), auto-call lifecycle pause on background (H3),
 color sliders commit on drag end (H4), R8 `assembleRelease` in CI (H5),
 auto-cross cursor clamp + ván-mới on shrink (M1), wall-clock countdown
 immune to animator scale (M3), `grep -Fvx` in the tag guard (L2). Four new
-tests cover H2/H3/M1. Minors deferred to `plans/TODO.md` tech debt.
+tests cover H2/H3/M1. Minors deferred to `TODO.md` tech debt.
 
 ## State for the next session
 

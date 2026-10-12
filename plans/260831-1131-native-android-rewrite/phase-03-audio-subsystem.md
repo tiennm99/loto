@@ -23,7 +23,7 @@ sequencing and cancellation semantics as `web/src/lib/voice.js`.
   a new utterance cancels any in-flight one (token semantics of
   `voice.js`).
 - Non-functional: no audio focus grab beyond transient playback
-  (`plans/TODO.md` flags the unanswered incoming-call question — decide
+  (`TODO.md` flags the unanswered incoming-call question — decide
   and document here: use `AudioAttributes` USAGE_MEDIA +
   `setHandleAudioBecomingNoisy`, request no focus or transient-may-duck;
   record the choice in the code and android README); no INTERNET.
@@ -77,7 +77,7 @@ Package `com.miti99.loto.audio`:
 
 - **ExoPlayer `asset:///` quirks on API 24** — the old port's research
   already picked ExoPlayer over SoundPool (decision record:
-  `git show f7cbb6e:android/plans/TODO.md`; the standalone research
+  `git show f7cbb6e:android/TODO.md`; the standalone research
   reports no longer exist). Signal: playback failure on
   the API 24 emulator in Phase 10. Response: fall back to
   `AssetFileDescriptor` + `ProgressiveMediaSource`, or MediaPlayer for

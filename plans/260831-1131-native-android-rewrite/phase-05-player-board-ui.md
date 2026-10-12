@@ -35,7 +35,7 @@ celebration. Compose throughout, driven by `PlayerBoardViewModel`.
     match web copy exactly.
 - Non-functional: haptics via `VIBRATE` on cell tap, suppressed when the
   system reduced-motion/haptics-off signals say so (mirror wrapper
-  behavior recorded in `plans/TODO.md` QA list); 60fps grid on API 24
+  behavior recorded in `TODO.md` QA list); 60fps grid on API 24
   hardware (no per-cell recomposition storms — stable keys, immutable
   cell state).
 

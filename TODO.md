@@ -157,10 +157,10 @@ iOS Safari. No code; verification only.
   `cookie`: still needed — Kit 2.70.x still declares `cookie ^0.6.0`,
   below the 0.7.0 fix. Kit 3.0.1 (now `latest`) declares `^2.0.1`, so
   the override goes away with a Kit 3 migration (a major upgrade, not
-  done). `serialize-javascript`: effectively redundant — the consumer
+  done). `serialize-javascript`: dropped 2026-10-12 — redundant — the consumer
   (`@rollup/plugin-terser`, via `workbox-build`) declares `^7.0.3`, which
   already resolves to 7.1.x; the `^7.0.5` override only guards a lockfile
-  that pins 7.0.3/7.0.4. Safe to drop.
+  that pins 7.0.3/7.0.4.
 - **Voice list growth.** If we add voices > 2 (esp. > 10), revisit
   the precache strategy — currently we precache only the default
   voice. The 7d runtime cache covers the rest, but cold-start cost
