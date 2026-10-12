@@ -62,10 +62,30 @@ jobs:
         run: ./gradlew :app:lint :app:test
         working-directory: android
 
+      # An unset secret expands to an empty string, which would otherwise
+      # decode to a zero-byte keystore and fail later inside Gradle with an
+      # unrelated-looking error. Check every signing secret up front.
       - name: Decode keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/keystore.p12"
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -eu
+          missing=0
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "$(printenv "$name")" ]; then
+              echo "::error::Repository secret $name is empty or not set; it is required to sign the release."
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ] || exit 1
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/keystore.p12"
+          if [ ! -s "$GITHUB_WORKSPACE/keystore.p12" ]; then
+            echo "::error::KEYSTORE_BASE64 decoded to an empty keystore; re-encode it with 'base64 -w0 keystore.p12'."
+            exit 1
+          fi
 
       - name: Build signed AAB + APK
         working-directory: android
@@ -76,7 +96,7 @@ jobs:
           LOTO_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew :app:bundleRelease :app:assembleRelease
 
-      # L10: the decoded keystore has no real exposure on this ephemeral
+      # The decoded keystore has no real exposure on this ephemeral
       # runner (nothing archives the workspace), but removing it explicitly
       # closes the class of mistake where a future step does. if: always()
       # so it runs even if the build step above fails.
