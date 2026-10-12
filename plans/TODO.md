@@ -147,9 +147,6 @@ iOS Safari. No code; verification only.
 
 ## Tech debt
 
-- **Android loading-flag timeouts.** `MasterStore.loading` and
-  `PlayerUiState.loading` have no timeout; a hung DataStore read would
-  leave the UI on its loading state. (Web has no async loads.)
 - **M6 recomposition perf** — needs a profiled baseline on a device first.
 - **`web/package.json` overrides.** `cookie` still forces 0.7.2 over
   Kit's `^0.6.0`. `serialize-javascript` stays: it holds the floor

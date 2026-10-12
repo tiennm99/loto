@@ -13,11 +13,17 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.miti99.loto.audio.Voice
 import com.miti99.loto.audio.VoiceCatalog
 import java.io.IOException
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * DataStore-backed settings store. Every field is validated independently on
@@ -28,10 +34,14 @@ import kotlinx.coroutines.flow.onStart
  *   ids are the voice allowlist and its first entry the default voice;
  *   [settingsFlow] awaits it, so no settings snapshot is ever published
  *   from a not-yet-loaded manifest.
+ * @param readTimeout how long the first DataStore read may take before
+ *   [settingsFlow] publishes defaults instead, so consumers gated on
+ *   "settings loaded" never wait forever on a hung store.
  */
 class SettingsRepository(
     private val dataStore: DataStore<Preferences>,
     private val voices: Deferred<List<Voice>>,
+    private val readTimeout: Duration = 5.seconds,
 ) {
 
     private object Keys {
@@ -65,16 +75,27 @@ class SettingsRepository(
     // save" (acceptable, L4) had regressed into "settings never load and
     // auto-cross is dead for the rest of the process" (not acceptable). A
     // broken settings store must degrade to defaults, not to a dead board.
-    val settingsFlow: Flow<Settings> = dataStore.data
+    private val persistedPrefs: Flow<Preferences> = dataStore.data
         .catch {
             Log.w(TAG, "Failed to read settings; falling back to defaults", it)
             emit(emptyPreferences())
         }
-        .map { prefs -> toSettings(prefs, voices.await()) }
+
+    // A first read that hangs (rather than fails) publishes defaults once,
+    // then keeps following the store so the real values still land if the
+    // read eventually resolves.
+    val settingsFlow: Flow<Settings> = flow {
+        if (withTimeoutOrNull(readTimeout) { persistedPrefs.first() } == null) {
+            Log.w(TAG, "Settings read timed out after $readTimeout; using defaults")
+            emit(toSettings(emptyPreferences(), voices.await()))
+        }
+        emitAll(persistedPrefs.map { prefs -> toSettings(prefs, voices.await()) })
+    }
 
     /**
      * True once [settingsFlow] has produced its first value — either the
-     * real persisted read or the [catch] fallback after a read failure.
+     * real persisted read, the [catch] fallback after a read failure, or the
+     * defaults published when the first read times out.
      * False only for the brief startup window before that read lands (M4
      * residual): [LotoApplication]'s `settingsOrNull` is
      * `stateIn(..., SharingStarted.Eagerly, null)`, so its *initial* value

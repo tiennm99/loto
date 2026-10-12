@@ -11,11 +11,13 @@ import com.miti99.loto.SlowDataStore
 import com.miti99.loto.ThrowingDataStore
 import com.miti99.loto.audio.Voice
 import com.miti99.loto.audio.VoiceCatalog
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -251,6 +253,32 @@ class SettingsRepositoryTest {
         gate.complete(Unit)
         runCurrent()
         assertEquals(listOf(false, true), states)
+    }
+
+    @Test
+    fun `a hung first read publishes defaults, then the real values once it resolves`() = runTest {
+        val backing = InMemoryDataStore()
+        repo(backing).setMode(AppMode.BOTH)
+        val gate = CompletableDeferred<Unit>()
+        val repository = SettingsRepository(
+            SlowDataStore(backing, gate),
+            CompletableDeferred(VoiceCatalog.FALLBACK_VOICES),
+            readTimeout = 5.seconds,
+        )
+        val emitted = mutableListOf<Settings>()
+        backgroundScope.launch { repository.settingsFlow.toList(emitted) }
+
+        advanceTimeBy(4.seconds)
+        runCurrent()
+        assertEquals(emptyList<Settings>(), emitted)
+
+        advanceTimeBy(2.seconds)
+        runCurrent()
+        assertEquals(listOf(AppMode.PLAYER), emitted.map { it.mode })
+
+        gate.complete(Unit)
+        runCurrent()
+        assertEquals(listOf(AppMode.PLAYER, AppMode.BOTH), emitted.map { it.mode })
     }
 
     @Test

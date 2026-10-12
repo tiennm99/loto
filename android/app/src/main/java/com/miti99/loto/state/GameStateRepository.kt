@@ -9,7 +9,10 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.miti99.loto.game.CardGenerator
 import java.io.IOException
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** The player's persisted round: card, marks, and explicit unticks. */
 data class PlayerRoundState(
@@ -31,9 +34,13 @@ data class MasterRoundState(
  * Both failure classes fall back instead of crashing (the web's
  * try/catch-everything localStorage posture): malformed payloads
  * shape-validate to "no saved round", and IO errors are swallowed on write
- * and read as empty state on load.
+ * and read as empty state on load. A read that hangs past [readTimeout] also
+ * reads as empty state, so `loading` gates can never stick forever.
  */
-class GameStateRepository(private val dataStore: DataStore<Preferences>) {
+class GameStateRepository(
+    private val dataStore: DataStore<Preferences>,
+    private val readTimeout: Duration = 5.seconds,
+) {
 
     private object Keys {
         val PLAYER_GRID = stringPreferencesKey("player_grid")
@@ -84,7 +91,10 @@ class GameStateRepository(private val dataStore: DataStore<Preferences>) {
     }
 
     private suspend fun readPrefs(): Preferences = try {
-        dataStore.data.first()
+        withTimeoutOrNull(readTimeout) { dataStore.data.first() } ?: run {
+            Log.w(TAG, "Game state read timed out after $readTimeout; falling back to empty state")
+            emptyPreferences()
+        }
     } catch (e: IOException) {
         // L4: was silently swallowed — a persistently failing store used to
         // degrade to "round never restores" with zero signal for device QA.

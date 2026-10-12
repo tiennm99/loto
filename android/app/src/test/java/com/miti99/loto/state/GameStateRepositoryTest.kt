@@ -3,11 +3,18 @@ package com.miti99.loto.state
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.miti99.loto.InMemoryDataStore
+import com.miti99.loto.SlowDataStore
 import com.miti99.loto.ThrowingDataStore
 import com.miti99.loto.game.CardGenerator
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -141,6 +148,25 @@ class GameStateRepositoryTest {
         val repo = GameStateRepository(ThrowingDataStore())
         assertNull(repo.loadPlayerState())
         assertNull(repo.loadMasterState())
+    }
+
+    @Test
+    fun `a read that never resolves times out to empty state`() = runTest {
+        val backing = InMemoryDataStore()
+        GameStateRepository(backing).saveMasterState(
+            MasterRoundState(called = (1..10).toList(), remaining = (11..90).toList()),
+        )
+        // The gate is never completed: the store hangs instead of failing.
+        val repo = GameStateRepository(SlowDataStore(backing, CompletableDeferred()), readTimeout = 5.seconds)
+
+        val load = async { repo.loadMasterState() }
+        advanceTimeBy(4.seconds)
+        runCurrent()
+        assertFalse(load.isCompleted)
+
+        advanceTimeBy(2.seconds)
+        runCurrent()
+        assertNull(load.await())
     }
 
     @Test
