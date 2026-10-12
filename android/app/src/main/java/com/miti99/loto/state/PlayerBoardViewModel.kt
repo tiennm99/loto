@@ -61,6 +61,9 @@ data class PlayerUiState(
  * `web/src/lib/PlayerBoard.svelte`: cell toggling with manual-untick
  * tracking, master auto-cross replay, chờ/kinh detection with voice + toast,
  * and round persistence.
+ *
+ * Deliberately leaves [voicePlayer] alone when cleared — see
+ * [MasterPanelViewModel]'s class doc.
  */
 class PlayerBoardViewModel(
     private val repository: GameStateRepository,
@@ -93,7 +96,7 @@ class PlayerBoardViewModel(
      * Used only for the narrow pre-load window where [settingsOrNull] is
      * still null but a restored, already-clickable grid can be interacted
      * with (`onCellClick` → `detectRowEvents`). Production wiring supplies
-     * the manifest-derived defaults; tests that never exercise that window
+     * `SettingsRepository.defaults`; tests that never exercise that window
      * (i.e. every test whose `settingsOrNull` is a non-null-typed
      * `StateFlow<Settings>`) never read this.
      */
@@ -378,15 +381,6 @@ class PlayerBoardViewModel(
         if (_uiState.value.showCongrats) {
             _uiState.value = _uiState.value.copy(showCongrats = false)
         }
-    }
-
-    override fun onCleared() {
-        // L2: see MasterPanelViewModel.onCleared() — voicePlayer is a
-        // shared singleton; MainActivity.onDestroy() already stops it on
-        // the same isFinishing condition this onCleared() fires under, so
-        // cancelling it here too was redundant and coupled two
-        // independently-clearable owners to one shared resource.
-        super.onCleared()
     }
 
     /**

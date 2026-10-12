@@ -25,8 +25,10 @@ android {
         getByName("main") {
             // Voice clips and their manifest are mounted straight from the web
             // app's static dir so both apps ship the exact same files — no copy
-            // step, no drift. Mounts web/static/audio/** as assets/audio/**.
-            assets.srcDir("../../web/static")
+            // step, no drift. Only web/static/audio/ is mounted (as the assets
+            // root), so anything else added to web/static never reaches the
+            // APK; VoiceCatalog's asset paths are relative to this dir.
+            assets.srcDir("../../web/static/audio")
         }
     }
 
@@ -35,10 +37,6 @@ android {
         // `resourceConfigurations` (defaultConfig) is deprecated for locales
         // in AGP 8.13 in favor of this (L11).
         localeFilters += listOf("vi")
-        // Keep only the audio/ subtree from the mounted web/static dir.
-        // Pattern extends AAPT's default ignore list (hidden files, VCS dirs).
-        ignoreAssetsPattern =
-            "!icons:!manifest.webmanifest:!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
     }
 
     signingConfigs {

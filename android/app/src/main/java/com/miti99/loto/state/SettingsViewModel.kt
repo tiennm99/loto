@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val repository: SettingsRepository,
     val settings: StateFlow<Settings>,
-    /** Bundled voices for the voice picker. */
-    val voices: List<Voice>,
+    /** Bundled voices for the voice picker; empty until the manifest has loaded. */
+    val voices: StateFlow<List<Voice>>,
 ) : ViewModel() {
 
     fun setEmptyCellColor(value: String) = update { repository.setEmptyCellColor(value) }

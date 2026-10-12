@@ -24,7 +24,7 @@ behavior change on the web side needs a matching Kotlin change here.
 | Package | What it is |
 |---------|------------|
 | `game` | Pure game rules ported from `web/src/lib/game-logic.js` and friends: card generator, row state, draw deck, auto-cross |
-| `audio` | Voice catalog (parses `assets/audio/manifest.json`) + ExoPlayer wrapper with the web's cancellation semantics |
+| `audio` | Voice catalog (parses the bundled `manifest.json`) + ExoPlayer wrapper with the web's cancellation semantics |
 | `settings` | `Settings` model + DataStore repository — same fields, defaults, and per-field validation as the web store |
 | `state` | Round persistence, the shared master store, and the three ViewModels |
 | `ui` | Compose screens: player board, master panel, settings sheet, theme |
@@ -32,8 +32,9 @@ behavior change on the web side needs a matching Kotlin change here.
 ## Audio assets
 
 The 184 MP3s (2 voices × 92 clips) and their manifest are **not copied** into
-this project. `app/build.gradle.kts` mounts `../web/static/audio/` as
-`assets/audio/` at build time, so web and Android always ship the same files.
+this project. `app/build.gradle.kts` mounts `../web/static/audio/` (and only
+that directory) as the assets root at build time, so web and Android always
+ship the same clips, and nothing else added to `web/static/` reaches the APK.
 Regenerate them with the web app's `scripts/generate-audio.py`.
 
 ## Audio focus

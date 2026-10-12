@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.miti99.loto.InMemoryDataStore
 import com.miti99.loto.SlowDataStore
 import com.miti99.loto.ThrowingDataStore
+import com.miti99.loto.audio.Voice
+import com.miti99.loto.audio.VoiceCatalog
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -28,10 +30,10 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsRepositoryTest {
 
-    private val voiceIds = setOf("hoai-my", "nam-minh")
-
-    private fun repo(store: DataStore<Preferences>) =
-        SettingsRepository(store, voiceIds, defaultVoiceId = "hoai-my")
+    private fun repo(
+        store: DataStore<Preferences>,
+        voices: List<Voice> = VoiceCatalog.FALLBACK_VOICES,
+    ) = SettingsRepository(store, CompletableDeferred(voices))
 
     private fun runWithRepo(
         block: suspend (SettingsRepository, DataStore<Preferences>) -> Unit,
@@ -249,5 +251,39 @@ class SettingsRepositoryTest {
         gate.complete(Unit)
         runCurrent()
         assertEquals(listOf(false, true), states)
+    }
+
+    @Test
+    fun `settings are not published until the voice manifest has loaded`() = runTest {
+        // The manifest is parsed off the main thread; a snapshot published
+        // before it lands would validate the voice against nothing.
+        val manifest = CompletableDeferred<List<Voice>>()
+        val repository = SettingsRepository(InMemoryDataStore(), manifest)
+        val loaded = mutableListOf<Boolean>()
+        val emitted = mutableListOf<Settings>()
+        backgroundScope.launch { repository.loaded.toList(loaded) }
+        backgroundScope.launch { repository.settingsFlow.toList(emitted) }
+        runCurrent()
+        assertEquals(listOf(false), loaded)
+        assertEquals(emptyList<Settings>(), emitted)
+
+        manifest.complete(VoiceCatalog.FALLBACK_VOICES)
+        runCurrent()
+        assertEquals(listOf(false, true), loaded)
+        assertEquals(listOf("hoai-my"), emitted.map { it.voice })
+    }
+
+    @Test
+    fun `default and allowed voices come from the loaded manifest`() = runTest {
+        val manifestVoices = listOf(
+            Voice("nam-minh", "vi-VN-NamMinhNeural", "Nam Minh (nam)", "male"),
+        )
+        val store = InMemoryDataStore()
+        val repository = repo(store, manifestVoices)
+        assertEquals("nam-minh", repository.settingsFlow.first().voice)
+
+        // Valid under the fallback list, but not in this manifest.
+        store.edit { it[stringPreferencesKey("voice")] = "hoai-my" }
+        assertEquals("nam-minh", repository.settingsFlow.first().voice)
     }
 }

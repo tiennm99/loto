@@ -15,10 +15,13 @@ import com.miti99.loto.settings.SettingsRepository
 import com.miti99.loto.state.GameStateRepository
 import com.miti99.loto.state.MasterStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -45,15 +48,26 @@ class LotoApplication : Application() {
 
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    /** Bundled announcer voices, parsed once from the asset manifest. */
-    val voices: List<Voice> by lazy { VoiceCatalog.load(this) }
+    /**
+     * Bundled announcer voices, parsed once from the asset manifest on an IO
+     * thread (asset read + JSON parse stay off the main thread). Started in
+     * [onCreate]. Nothing reads it synchronously: [settingsRepository]
+     * awaits it before publishing any settings, so the voice id every draw
+     * announces with is validated against the real manifest, and until then
+     * the placeholder defaults name the same default voice.
+     */
+    private val voiceManifest: Deferred<List<Voice>> by lazy {
+        appScope.async(Dispatchers.IO) { VoiceCatalog.load(this@LotoApplication) }
+    }
+
+    /** Bundled voices for the picker; empty until [voiceManifest] resolves. */
+    val voices: StateFlow<List<Voice>> by lazy {
+        flow { emit(voiceManifest.await()) }
+            .stateIn(appScope, SharingStarted.Eagerly, emptyList())
+    }
 
     val settingsRepository: SettingsRepository by lazy {
-        SettingsRepository(
-            dataStore = settingsDataStore,
-            validVoiceIds = voices.map { it.id }.toSet(),
-            defaultVoiceId = VoiceCatalog.defaultVoiceId(voices),
-        )
+        SettingsRepository(dataStore = settingsDataStore, voices = voiceManifest)
     }
 
     /**
@@ -94,12 +108,11 @@ class LotoApplication : Application() {
      * so a plain `by lazy` singleton would hand every ViewModel an
      * already-released, permanently-dead player on a relaunch into the same
      * cached process. [releaseVoicePlayer] drops the reference on an
-     * explicit exit; the next access here rebuilds a working one.
+     * explicit exit; the next access here rebuilds a working one, on the
+     * configured voice (see [VoicePlayerHolder.followVoice]).
      */
     private val voicePlayerHolder: VoicePlayerHolder by lazy {
-        VoicePlayerHolder {
-            ExoVoicePlayer(this).also { it.voiceId = VoiceCatalog.defaultVoiceId(voices) }
-        }
+        VoicePlayerHolder { ExoVoicePlayer(this) }
     }
     val voicePlayer: VoicePlayerApi get() = voicePlayerHolder.value
 
@@ -108,6 +121,7 @@ class LotoApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        voiceManifest.start()
         // Two unrelated jobs on two launches (M4): they used to share one
         // coroutine with the round-state restore first, so a slow/failed
         // DataStore read for the round would stall voice-id sync too. Each
@@ -115,9 +129,8 @@ class LotoApplication : Application() {
         // settings/masterStore.state combine() is what makes that race safe
         // rather than this ordering.
         appScope.launch { masterStore.restore() }
-        appScope.launch {
-            // Keep the announcer on the configured voice.
-            settingsState.collect { voicePlayer.voiceId = it.voice }
-        }
+        // Keep the announcer — including one rebuilt after a release — on
+        // the configured voice.
+        appScope.launch { voicePlayerHolder.followVoice(settingsState.map { it.voice }) }
     }
 }

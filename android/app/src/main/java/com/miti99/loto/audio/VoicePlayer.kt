@@ -15,7 +15,7 @@ import androidx.media3.exoplayer.ExoPlayer
  * across calls. Switching the voice takes effect on the next utterance.
  */
 interface VoicePlayerApi {
-    /** The active voice id (folder slug under `assets/audio/`). */
+    /** The active voice id (folder slug under the assets root, i.e. `web/static/audio/`). */
     var voiceId: String
 
     /** Play [clipNames] as one gapless sequence, canceling any in-flight one. */
@@ -53,7 +53,7 @@ fun waitingClips(n: Int, voiceWaitingNumber: Boolean, modeIsBoth: Boolean): List
     }
 
 /**
- * Media3 ExoPlayer implementation over the bundled `asset:///audio/...`
+ * Media3 ExoPlayer implementation over the bundled `asset:///{voiceId}/...`
  * clips. Main-thread only (ExoPlayer requirement) — constructed and used
  * from the UI thread.
  *

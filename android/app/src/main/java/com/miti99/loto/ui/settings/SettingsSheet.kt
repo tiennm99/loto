@@ -52,6 +52,7 @@ fun SettingsSheet(
 ) {
     val palette = LotoTheme.palette
     val settings by viewModel.settings.collectAsState()
+    val voices by viewModel.voices.collectAsState()
     var confirmReset by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
@@ -215,7 +216,7 @@ fun SettingsSheet(
                     }
                 }
             }
-            if (viewModel.voices.size > 1) {
+            if (voices.size > 1) {
                 Text(
                     text = stringResource(R.string.settings_voice_picker),
                     color = palette.buttonSecondaryText,
@@ -224,7 +225,7 @@ fun SettingsSheet(
                     modifier = Modifier.padding(top = 12.dp, bottom = 6.dp),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (voice in viewModel.voices) {
+                    for (voice in voices) {
                         ChoiceButton(
                             label = voice.label,
                             selected = settings.voice == voice.id,

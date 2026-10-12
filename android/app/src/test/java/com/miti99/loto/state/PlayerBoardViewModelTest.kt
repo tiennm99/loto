@@ -3,6 +3,7 @@ package com.miti99.loto.state
 import com.miti99.loto.InMemoryDataStore
 import com.miti99.loto.SlowDataStore
 import com.miti99.loto.audio.FakeVoicePlayer
+import com.miti99.loto.audio.VoiceCatalog
 import com.miti99.loto.game.CardGenerator
 import com.miti99.loto.settings.AppMode
 import com.miti99.loto.settings.Settings
@@ -456,15 +457,15 @@ class PlayerBoardViewModelTest {
                 MasterRoundState(called = (1..90).toList(), remaining = emptyList()),
             )
 
-            val voiceIds = setOf("hoai-my")
+            val voices = CompletableDeferred(listOf(VoiceCatalog.FALLBACK_VOICES.first()))
             val settingsBacking = InMemoryDataStore()
             // Persist the real mode ahead of time (BOTH != the PLAYER
             // default) via an ungated repository over the same backing store.
-            SettingsRepository(settingsBacking, voiceIds, "hoai-my").setMode(AppMode.BOTH)
+            SettingsRepository(settingsBacking, voices).setMode(AppMode.BOTH)
 
             val gate = CompletableDeferred<Unit>()
             val gatedSettingsRepo =
-                SettingsRepository(SlowDataStore(settingsBacking, gate), voiceIds, "hoai-my")
+                SettingsRepository(SlowDataStore(settingsBacking, gate), voices)
             // Single source of truth (M2), matching LotoApplication's
             // settingsOrNull wiring: null until the gated read resolves.
             val settingsOrNull: StateFlow<Settings?> = gatedSettingsRepo.settingsFlow

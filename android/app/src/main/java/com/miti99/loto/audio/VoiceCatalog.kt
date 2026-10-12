@@ -4,8 +4,9 @@ import android.content.Context
 import org.json.JSONObject
 
 /**
- * A bundled announcer voice, mirroring the entries of
- * `assets/audio/manifest.json` (the same file the web app imports).
+ * A bundled announcer voice, mirroring the entries of the bundled
+ * `manifest.json` (`web/static/audio/manifest.json`, the same file the web
+ * app imports).
  */
 data class Voice(
     val id: String,
@@ -15,13 +16,15 @@ data class Voice(
 )
 
 /**
- * Catalog of the bundled voices. Clips live under
- * `assets/audio/{voiceId}/{1..90,cho,kinh}.mp3`; the manifest is produced by
- * `scripts/generate-audio.py` in the web app and shipped verbatim.
+ * Catalog of the bundled voices. `web/static/audio/` is mounted as the
+ * assets root (see `app/build.gradle.kts`), so clips live at
+ * `assets/{voiceId}/{1..90,cho,kinh}.mp3` next to `assets/manifest.json`;
+ * the manifest is produced by `scripts/generate-audio.py` in the web app and
+ * shipped verbatim.
  */
 object VoiceCatalog {
 
-    const val MANIFEST_ASSET_PATH = "audio/manifest.json"
+    const val MANIFEST_ASSET_PATH = "manifest.json"
 
     /** Clip basename for the "Chờ" announcement. */
     const val CLIP_CHO = "cho"
@@ -79,5 +82,5 @@ object VoiceCatalog {
      * [clipName] ∈ "1".."90" | [CLIP_CHO] | [CLIP_KINH].
      */
     fun clipPath(voiceId: String, clipName: String): String =
-        "audio/$voiceId/$clipName.mp3"
+        "$voiceId/$clipName.mp3"
 }

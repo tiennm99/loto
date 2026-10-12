@@ -18,6 +18,13 @@ import kotlinx.coroutines.launch
  * `web/src/lib/MasterPanel.svelte`. Deck data lives in the shared
  * [MasterStore]; this ViewModel adds the auto-call ticker, voice
  * announcements, and the countdown reset signal.
+ *
+ * No `onCleared()` cancel of [voicePlayer]: it is an app-scoped singleton
+ * shared with [PlayerBoardViewModel], and `MainActivity.onDestroy()`
+ * already releases it on the same final-exit (`isFinishing`) path. A
+ * per-ViewModel cancel would be redundant, and would let one screen
+ * tearing down cut audio the other is still using if the two ViewModels'
+ * scopes ever diverged.
  */
 class MasterPanelViewModel(
     private val masterStore: MasterStore,
@@ -115,20 +122,6 @@ class MasterPanelViewModel(
     fun setForeground(foreground: Boolean) {
         _foreground.value = foreground
         if (!foreground) voicePlayer.cancel()
-    }
-
-    override fun onCleared() {
-        // L2: voicePlayer is an app-scoped singleton also cancelled by
-        // PlayerBoardViewModel.onCleared(). Both VMs are activity-scoped
-        // (LotoViewModelFactory), so onCleared() only fires together, on a
-        // real finish — MainActivity.onDestroy() already stops/releases the
-        // player unconditionally on that same isFinishing path (L1). A
-        // per-VM cancel() here was therefore redundant *and* fragile: if
-        // either VM's scope ever changed to clear independently of the
-        // other, one screen tearing down could cut audio the other screen
-        // is still using. Not cancelling here relies solely on
-        // MainActivity's guarded release() to stop playback on exit.
-        super.onCleared()
     }
 }
 

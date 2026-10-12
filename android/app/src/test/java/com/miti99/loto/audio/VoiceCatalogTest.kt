@@ -11,13 +11,19 @@ class VoiceCatalogTest {
     fun `parses the real bundled manifest`() {
         // The same file Gradle mounts into assets/ — read straight from the
         // web app's static dir (test working dir is the app module).
-        val manifest = File("../../web/static/audio/manifest.json")
+        val manifest = File(AUDIO_ASSETS_DIR, VoiceCatalog.MANIFEST_ASSET_PATH)
         assertTrue("expected ${manifest.absolutePath} to exist", manifest.exists())
         val voices = VoiceCatalog.parse(manifest.readText())
         assertEquals(listOf("hoai-my", "nam-minh"), voices.map { it.id })
         assertEquals("vi-VN-HoaiMyNeural", voices[0].edgeName)
         assertEquals("female", voices[0].gender)
         assertEquals("Nam Minh (nam)", voices[1].label)
+        // SettingsRepository.defaults uses the fallback default before the
+        // manifest has loaded; it must name the same voice.
+        assertEquals(
+            VoiceCatalog.defaultVoiceId(VoiceCatalog.FALLBACK_VOICES),
+            VoiceCatalog.defaultVoiceId(voices),
+        )
     }
 
     @Test
@@ -55,8 +61,26 @@ class VoiceCatalogTest {
 
     @Test
     fun `clipPath builds the asset-relative mp3 path`() {
-        assertEquals("audio/hoai-my/42.mp3", VoiceCatalog.clipPath("hoai-my", "42"))
-        assertEquals("audio/nam-minh/cho.mp3", VoiceCatalog.clipPath("nam-minh", VoiceCatalog.CLIP_CHO))
-        assertEquals("audio/hoai-my/kinh.mp3", VoiceCatalog.clipPath("hoai-my", VoiceCatalog.CLIP_KINH))
+        assertEquals("hoai-my/42.mp3", VoiceCatalog.clipPath("hoai-my", "42"))
+        assertEquals("nam-minh/cho.mp3", VoiceCatalog.clipPath("nam-minh", VoiceCatalog.CLIP_CHO))
+        assertEquals("hoai-my/kinh.mp3", VoiceCatalog.clipPath("hoai-my", VoiceCatalog.CLIP_KINH))
+    }
+
+    @Test
+    fun `every clip path resolves inside the mounted assets dir`() {
+        // Pins the build.gradle.kts mount (web/static/audio as the assets
+        // root) to the paths the player requests at runtime.
+        val voices = VoiceCatalog.parse(File(AUDIO_ASSETS_DIR, VoiceCatalog.MANIFEST_ASSET_PATH).readText())
+        val clips = (1..90).map { it.toString() } + VoiceCatalog.CLIP_CHO + VoiceCatalog.CLIP_KINH
+        val missing = voices.flatMap { voice ->
+            clips.map { VoiceCatalog.clipPath(voice.id, it) }
+                .filterNot { File(AUDIO_ASSETS_DIR, it).isFile }
+        }
+        assertEquals(emptyList<String>(), missing)
+    }
+
+    private companion object {
+        /** Mirrors `assets.srcDir` in `app/build.gradle.kts` (test working dir is the app module). */
+        const val AUDIO_ASSETS_DIR = "../../web/static/audio"
     }
 }
