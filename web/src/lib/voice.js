@@ -57,7 +57,12 @@ export function unlockAudio() {
   const a = getAudio();
   const played = a.play();
   if (played && typeof played.then === "function") {
-    played.then(() => a.pause()).catch(() => {
+    // Pause only if no clip took the element over in the meantime —
+    // a caller may start playback right after unlocking, in the same
+    // gesture, and the priming promise must not cut that clip off.
+    played.then(() => {
+      if (activeClip !== a) a.pause();
+    }).catch(() => {
       /* The priming play() itself may reject (e.g. no src yet) — that's
          fine, the attempt still happened synchronously inside the
          gesture, which is what iOS actually checks. */

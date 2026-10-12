@@ -17,7 +17,12 @@
   import { pushOverlay } from "$lib/overlay-history.js";
   import { applyMasterCalls } from "$lib/player-auto-cross.js";
   import { settings } from "$lib/settings-store.svelte.js";
-  import { cancelPlayback, playBingo, playWaiting } from "$lib/voice.js";
+  import {
+    cancelPlayback,
+    playBingo,
+    playWaiting,
+    unlockAudio,
+  } from "$lib/voice.js";
 
   const STORAGE_PREFIX = "loto";
   const PREVIEW_CELLS = [...Array(27).keys()];
@@ -371,6 +376,10 @@
    * @param {number} col
    */
   function handleCellClick(row, col) {
+    // A cell tap is the player side's user gesture — prime the shared
+    // <audio> element here too, so "Chờ"/"Kinh" can play on iOS in
+    // player-only mode, where the master's buttons are never tapped.
+    unlockAudio();
     if (
       typeof navigator !== "undefined" &&
       navigator.vibrate &&

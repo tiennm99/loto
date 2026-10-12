@@ -19,7 +19,7 @@
  * `verify:pwa` script), with the same `BUILD_PROFILE`/`NEXT_BASE_PATH` env
  * the build used.
  */
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 import { resolveBase } from "../base-path.js";
@@ -55,19 +55,43 @@ try {
   process.exit(1);
 }
 
-// --- C1: some built client chunk actually registers it -------------------
+// --- the layout's virtual:pwa-register import survived as its own chunk --
+// Located through Vite's client manifest rather than by grepping chunk
+// contents for "serviceWorker" + "sw.js" together: Rollup is free to split
+// those strings across chunks, which would fail this gate with no real
+// regression. The manifest names the chunk by its source id regardless.
 const appDir = join(BUILD_DIR, "_app");
 const jsFiles = walkJsFiles(appDir);
-const registersSW = jsFiles.some((f) => {
-  const src = readFileSync(f, "utf8");
-  return src.includes("serviceWorker") && src.includes("sw.js");
-});
-if (!registersSW) {
+const CLIENT_MANIFEST = join(".svelte-kit", "output", "client", ".vite", "manifest.json");
+/** @type {Record<string, { file: string, dynamicImports?: string[] }>} */
+let clientManifest = {};
+try {
+  clientManifest = JSON.parse(readFileSync(CLIENT_MANIFEST, "utf8"));
+} catch {
+  fail(`${CLIENT_MANIFEST} not found or unreadable — run this right after the build.`);
+}
+const registerKey = Object.keys(clientManifest).find((k) =>
+  k.endsWith("virtual:pwa-register"),
+);
+if (!registerKey) {
   fail(
-    `No built JS chunk under ${appDir} registers the service worker ` +
-      '(expected a "serviceWorker" + "sw.js" reference reachable from the ' +
-      "virtual:pwa-register import in +layout.svelte).",
+    "The client build has no virtual:pwa-register chunk — the dynamic " +
+      "import in +layout.svelte that registers the service worker is gone.",
   );
+} else {
+  const registerFile = join(BUILD_DIR, clientManifest[registerKey].file);
+  if (!existsSync(registerFile)) {
+    fail(`virtual:pwa-register chunk ${registerFile} is missing from ${BUILD_DIR}.`);
+  }
+  const importedBy = Object.values(clientManifest).some((entry) =>
+    entry.dynamicImports?.includes(registerKey),
+  );
+  if (!importedBy) {
+    fail("No client chunk dynamically imports virtual:pwa-register.");
+  }
+}
+if (!jsFiles.some((f) => readFileSync(f, "utf8").includes("sw.js"))) {
+  fail(`No built JS under ${appDir} references "sw.js" — nothing registers it.`);
 }
 
 // --- H1: precached audio entries carry the resolved base path -----------

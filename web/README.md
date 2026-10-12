@@ -117,6 +117,19 @@ The script auto-discovers all available `vi-*` voices and writes an updated mani
 
 ---
 
+## Regenerating Icons
+
+`static/icons/source.svg` is the source for `icon-192.png` and `icon-512.png`;
+`static/icons/source-maskable.svg` (full-bleed background, wordmark inside the
+80% safe zone) is the source for `icon-maskable-512.png`. Render them with the
+real **Roboto Condensed Black Italic** TTF loaded explicitly — a fallback font is
+wider and clips the wordmark. Any SVG rasterizer that accepts a font file works,
+e.g. [`@resvg/resvg-js`](https://github.com/thx/resvg-js) with
+`font: { fontFiles: [...], loadSystemFonts: false }` and `fitTo` set to each
+PNG's exact pixel width. Open the results and check nothing touches the edges.
+
+---
+
 ## Deployment
 
 Deployed to GitHub Pages by the `deploy-pages` job in

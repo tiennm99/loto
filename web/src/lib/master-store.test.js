@@ -80,6 +80,53 @@ describe("master-store", () => {
     expect(masterState.called).toEqual([]);
   });
 
+  describe("deck partition validation", () => {
+    const full = Array.from({ length: 90 }, (_, i) => i + 1);
+
+    /** @param {unknown} payload */
+    function loadFrom(payload) {
+      localStorage.setItem("loto_master", JSON.stringify(payload));
+      loadMaster();
+    }
+
+    it("accepts a complete split of the 90-number deck", () => {
+      loadFrom({ called: full.slice(0, 10), remaining: full.slice(10) });
+      expect(masterState.called).toEqual(full.slice(0, 10));
+      expect(masterState.remaining).toHaveLength(80);
+    });
+
+    it("accepts the empty pre-round state", () => {
+      masterState.called = [3];
+      masterState.remaining = [4];
+      loadFrom({ called: [], remaining: [] });
+      expect(masterState.called).toEqual([]);
+      expect(masterState.remaining).toEqual([]);
+    });
+
+    it("rejects a short deck", () => {
+      loadFrom({ called: [1, 2], remaining: [3, 4] });
+      expect(masterState.called).toEqual([]);
+      expect(masterState.remaining).toEqual([]);
+    });
+
+    it("rejects a number in both called and remaining", () => {
+      // 90 entries, but 1 appears twice and 90 is missing.
+      loadFrom({ called: [1], remaining: full.slice(0, 89) });
+      expect(masterState.called).toEqual([]);
+      expect(masterState.remaining).toEqual([]);
+    });
+
+    it("rejects duplicates inside called", () => {
+      loadFrom({ called: [5, 5], remaining: full.filter((n) => n !== 5 && n !== 6) });
+      expect(masterState.called).toEqual([]);
+    });
+
+    it("still marks the store hydrated after a rejected payload", () => {
+      loadFrom({ called: [1, 2], remaining: [3] });
+      expect(masterState.hydrated).toBe(true);
+    });
+  });
+
   it("loadMaster rejects payloads exceeding the size cap", () => {
     const big = "x".repeat(20_000);
     localStorage.setItem("loto_master", big);

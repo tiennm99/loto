@@ -143,4 +143,23 @@ describe("voice — iOS unlock (M6)", () => {
     expect(audios[0]).toBe(primed);
     expect(audios[0].src).toMatch(/\/9\.mp3$/);
   });
+
+  it("the priming play() does not pause a clip started in the same gesture", async () => {
+    // Player cell tap: unlockAudio() then playWaiting() in one click task.
+    voice.unlockAudio();
+    voice.playWaiting(5);
+    // Let the priming play() promise settle.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(audios.length).toBe(1);
+    expect(audios[0].src).toMatch(/\/cho\.mp3$/);
+    expect(audios[0].paused).toBe(false);
+  });
+
+  it("the priming play() pauses the element when nothing else started", async () => {
+    voice.unlockAudio();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(audios[0].paused).toBe(true);
+  });
 });

@@ -13,11 +13,11 @@
   <rect width="512" height="512" rx="96" fill="url(#bg)"/>
   <rect x="56" y="56" width="400" height="400" rx="64" fill="#0a0f1f" opacity="0.18"/>
   <text
-    x="256" y="312"
+    x="256" y="330"
     text-anchor="middle"
     font-family="Roboto Condensed, Arial Narrow, system-ui, sans-serif"
     font-weight="900"
-    font-size="240"
+    font-size="200"
     font-style="italic"
     letter-spacing="-8"
     fill="url(#text)"

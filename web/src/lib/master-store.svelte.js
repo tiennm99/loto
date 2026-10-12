@@ -46,6 +46,22 @@ function isValidNumberArray(v) {
   );
 }
 
+/**
+ * Same rule as the Android loader: a restored round must split the
+ * 90-number deck exactly — no duplicates, no overlap, nothing missing.
+ * An overlapping or short deck (partial write, tampered storage) would
+ * make player auto-cross mark a cell twice or never. Both arrays empty
+ * is also accepted: it is what a tab persists before any round starts.
+ * @param {number[]} called
+ * @param {number[]} remaining
+ */
+function isCompleteDeckPartition(called, remaining) {
+  const total = called.length + remaining.length;
+  if (total === 0) return true;
+  if (total !== 90) return false;
+  return new Set([...called, ...remaining]).size === total;
+}
+
 export function loadMaster() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -56,7 +72,8 @@ export function loadMaster() {
     if (
       !parsed ||
       !isValidNumberArray(parsed.called) ||
-      !isValidNumberArray(parsed.remaining)
+      !isValidNumberArray(parsed.remaining) ||
+      !isCompleteDeckPartition(parsed.called, parsed.remaining)
     ) {
       return;
     }
